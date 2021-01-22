@@ -1,0 +1,20 @@
+plugins {
+    id 'war'
+}
+
+dependencies {
+    implementation project(":core")
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+}
+
+task explodedWar(type: Copy) {
+    into "$buildDir/libs/exploded/${project.name}.war"
+    with war
+}
+
+war.dependsOn explodedWar
