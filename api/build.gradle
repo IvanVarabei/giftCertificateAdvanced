@@ -4,12 +4,13 @@ plugins {
 
 dependencies {
     implementation project(":core")
+    testRuntime project(':core')
     implementation 'org.springframework.boot:spring-boot-starter-web'
     providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
-
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-
 }
 
 task explodedWar(type: Copy) {
