@@ -16,6 +16,8 @@ public interface GiftCertificateRepository {
 
     void update(GiftCertificate giftCertificate);
 
+    void updatePrice(GiftCertificate giftCertificate);
+
     void delete(Long giftCertificateId);
 
     ZoneId getDatabaseZoneId();

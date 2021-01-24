@@ -57,6 +57,9 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
     private static final String UPDATE_CERTIFICATE = "update gift_certificate set name = ?, description = ?, " +
             "price = ?, duration = ?, last_update_date = ? where id = ?";
 
+    private static final String UPDATE_PRICE = "update gift_certificate set price = ?, last_update_date = ? " +
+            "where id = ?";
+
     private static final String DELETE_CERTIFICATE = "delete from gift_certificate where id = ?";
 
     private static final String BLANK = " ";
@@ -142,6 +145,13 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
                 .toZone(giftCertificate.getUpdatedDate(), defaultZone, ZoneId.systemDefault());
         jdbcTemplate.update(UPDATE_CERTIFICATE, giftCertificate.getName(), giftCertificate.getDescription(),
                 giftCertificate.getPrice(), giftCertificate.getDuration(), updatedDate, giftCertificate.getId());
+    }
+
+    @Override
+    public void updatePrice(GiftCertificate giftCertificate) {
+        LocalDateTime updatedDate = DateTimeUtil
+                .toZone(giftCertificate.getUpdatedDate(), defaultZone, ZoneId.systemDefault());
+        jdbcTemplate.update(UPDATE_PRICE, giftCertificate.getPrice(), updatedDate, giftCertificate.getId());
     }
 
     @Override

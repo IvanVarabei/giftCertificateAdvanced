@@ -1,6 +1,7 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.dto.GiftCertificateDto;
+import com.epam.esm.dto.PriceDto;
 import com.epam.esm.dto.SearchCertificateDto;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
@@ -85,6 +86,20 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
                 .ifPresentOrElse(t -> giftCertificateRepository.delete(certificateId), () -> {
                     throw new ResourceNotFoundException(String.format(ErrorMessage.RESOURCE_NOT_FOUND, certificateId));
                 });
+    }
+
+    @Override
+    @Transactional
+    public GiftCertificateDto updatePrice(PriceDto priceDto) {
+        GiftCertificate existed = giftCertificateRepository
+                .findById(priceDto.getId())
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(ErrorMessage.RESOURCE_NOT_FOUND, priceDto.getId())));
+        existed.setPrice(priceDto.getPrice());
+        existed.setUpdatedDate(LocalDateTime.now(giftCertificateRepository.getDatabaseZoneId()));
+        giftCertificateRepository.updatePrice(existed);
+        existed.setTags(tagService.getTagsByCertificateId(existed.getId()));
+        adjustDateTimeAccordingToClientTimeZone(existed, clientZone);
+        return certificateConverter.toDTO(existed);
     }
 
     private void adjustDateTimeAccordingToClientTimeZone(GiftCertificate certificate, ZoneId toZone) {

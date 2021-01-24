@@ -1,6 +1,7 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.dto.GiftCertificateDto;
+import com.epam.esm.dto.PriceDto;
 import com.epam.esm.dto.SearchCertificateDto;
 import com.epam.esm.dto.search.SortByField;
 import com.epam.esm.dto.search.SortOrder;
@@ -108,5 +109,10 @@ public class CertificateController {
             @PathVariable("certificateId") @Min(1) Long certificateId) {
         giftCertificateService.deleteCertificate(certificateId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping
+    public ResponseEntity<GiftCertificateDto> updatePrice(@Valid @RequestBody PriceDto priceDto) {
+        return ResponseEntity.ok().body(giftCertificateService.updatePrice(priceDto));
     }
 }
