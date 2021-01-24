@@ -1,27 +1,25 @@
 package com.epam.esm.repository;
 
+import com.epam.esm.config.EmbeddedTestConfig;
 import com.epam.esm.dto.SearchCertificateDto;
 import com.epam.esm.dto.search.SortByField;
 import com.epam.esm.dto.search.SortOrder;
 import com.epam.esm.entity.GiftCertificate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = com.epam.esm.config.EmbeddedTestConfig.class)
-@WebAppConfiguration
+@SpringBootTest
+@ContextConfiguration(classes = {EmbeddedTestConfig.class})
 class GiftCertificateRepositoryImplTest {
     @Autowired
     GiftCertificateRepository certificateRepository;

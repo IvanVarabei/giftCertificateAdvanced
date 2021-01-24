@@ -5,8 +5,6 @@ import org.flywaydb.core.Flyway;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -18,18 +16,6 @@ public class EmbeddedTestConfig {
     public DataSource createDataSource() throws IOException {
         EmbeddedPostgres postgres = EmbeddedPostgres.start();
         return postgres.getPostgresDatabase();
-    }
-
-    @Bean
-    public JdbcTemplate getJdbcTemplate() throws IOException {
-        return new JdbcTemplate(createDataSource());
-    }
-
-    @Bean
-    public DataSourceTransactionManager createTransactionManager() throws IOException {
-        DataSourceTransactionManager transactionManager = new DataSourceTransactionManager();
-        transactionManager.setDataSource(createDataSource());
-        return transactionManager;
     }
 
     @Bean

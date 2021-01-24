@@ -2,12 +2,12 @@ package com.epam.esm.repository.impl;
 
 import com.epam.esm.dto.SearchCertificateDto;
 import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.mapper.CertificateMapper;
 import com.epam.esm.repository.GiftCertificateRepository;
 import com.epam.esm.util.DateTimeUtil;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
@@ -29,7 +29,7 @@ import static com.epam.esm.dto.search.SortOrder.DESC;
 public class GiftCertificateRepositoryImpl implements GiftCertificateRepository {
     private static final ZoneId defaultZone = ZoneOffset.UTC;
     private final JdbcTemplate jdbcTemplate;
-    private final CertificateMapper certificateMapper;
+    private final RowMapper<GiftCertificate> certificateMapper;
 
     private static final String CREATE_CERTIFICATE =
             "insert into gift_certificate (name, description, price, duration, create_date, last_update_date) " +

@@ -1,10 +1,10 @@
 package com.epam.esm.repository.impl;
 
 import com.epam.esm.entity.Tag;
-import com.epam.esm.mapper.TagMapper;
 import com.epam.esm.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
@@ -18,7 +18,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class TagRepositoryImpl implements TagRepository {
     private final JdbcTemplate jdbcTemplate;
-    private final TagMapper tagMapper;
+    private final RowMapper<Tag> tagMapper;
 
     private static final String CREATE_TAG = "insert into tag (name) values (?)";
 
