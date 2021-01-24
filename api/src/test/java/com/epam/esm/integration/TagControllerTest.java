@@ -7,16 +7,12 @@ import com.epam.esm.exception.ExceptionDto;
 import com.epam.esm.repository.TagRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.util.List;
 
@@ -24,23 +20,16 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(SpringExtension.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 @ContextConfiguration(classes = {EmbeddedTestConfig.class})
-@WebAppConfiguration
 class TagControllerTest {
     @Autowired
-    WebApplicationContext wac;
-    @Autowired
     TagRepository tagRepository;
+    @Autowired
     ObjectMapper objectMapper;
+    @Autowired
     MockMvc mockMvc;
-
-    @BeforeEach
-    public void setup() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
-        objectMapper = new ObjectMapper();
-        objectMapper.findAndRegisterModules();
-    }
 
     @Test
     void should_return_created_tag_having_generated_id() throws Exception {

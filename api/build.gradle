@@ -1,21 +1,13 @@
-plugins {
-    id 'war'
-}
-
 dependencies {
     implementation project(":core")
     implementation 'org.springframework.boot:spring-boot-starter-web'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
     implementation 'org.springframework.boot:spring-boot-starter-logging'
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
 }
 
-task explodedWar(type: Copy) {
-    into "$buildDir/libs/exploded/${project.name}.war"
-    with war
+bootJar{
+    archiveFileName  = 'apiBootJar.jar'
 }
-
-war.dependsOn explodedWar
