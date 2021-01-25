@@ -1,24 +1,69 @@
 plugins {
-	id 'org.springframework.boot' version '2.4.2'
-	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-	id 'java'
-	id 'war'
+    id 'org.springframework.boot' version '2.4.2'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 }
 
-group = 'com.epam.esm'
-version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '11'
+subprojects {
+    apply plugin: 'java-library'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
 
-repositories {
-	mavenCentral()
-}
+    ext.springVersion = '5.3.2'
+    ext.jacksonVersion = '2.12.0'
+    ext.mapstructVersion = '1.4.1.Final'
 
-dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-}
+    tasks.withType(JavaCompile) {
+        sourceCompatibility = 11
+        targetCompatibility = 11
+        options.encoding = 'UTF-8'
+    }
 
-test {
-	useJUnitPlatform()
+    compileJava.dependsOn clean
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        // Spring
+        implementation group: 'org.springframework', name: 'spring-context', version: springVersion
+        implementation group: 'org.springframework', name: 'spring-jdbc', version: springVersion
+
+        // Jackson
+        implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jacksonVersion
+        implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion
+        implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
+
+        // Validation
+        implementation 'org.hibernate.validator:hibernate-validator:6.1.6.Final'
+
+        // Database
+        implementation group: 'org.postgresql', name: 'postgresql', version: '42.2.18'
+        implementation group: 'com.zaxxer', name: 'HikariCP', version: '3.4.5'
+
+        // Test
+        testImplementation group: 'com.opentable.components', name: 'otj-pg-embedded', version: '0.13.3'
+        testImplementation group: 'org.flywaydb', name: 'flyway-core', version: '7.4.0'
+
+        // Lombok
+        compileOnly 'org.projectlombok:lombok:1.18.16'
+        annotationProcessor 'org.projectlombok:lombok:1.18.16'
+        testCompileOnly 'org.projectlombok:lombok:1.18.16'
+        testAnnotationProcessor 'org.projectlombok:lombok:1.18.16'
+
+        // Mapping
+        implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+        annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+
+        // Util
+        implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.10'
+    }
+
+    jar {
+        enabled = true
+    }
+
+    test {
+        useJUnitPlatform()
+    }
 }
