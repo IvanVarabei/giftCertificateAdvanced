@@ -3,6 +3,7 @@ package com.epam.esm.exception;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,17 +32,26 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class ErrorControllerAdvice {
     /**
-     * Handles enum request parameters(url) conversion exception.
+     * Handles following cases:
+     * <ul>
+     *  <li>Enum request parameters don't match enum members</li>
+     *  <li>A path variable can't be parsed to an integer</li>
+     * </ul>
      */
     @ResponseBody
     @ExceptionHandler
     public ResponseEntity<ExceptionDto> handle(MethodArgumentTypeMismatchException ex) {
         String parameterName = ex.getName();
-        String enumValues = Arrays.stream(ex.getRequiredType().getEnumConstants())
-                .map(Object::toString)
-                .collect(Collectors.joining(", "));
-        String message = String.format("Parameter '%s' must be either null or one of the following values: %s",
-                parameterName, enumValues);
+        String message;
+        if (ex.getCause().getClass().equals(ConversionFailedException.class)) {
+            String enumValues = Arrays.stream(ex.getRequiredType().getEnumConstants())
+                    .map(Object::toString)
+                    .collect(Collectors.joining(", "));
+            message = String.format("Parameter '%s' must be either null or one of the following values: %s",
+                    parameterName, enumValues);
+        } else {
+            message = String.format("Parameter '%s' is wrong. %s", parameterName, ex.getMessage());
+        }
         ExceptionDto exceptionDto = new ExceptionDto();
         exceptionDto.setErrorMessage(message);
         exceptionDto.setErrorCode(400);
@@ -97,7 +107,7 @@ public class ErrorControllerAdvice {
      * Handle custom exception ResourceNotFoundException
      */
     @ExceptionHandler(ResourceNotFoundException.class)
-    ResponseEntity<ExceptionDto> handleException(ResourceNotFoundException ex) {
+    public ResponseEntity<ExceptionDto> handle(ResourceNotFoundException ex) {
         ExceptionDto exceptionDto = new ExceptionDto();
         exceptionDto.setErrorMessage(ex.getMessage());
         exceptionDto.setErrorCode(40401);
@@ -109,7 +119,7 @@ public class ErrorControllerAdvice {
      * Run if url is not supported
      */
     @ExceptionHandler(NoHandlerFoundException.class)
-    ResponseEntity<ExceptionDto> handleNotFoundMapping(NoHandlerFoundException ex) {
+    public ResponseEntity<ExceptionDto> handle(NoHandlerFoundException ex) {
         ExceptionDto exceptionDto = new ExceptionDto();
         exceptionDto.setErrorMessage(ex.getMessage());
         exceptionDto.setErrorCode(NOT_FOUND.value());
@@ -118,7 +128,7 @@ public class ErrorControllerAdvice {
     }
 
     @ExceptionHandler(DuplicateKeyException.class)
-    ResponseEntity<ExceptionDto> handleException(DuplicateKeyException ex) {
+    public ResponseEntity<ExceptionDto> handle(DuplicateKeyException ex) {
         ExceptionDto exceptionDto = new ExceptionDto();
         exceptionDto.setErrorMessage(ex.getLocalizedMessage());
         exceptionDto.setErrorCode(40901);
@@ -127,7 +137,7 @@ public class ErrorControllerAdvice {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ExceptionDto> handleMessageNotReadableException(HttpMessageNotReadableException ex) {
+    public ResponseEntity<ExceptionDto> handle(HttpMessageNotReadableException ex) {
         ExceptionDto exceptionDto = new ExceptionDto();
         exceptionDto.setErrorMessage(ex.getMessage());
         exceptionDto.setErrorCode(400);
@@ -136,7 +146,7 @@ public class ErrorControllerAdvice {
     }
 
     @ExceptionHandler(Throwable.class)
-    ResponseEntity<ExceptionDto> handleException(Throwable e) {
+    public ResponseEntity<ExceptionDto> handle(Throwable e) {
         log.error(e.getMessage(), e);
         ExceptionDto exceptionDto = new ExceptionDto();
         exceptionDto.setErrorMessage(e.getMessage());

@@ -12,6 +12,7 @@ import java.util.List;
 
 @Data
 public class GiftCertificateDto {
+    @Min(1)
     private Long id;
     @NotBlank
     @Pattern(regexp = "[\\w\\s]{2,64}")

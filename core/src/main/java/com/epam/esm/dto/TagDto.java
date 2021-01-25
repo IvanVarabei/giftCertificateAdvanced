@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 
@@ -11,6 +12,7 @@ import javax.validation.constraints.Pattern;
 @Data
 @AllArgsConstructor
 public class TagDto {
+    @Min(1)
     private Long id;
     @NotBlank
     @Pattern(regexp = "\\w{2,64}")
