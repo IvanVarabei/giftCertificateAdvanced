@@ -5,15 +5,16 @@ import com.epam.esm.dto.TagDto;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ResourceNotFoundException;
-import com.epam.esm.mapper.impl.CertificateConverterImpl;
+import com.epam.esm.mapper.CertificateConverter;
 import com.epam.esm.repository.GiftCertificateRepository;
 import com.epam.esm.service.impl.GiftCertificateServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -22,11 +23,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@SpringBootTest
 class CertificateServiceImplTest {
     TagService tagService;
     GiftCertificateRepository certificateRepository;
     GiftCertificateService giftCertificateService;
     GiftCertificate certificate;
+    @Autowired
+    CertificateConverter certificateConverter;
 
     {
         certificate = new GiftCertificate();
@@ -43,9 +47,8 @@ class CertificateServiceImplTest {
     public void setUp() {
         tagService = mock(TagService.class);
         certificateRepository = mock(GiftCertificateRepository.class);
-        when(certificateRepository.getDatabaseZoneId()).thenReturn(ZoneOffset.UTC);
         giftCertificateService = new GiftCertificateServiceImpl(certificateRepository, tagService,
-                new CertificateConverterImpl());
+                certificateConverter);
     }
 
     @Test

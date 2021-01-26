@@ -1,5 +1,6 @@
 package com.epam.esm.service.impl;
 
+import com.epam.esm.config.TimeZoneConfig;
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.PriceDto;
 import com.epam.esm.dto.SearchCertificateDto;
@@ -24,7 +25,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class GiftCertificateServiceImpl implements GiftCertificateService {
-    private static final ZoneId clientZone = ZoneId.of("Europe/Moscow");
     private final GiftCertificateRepository giftCertificateRepository;
     private final TagService tagService;
     private final CertificateConverter certificateConverter;
@@ -34,12 +34,12 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     public GiftCertificateDto createCertificate(GiftCertificateDto giftCertificateDto) {
         GiftCertificate createdCertificate = certificateConverter.toEntity(giftCertificateDto);
         createdCertificate.setId(null);
-        createdCertificate.setCreatedDate(LocalDateTime.now(giftCertificateRepository.getDatabaseZoneId()));
+        createdCertificate.setCreatedDate(LocalDateTime.now(TimeZoneConfig.DATABASE_ZONE));
         createdCertificate.setUpdatedDate(createdCertificate.getCreatedDate());
         giftCertificateRepository.save(createdCertificate);
         List<Tag> tags = tagService.bindTags(createdCertificate.getId(), createdCertificate.getTags());
         createdCertificate.setTags(tags);
-        adjustDateTimeAccordingToClientTimeZone(createdCertificate, clientZone);
+        adjustDateTimeAccordingToClientTimeZone(createdCertificate, TimeZoneConfig.CLIENT_ZONE);
         return certificateConverter.toDTO(createdCertificate);
     }
 
@@ -47,7 +47,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     public List<GiftCertificateDto> getCertificates(SearchCertificateDto searchDto) {
         List<GiftCertificate> certificates = giftCertificateRepository.findAll(searchDto);
         certificates.forEach(c -> c.setTags(tagService.getTagsByCertificateId(c.getId())));
-        certificates.forEach(c -> adjustDateTimeAccordingToClientTimeZone(c, clientZone));
+        certificates.forEach(c -> adjustDateTimeAccordingToClientTimeZone(c, TimeZoneConfig.CLIENT_ZONE));
         return certificates.stream().map(certificateConverter::toDTO).collect(Collectors.toList());
     }
 
@@ -56,7 +56,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         GiftCertificate certificate = giftCertificateRepository.findById(certificateId).orElseThrow(() ->
                 new ResourceNotFoundException(String.format(ErrorMessage.RESOURCE_NOT_FOUND, certificateId)));
         certificate.setTags(tagService.getTagsByCertificateId(certificateId));
-        adjustDateTimeAccordingToClientTimeZone(certificate, clientZone);
+        adjustDateTimeAccordingToClientTimeZone(certificate, TimeZoneConfig.CLIENT_ZONE);
         return certificateConverter.toDTO(certificate);
     }
 
@@ -71,11 +71,11 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         existed.setPrice(update.getPrice());
         existed.setDescription(update.getDescription());
         existed.setDuration(update.getDuration());
-        existed.setUpdatedDate(LocalDateTime.now(giftCertificateRepository.getDatabaseZoneId()));
+        existed.setUpdatedDate(LocalDateTime.now(TimeZoneConfig.DATABASE_ZONE));
         giftCertificateRepository.update(existed);
         tagService.unbindTagsFromCertificate(existed.getId());
         existed.setTags(tagService.bindTags(update.getId(), update.getTags()));
-        adjustDateTimeAccordingToClientTimeZone(existed, clientZone);
+        adjustDateTimeAccordingToClientTimeZone(existed, TimeZoneConfig.CLIENT_ZONE);
         return certificateConverter.toDTO(existed);
     }
 
@@ -95,15 +95,15 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
                 .findById(priceDto.getId())
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(ErrorMessage.RESOURCE_NOT_FOUND, priceDto.getId())));
         existed.setPrice(priceDto.getPrice());
-        existed.setUpdatedDate(LocalDateTime.now(giftCertificateRepository.getDatabaseZoneId()));
+        existed.setUpdatedDate(LocalDateTime.now(TimeZoneConfig.DATABASE_ZONE));
         giftCertificateRepository.updatePrice(existed);
         existed.setTags(tagService.getTagsByCertificateId(existed.getId()));
-        adjustDateTimeAccordingToClientTimeZone(existed, clientZone);
+        adjustDateTimeAccordingToClientTimeZone(existed, TimeZoneConfig.CLIENT_ZONE);
         return certificateConverter.toDTO(existed);
     }
 
     private void adjustDateTimeAccordingToClientTimeZone(GiftCertificate certificate, ZoneId toZone) {
-        ZoneId repositoryZone = giftCertificateRepository.getDatabaseZoneId();
+        ZoneId repositoryZone = TimeZoneConfig.DATABASE_ZONE;
         certificate.setCreatedDate(DateTimeUtil.toZone(certificate.getCreatedDate(), repositoryZone, toZone));
         certificate.setUpdatedDate(DateTimeUtil.toZone(certificate.getUpdatedDate(), repositoryZone, toZone));
     }

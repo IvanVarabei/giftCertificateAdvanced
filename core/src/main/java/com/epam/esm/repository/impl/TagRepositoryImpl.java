@@ -29,16 +29,16 @@ public class TagRepositoryImpl implements TagRepository {
     private static final String READ_TAGS = "select id, name from tag";
 
     private static final String READ_TAGS_BY_CERTIFICATE_ID =
-            "SELECT id, name FROM tag JOIN certificate_tag ON tag.id = tag_id WHERE gift_certificate_id = ?";
+            "SELECT id, name FROM tag JOIN certificate_x_tag ON tag.id = tag_id WHERE gift_certificate_id = ?";
 
     private static final String UPDATE_TAG = "update tag set name = ? where id = ?";
 
     private static final String DELETE_TAG = "delete from tag where id = ?";
 
     private static final String BIND_TAG =
-            "insert into certificate_tag (gift_certificate_id, tag_id) values (?, ?)";
+            "insert into certificate_x_tag (gift_certificate_id, tag_id) values (?, ?)";
 
-    private static final String UNBIND_TAGS = "delete from certificate_tag where gift_certificate_id = ?";
+    private static final String UNBIND_TAGS = "delete from certificate_x_tag where gift_certificate_id = ?";
 
     @Override
     public Tag save(Tag tag) {

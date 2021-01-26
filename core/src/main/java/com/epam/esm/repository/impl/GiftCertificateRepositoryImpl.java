@@ -1,5 +1,6 @@
 package com.epam.esm.repository.impl;
 
+import com.epam.esm.config.TimeZoneConfig;
 import com.epam.esm.dto.SearchCertificateDto;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.mapper.CertificateMapper;
@@ -17,7 +18,6 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -27,7 +27,6 @@ import static com.epam.esm.dto.search.SortOrder.DESC;
 @Repository
 @RequiredArgsConstructor
 public class GiftCertificateRepositoryImpl implements GiftCertificateRepository {
-    private static final ZoneId defaultZone = ZoneOffset.UTC;
     private final JdbcTemplate jdbcTemplate;
     private final CertificateMapper certificateMapper;
 
@@ -40,7 +39,7 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
                     "where true ";
 
     private static final String READ_CERTIFICATES_TAGS1 = "and id in (SELECT gift_certificate_id FROM " +
-            "certificate_tag LEFT JOIN tag ON tag_id = tag.id WHERE tag.name IN (";
+            "certificate_x_tag LEFT JOIN tag ON tag_id = tag.id WHERE tag.name IN (";
 
     private static final String READ_CERTIFICATES_TAGS2 = ") " +
             "GROUP BY gift_certificate_id HAVING COUNT(tag_id) = ?)";
@@ -68,9 +67,10 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
     public GiftCertificate save(GiftCertificate giftCertificate) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         LocalDateTime createdDate = DateTimeUtil
-                .toZone(giftCertificate.getCreatedDate(), defaultZone, ZoneId.systemDefault());
+                .toZone(giftCertificate.getCreatedDate(), TimeZoneConfig.DATABASE_ZONE, ZoneId.systemDefault());
         jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(CREATE_CERTIFICATE, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement preparedStatement =
+                    connection.prepareStatement(CREATE_CERTIFICATE, Statement.RETURN_GENERATED_KEYS);
             int index = 1;
             preparedStatement.setString(index++, giftCertificate.getName());
             preparedStatement.setString(index++, giftCertificate.getDescription());
@@ -90,7 +90,7 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
      * where true
      * and id in (
      * SELECT gift_certificate_id
-     * FROM certificate_tag
+     * FROM certificate_x_tag
      * LEFT JOIN tag ON tag_id = tag.id
      * WHERE tag.name IN ('cheap', 'gym')
      * GROUP BY gift_certificate_id
@@ -142,7 +142,7 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
     @Override
     public void update(GiftCertificate giftCertificate) {
         LocalDateTime updatedDate = DateTimeUtil
-                .toZone(giftCertificate.getUpdatedDate(), defaultZone, ZoneId.systemDefault());
+                .toZone(giftCertificate.getUpdatedDate(), TimeZoneConfig.DATABASE_ZONE, ZoneId.systemDefault());
         jdbcTemplate.update(UPDATE_CERTIFICATE, giftCertificate.getName(), giftCertificate.getDescription(),
                 giftCertificate.getPrice(), giftCertificate.getDuration(), updatedDate, giftCertificate.getId());
     }
@@ -150,17 +150,12 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
     @Override
     public void updatePrice(GiftCertificate giftCertificate) {
         LocalDateTime updatedDate = DateTimeUtil
-                .toZone(giftCertificate.getUpdatedDate(), defaultZone, ZoneId.systemDefault());
+                .toZone(giftCertificate.getUpdatedDate(), TimeZoneConfig.DATABASE_ZONE, ZoneId.systemDefault());
         jdbcTemplate.update(UPDATE_PRICE, giftCertificate.getPrice(), updatedDate, giftCertificate.getId());
     }
 
     @Override
     public void delete(Long giftCertificateId) {
         jdbcTemplate.update(DELETE_CERTIFICATE, giftCertificateId);
-    }
-
-    @Override
-    public ZoneId getDatabaseZoneId() {
-        return defaultZone;
     }
 }
