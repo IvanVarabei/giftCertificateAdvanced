@@ -21,9 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,24 +42,18 @@ public class OrderServiceImpl implements OrderService {
         Order order = new Order();
         order.setUserId(userId);
         order.setPlacedDate(LocalDateTime.now(TimeZoneConfig.DATABASE_ZONE));
-        Map<Long, Integer> map = new HashMap<>();
-        placeOrderDto.getItemEntryDtoList().forEach(dto -> {
-            int currentAmount = dto.getAmount();
-            int amountSum = map.containsKey(dto.getItemId()) ? map.get(dto.getItemId()) + currentAmount : currentAmount;
-            map.put(dto.getItemId(), amountSum);
-        });
-        order.setOrderItems(map.keySet().stream()
+        order.setOrderItems(placeOrderDto.getItemEntries().keySet().stream()
                 .map(o -> {
                     GiftCertificateDto giftCertificateDto = certificateService.getCertificateById(o);
                     GiftCertificateAsOrderItem orderItem = certificateConverter.dtoToOrderItem(giftCertificateDto);
-                    orderItem.setAmount(map.get(o));
+                    orderItem.setAmount(placeOrderDto.getItemEntries().get(o));
                     return orderItem;
                 })
                 .collect(Collectors.toList()));
         orderRepository.createOrder(order);
         return orderConverter.toDTO(adjustDateTimeAccordingToClientTimeZone(order, TimeZoneConfig.CLIENT_ZONE));
     }
-    
+
     @Override
     public List<OrderDto> getOrdersByUserId(Long userId) {
         userRepository.findById(userId).orElseThrow(() ->
