@@ -35,17 +35,18 @@ create table consumer
 create table purchase
 (
     id          serial      not null primary key,
-    placed_date timestamptz not null default (now() at time zone 'UTC'),
-    consumer_id integer     not null references consumer on delete cascade
+    consumer_id integer     not null references consumer on delete cascade,
+    placed_date timestamptz not null default (now() at time zone 'UTC')
 );
 
 create table gift_certificate_as_purchase_item
 (
     id          serial         not null primary key,
+    purchase_id integer        not null references purchase on delete cascade,
+    amount      integer        not null default 1,
     name        varchar(64)    not null,
     description varchar(512),
     price       numeric(16, 2) not null,
     duration    integer        not null,
-    purchase_id integer        not null references purchase on delete cascade,
     constraint positive_price check (price > (0)::numeric)
 );

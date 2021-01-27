@@ -15,4 +15,5 @@ public class GiftCertificateAsOrderItemDto {
     private String description;
     private BigDecimal price;
     private Integer duration;
+    private Integer amount;
 }

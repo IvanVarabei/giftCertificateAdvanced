@@ -14,4 +14,5 @@ public class GiftCertificateAsOrderItem extends BaseEntity {
     private String description;
     private BigDecimal price;
     private Integer duration;
+    private Integer amount;
 }

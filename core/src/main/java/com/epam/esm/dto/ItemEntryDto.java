@@ -4,15 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.Valid;
 import javax.validation.constraints.Min;
-import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PlaceOrderDto {
+public class ItemEntryDto {
     @Min(1)
-    private Long userId;
-    private List<@Valid ItemEntryDto> itemEntryDtoList;
+    private Long itemId;
+    @Min(1)
+    private Integer amount;
 }

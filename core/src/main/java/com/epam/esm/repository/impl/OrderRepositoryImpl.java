@@ -25,12 +25,13 @@ import java.util.List;
 public class OrderRepositoryImpl implements OrderRepository {
     private static final String CREATE_ORDER = "insert into purchase (consumer_id, placed_date) values (?, ?)";
     private static final String CREATE_CERTIFICATE_AS_ORDER_ITEM =
-            "insert into gift_certificate_as_purchase_item (name, description, price, duration, purchase_id) " +
-                    "values (?, ?, ?, ?, ?);";
+            "insert into gift_certificate_as_purchase_item " +
+                    "(name, description, price, duration, purchase_id, amount) values (?, ?, ?, ?, ?, ?);";
     private static final String READ_ORDER_BY_USER_ID =
             "select id, placed_date from purchase where consumer_id = ?";
     private static final String READ_CERTIFICATE_AS_ORDER_ITEM_BY_ORDER_ID =
-            "select id, name, description, price, duration from gift_certificate_as_purchase_item where purchase_id =?";
+            "select id, name, description, price, duration, amount from gift_certificate_as_purchase_item " +
+                    "where purchase_id =?";
     private final JdbcTemplate jdbcTemplate;
     private final RowMapper<GiftCertificateAsOrderItem> certificateAsOrderItemMapper;
 
@@ -77,7 +78,8 @@ public class OrderRepositoryImpl implements OrderRepository {
             preparedStatement.setString(index++, certificate.getDescription());
             preparedStatement.setBigDecimal(index++, certificate.getPrice());
             preparedStatement.setInt(index++, certificate.getDuration());
-            preparedStatement.setLong(index, orderId);
+            preparedStatement.setLong(index++, orderId);
+            preparedStatement.setInt(index, certificate.getAmount());
             return preparedStatement;
         }, keyHolder);
         certificate.setId(((Number) keyHolder.getKeys().get("id")).longValue());
