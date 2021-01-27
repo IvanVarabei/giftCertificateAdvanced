@@ -1,8 +1,8 @@
 package com.epam.esm.repository.impl;
 
 import com.epam.esm.config.TimeZoneConfig;
-import com.epam.esm.entity.GiftCertificateAsOrderItem;
 import com.epam.esm.entity.Order;
+import com.epam.esm.entity.OrderItem;
 import com.epam.esm.repository.OrderRepository;
 import com.epam.esm.util.DateTimeUtil;
 import lombok.RequiredArgsConstructor;
@@ -23,34 +23,31 @@ import java.util.List;
 @Repository
 @RequiredArgsConstructor
 public class OrderRepositoryImpl implements OrderRepository {
-    private static final String CREATE_ORDER = "insert into purchase (consumer_id, placed_date) values (?, ?)";
-    private static final String CREATE_CERTIFICATE_AS_ORDER_ITEM =
-            "insert into gift_certificate_as_purchase_item " +
-                    "(name, description, price, duration, purchase_id, amount) values (?, ?, ?, ?, ?, ?);";
-    private static final String READ_ORDER_BY_USER_ID =
-            "select id, placed_date from purchase where consumer_id = ?";
-    private static final String READ_CERTIFICATE_AS_ORDER_ITEM_BY_ORDER_ID =
-            "select id, name, description, price, duration, amount from gift_certificate_as_purchase_item " +
-                    "where purchase_id =?";
     private final JdbcTemplate jdbcTemplate;
-    private final RowMapper<GiftCertificateAsOrderItem> certificateAsOrderItemMapper;
+    private static final String CREATE_ORDER = "insert into \"order\" (user_id, created_date) values (?, ?)";
+    private static final String CREATE_CERTIFICATE_AS_ORDER_ITEM = "insert into order_item " +
+            "(name, description, price, duration, order_id, quantity) values (?, ?, ?, ?, ?, ?)";
+    private static final String READ_ORDER_BY_USER_ID = "select id, created_date from \"order\" where user_id = ?";
+    private static final String READ_CERTIFICATE_AS_ORDER_ITEM_BY_ORDER_ID =
+            "select id, name, description, price, duration, quantity from order_item where order_id =?";
+    private final RowMapper<OrderItem> certificateAsOrderItemMapper;
 
     @Override
     public Order createOrder(Order order) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        LocalDateTime placedDate = DateTimeUtil.toZone(order.getPlacedDate(), TimeZoneConfig.DATABASE_ZONE,
-                ZoneId.systemDefault());
+        LocalDateTime cratedDate;
+        cratedDate = DateTimeUtil.toZone(order.getCreatedDate(), TimeZoneConfig.DATABASE_ZONE, ZoneId.systemDefault());
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement =
                     connection.prepareStatement(CREATE_ORDER, Statement.RETURN_GENERATED_KEYS);
             int index = 1;
-            preparedStatement.setLong(index++, order.getUserId());
-            preparedStatement.setTimestamp(index, Timestamp.valueOf(placedDate));
+            preparedStatement.setLong(index++, order.getUser().getId());
+            preparedStatement.setTimestamp(index, Timestamp.valueOf(cratedDate));
             return preparedStatement;
         }, keyHolder);
         Long orderId = ((Number) keyHolder.getKeys().get("id")).longValue();
         order.setId(orderId);
-        order.getOrderItems().forEach(certificate -> saveGiftCertificateAsOrderItem(orderId, certificate));
+        order.getOrderItems().forEach(certificate -> saveOrderItem(orderId, certificate));
         return order;
     }
 
@@ -58,30 +55,32 @@ public class OrderRepositoryImpl implements OrderRepository {
     public List<Order> findOrdersByUserId(Long userId) {
         return jdbcTemplate.query(READ_ORDER_BY_USER_ID, (rs, rowNum) -> {
             Order order = new Order();
-            order.setUserId(userId);
             order.setId(rs.getLong("id"));
-            order.setPlacedDate(ZonedDateTime.ofInstant(rs.getTimestamp("placed_date").toInstant(),
+            order.setCreatedDate(ZonedDateTime.ofInstant(rs.getTimestamp("created_date").toInstant(),
                     TimeZoneConfig.DATABASE_ZONE).toLocalDateTime());
-            order.setOrderItems(jdbcTemplate.query(READ_CERTIFICATE_AS_ORDER_ITEM_BY_ORDER_ID,
-                    certificateAsOrderItemMapper, order.getId()));
             return order;
         }, userId);
     }
 
-    private void saveGiftCertificateAsOrderItem(Long orderId, GiftCertificateAsOrderItem certificate) {
+    @Override
+    public List<OrderItem> findOrderItemsByOrderId(Long orderId) {
+        return jdbcTemplate.query(READ_CERTIFICATE_AS_ORDER_ITEM_BY_ORDER_ID, certificateAsOrderItemMapper, orderId);
+    }
+
+    private void saveOrderItem(Long orderId, OrderItem orderItem) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement =
                     connection.prepareStatement(CREATE_CERTIFICATE_AS_ORDER_ITEM, Statement.RETURN_GENERATED_KEYS);
             int index = 1;
-            preparedStatement.setString(index++, certificate.getName());
-            preparedStatement.setString(index++, certificate.getDescription());
-            preparedStatement.setBigDecimal(index++, certificate.getPrice());
-            preparedStatement.setInt(index++, certificate.getDuration());
+            preparedStatement.setString(index++, orderItem.getName());
+            preparedStatement.setString(index++, orderItem.getDescription());
+            preparedStatement.setBigDecimal(index++, orderItem.getPrice());
+            preparedStatement.setInt(index++, orderItem.getDuration());
             preparedStatement.setLong(index++, orderId);
-            preparedStatement.setInt(index, certificate.getAmount());
+            preparedStatement.setInt(index, orderItem.getQuantity());
             return preparedStatement;
         }, keyHolder);
-        certificate.setId(((Number) keyHolder.getKeys().get("id")).longValue());
+        orderItem.setId(((Number) keyHolder.getKeys().get("id")).longValue());
     }
 }

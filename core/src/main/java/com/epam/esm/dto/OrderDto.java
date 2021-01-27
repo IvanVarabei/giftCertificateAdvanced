@@ -5,7 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -13,8 +16,10 @@ import java.util.List;
 @NoArgsConstructor
 public class OrderDto {
     private Long id;
-    private Long userId;
+    @NotNull
+    @Valid
+    private UserDto user;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime placedDate;
-    private List<GiftCertificateAsOrderItemDto> orderItems;
+    private LocalDateTime createdDate;
+    private List<@Valid OrderItemDto> orderItems = new ArrayList<>();
 }

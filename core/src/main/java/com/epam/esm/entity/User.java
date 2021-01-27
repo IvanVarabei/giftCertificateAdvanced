@@ -8,5 +8,7 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class User extends BaseEntity {
-    private String login;
+    private String username;
+    private String password;
+    private String email;
 }

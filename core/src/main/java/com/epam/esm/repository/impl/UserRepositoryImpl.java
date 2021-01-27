@@ -12,9 +12,10 @@ import java.util.Optional;
 @Repository
 @RequiredArgsConstructor
 public class UserRepositoryImpl implements UserRepository {
-    private static final String READ_USER_BY_ID = "select id, login from consumer where id = ?";
     private final JdbcTemplate jdbcTemplate;
     private final RowMapper<User> userMapper;
+
+    private static final String READ_USER_BY_ID = "select id, username, password, email from \"user\" where id = ?";
 
     @Override
     public Optional<User> findById(Long userId) {

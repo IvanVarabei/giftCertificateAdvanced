@@ -12,4 +12,6 @@ import org.springframework.stereotype.Component;
         unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface OrderConverter {
     OrderDto toDTO(Order order);
+
+    Order toEntity(OrderDto orderDto);
 }

@@ -11,7 +11,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class Order extends BaseEntity {
-    private Long userId;
-    private LocalDateTime placedDate;
-    private List<GiftCertificateAsOrderItem> orderItems;
+    private User user;
+    private LocalDateTime createdDate;
+    private List<OrderItem> orderItems;
 }

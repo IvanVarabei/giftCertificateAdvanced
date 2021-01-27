@@ -1,12 +1,11 @@
 package com.epam.esm.service;
 
 import com.epam.esm.dto.OrderDto;
-import com.epam.esm.dto.PlaceOrderDto;
 
-import java.util.List;
+import java.util.Map;
 
 public interface OrderService {
-    OrderDto placeOrder(PlaceOrderDto placeOrderDto);
+    OrderDto saveOrder(OrderDto orderDto);
 
-    List<OrderDto> getOrdersByUserId(Long userId);
+    Map<Long, OrderDto> getOrdersByUserId(Long userId);
 }

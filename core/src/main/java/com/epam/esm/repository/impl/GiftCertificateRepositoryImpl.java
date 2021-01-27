@@ -39,7 +39,7 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
                     "where true ";
 
     private static final String READ_CERTIFICATES_TAGS1 = "and id in (SELECT gift_certificate_id FROM " +
-            "certificate_x_tag LEFT JOIN tag ON tag_id = tag.id WHERE tag.name IN (";
+            "certificate_tag LEFT JOIN tag ON tag_id = tag.id WHERE tag.name IN (";
 
     private static final String READ_CERTIFICATES_TAGS2 = ") " +
             "GROUP BY gift_certificate_id HAVING COUNT(tag_id) = ?)";
@@ -90,7 +90,7 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
      * where true
      * and id in (
      * SELECT gift_certificate_id
-     * FROM certificate_x_tag
+     * FROM certificate_tag
      * LEFT JOIN tag ON tag_id = tag.id
      * WHERE tag.name IN ('cheap', 'gym')
      * GROUP BY gift_certificate_id

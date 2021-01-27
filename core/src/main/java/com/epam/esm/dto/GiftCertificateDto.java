@@ -20,10 +20,13 @@ public class GiftCertificateDto {
     @NotBlank
     @Pattern(regexp = ".{2,512}")
     private String description;
+    @NotNull
     @DecimalMin(value = "0.0", inclusive = false)
     @Digits(integer = 7, fraction = 2)
     private BigDecimal price;
+    @NotNull
     @Positive
+    @Max(1_000)
     private Integer duration;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdDate;

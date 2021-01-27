@@ -8,13 +8,13 @@ VALUES ('gym'),
        ('cheap'),
        ('rest');
 
-INSERT INTO certificate_x_tag(gift_certificate_id, tag_id)
+INSERT INTO certificate_tag(gift_certificate_id, tag_id)
 VALUES (1, 1),
        (1, 2),
        (3, 3),
        (3, 2);
 
-INSERT INTO consumer(id, login)
-VALUES (1, 'Alex'),
-       (2, 'Oleg');
+INSERT INTO "user"(id, username, password, email)
+VALUES (1, 'Alex', 'qwerty', 'alex@gamil.com'),
+       (2, 'Oleg', 'qwerty', 'oleg@gamil.com');
 
