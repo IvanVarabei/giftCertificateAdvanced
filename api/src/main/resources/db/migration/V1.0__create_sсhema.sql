@@ -37,19 +37,16 @@ create table "user"
 
 create table "order"
 (
-    id           serial      not null primary key,
-    created_date timestamptz not null default (now() at time zone 'UTC'),
-    user_id      integer     not null references "user" on delete cascade
+    id           serial         not null primary key,
+    cost         numeric(16, 2) not null,
+    created_date timestamptz    not null default (now() at time zone 'UTC'),
+    user_id      integer        not null references "user" on delete cascade
 );
 
 create table order_item
 (
-    id          serial         not null primary key,
-    name        varchar(64)    not null,
-    description varchar(512),
-    price       numeric(16, 2) not null,
-    duration    integer        not null,
-    quantity    integer        not null default 1,
-    order_id    integer        not null references "order" on delete cascade,
-    constraint positive_price check (price > (0)::numeric)
+    id                  serial  not null primary key,
+    quantity            integer not null default 1,
+    order_id            integer not null references "order" on delete cascade,
+    gift_certificate_id integer not null references gift_certificate
 );

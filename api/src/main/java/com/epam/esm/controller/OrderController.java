@@ -1,5 +1,6 @@
 package com.epam.esm.controller;
 
+import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.OrderDto;
 import com.epam.esm.service.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -28,5 +29,16 @@ public class OrderController {
     @GetMapping("/{userId}")
     public ResponseEntity<Map<Long, OrderDto>> getOrdersByUserId(@PathVariable("userId") @Min(1) Long userId) {
         return ResponseEntity.ok().body(orderService.getOrdersByUserId(userId));
+    }
+
+    @PutMapping
+    public ResponseEntity<OrderDto> updateOrder(@Valid @RequestBody OrderDto orderDto) {
+        return ResponseEntity.ok().body(orderService.updateOrder(orderDto));
+    }
+
+    @DeleteMapping("/{orderId}")
+    public ResponseEntity<GiftCertificateDto> deleteCertificate(@PathVariable("orderId") @Min(1) Long orderId) {
+        orderService.deleteOrder(orderId);
+        return ResponseEntity.noContent().build();
     }
 }
