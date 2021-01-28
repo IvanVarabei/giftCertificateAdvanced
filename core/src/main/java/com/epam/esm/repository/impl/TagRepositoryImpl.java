@@ -31,6 +31,23 @@ public class TagRepositoryImpl implements TagRepository {
     private static final String READ_TAGS_BY_CERTIFICATE_ID =
             "SELECT id, name FROM tag JOIN certificate_tag ON tag.id = tag_id WHERE gift_certificate_id = ?";
 
+    private static final String READ_MOST_COMMON_TAG_OF_USER_WITH_THE_HIGHEST_COST_OF_ALL_ORDERS =
+            "select t.id, t.name " +
+                    "from \"order\" " +
+                    "         join order_item oi on \"order\".id = oi.order_id " +
+                    "    and user_id = (select user_id " +
+                    "                   from (select user_id, sum(cost) as cost_sum " +
+                    "                         from \"order\" " +
+                    "                         group by user_id) as uims " +
+                    "                   order by cost_sum desc " +
+                    "                   limit 1) " +
+                    "         join gift_certificate gc on oi.gift_certificate_id = gc.id " +
+                    "         join certificate_tag ct on gc.id = ct.gift_certificate_id " +
+                    "         join tag t on t.id = ct.tag_id " +
+                    "group by t.id, t.name " +
+                    "order by sum(quantity) desc " +
+                    "limit 1";
+
     private static final String UPDATE_TAG = "update tag set name = ? where id = ?";
 
     private static final String DELETE_TAG = "delete from tag where id = ?";
@@ -90,5 +107,11 @@ public class TagRepositoryImpl implements TagRepository {
     @Override
     public void unbindTagsFromCertificate(Long certificateId) {
         jdbcTemplate.update(UNBIND_TAGS, certificateId);
+    }
+
+    @Override
+    public Optional<Tag> getMostCommonTagOfUserWithHighestCostOfAllOrders() {
+        return jdbcTemplate.query(READ_MOST_COMMON_TAG_OF_USER_WITH_THE_HIGHEST_COST_OF_ALL_ORDERS, tagMapper)
+                .stream().findAny();
     }
 }

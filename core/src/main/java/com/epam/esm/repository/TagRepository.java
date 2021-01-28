@@ -23,4 +23,6 @@ public interface TagRepository {
     void bindWithCertificate(Long certificateId, Long tagId);
 
     void unbindTagsFromCertificate(Long certificateId);
+
+    Optional<Tag> getMostCommonTagOfUserWithHighestCostOfAllOrders();
 }

@@ -81,4 +81,10 @@ public class TagServiceImpl implements TagService {
     public List<Tag> getTagsByCertificateId(Long certificateId) {
         return tagRepository.getTagsByCertificateId(certificateId);
     }
+
+    @Override
+    public TagDto getMostCommonTagOfUserWithHighestCostOfAllOrders() {
+        Optional<Tag> tagOptional = tagRepository.getMostCommonTagOfUserWithHighestCostOfAllOrders();
+        return tagConverter.toDTO(tagOptional.get());
+    }
 }
