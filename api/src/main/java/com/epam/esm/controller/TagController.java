@@ -1,13 +1,18 @@
 package com.epam.esm.controller;
 
+import com.epam.esm.dto.Page;
 import com.epam.esm.dto.TagDto;
+import com.epam.esm.listener.PaginatedResultsRetrievedEvent;
 import com.epam.esm.service.TagService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import java.net.URI;
@@ -22,6 +27,8 @@ import java.util.List;
 @Validated
 public class TagController {
     private final TagService tagService;
+    private static final String REQUEST_MAPPING = "/api/tags";
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * The method allows creating {@link com.epam.esm.entity.Tag}.
@@ -46,8 +53,22 @@ public class TagController {
      * @return list of {@link TagDto}. Response code 200.
      */
     @GetMapping
-    public ResponseEntity<List<TagDto>> getTags() {
-        return ResponseEntity.ok().body(tagService.getTags());
+    public ResponseEntity<List<TagDto>> getTags(@RequestParam(defaultValue = "0") @Min(0) Integer page,
+                                                @RequestParam(defaultValue = "3") @Min(1) Integer size,
+                                                UriComponentsBuilder uriBuilder,
+                                                HttpServletResponse response) {
+        Page<TagDto> resultPage = tagService.findPaginated(page, size);
+        PaginatedResultsRetrievedEvent event = PaginatedResultsRetrievedEvent
+                .builder()
+                .requestMapping(REQUEST_MAPPING)
+                .uriBuilder(uriBuilder)
+                .response(response)
+                .page(page)
+                .lastPage(resultPage.getLastPage())
+                .pageSize(size)
+                .build();
+        eventPublisher.publishEvent(event);
+        return ResponseEntity.ok().body(resultPage.getContent());
     }
 
     /**

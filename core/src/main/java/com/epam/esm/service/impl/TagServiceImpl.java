@@ -1,5 +1,6 @@
 package com.epam.esm.service.impl;
 
+import com.epam.esm.dto.Page;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ErrorMessage;
@@ -28,8 +29,17 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public List<TagDto> getTags() {
-        return tagRepository.findAll().stream().map(tagConverter::toDTO).collect(Collectors.toList());
+    public Page<TagDto> findPaginated(Integer page, Integer size) {
+        int lastPage = (tagRepository.countAll() + size - 1) / size - 1;
+        if (page > lastPage) {
+            throw new ResourceNotFoundException(String.format(ErrorMessage.PAGE_NOT_FOUND, size, page, lastPage));
+        }
+        int offset = size * page;
+        List<Tag> foundTags = tagRepository.findAllPaginated(offset, size);
+        Page<TagDto> pageEntity = new Page<>();
+        pageEntity.setContent(foundTags.stream().map(tagConverter::toDTO).collect(Collectors.toList()));
+        pageEntity.setLastPage(lastPage);
+        return pageEntity;
     }
 
     @Override

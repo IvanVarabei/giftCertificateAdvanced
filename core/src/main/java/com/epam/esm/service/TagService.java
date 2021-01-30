@@ -1,5 +1,6 @@
 package com.epam.esm.service;
 
+import com.epam.esm.dto.Page;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.entity.Tag;
 
@@ -8,7 +9,7 @@ import java.util.List;
 public interface TagService {
     TagDto createTag(TagDto tagDto);
 
-    List<TagDto> getTags();
+    Page<TagDto> findPaginated(Integer page, Integer size);
 
     TagDto getTagById(Long tagId);
 

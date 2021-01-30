@@ -56,6 +56,10 @@ public class TagRepositoryImpl implements TagRepository {
 
     private static final String UNBIND_TAGS = "delete from certificate_tag where gift_certificate_id = ?";
 
+    private static final String COUNT_TAGS = "select count(id) from tag";
+
+    private static final String PAGINATION = "%s offset %s limit %s";
+
     @Override
     public Tag save(Tag tag) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -69,8 +73,13 @@ public class TagRepositoryImpl implements TagRepository {
     }
 
     @Override
-    public List<Tag> findAll() {
-        return jdbcTemplate.query(READ_TAGS, tagMapper);
+    public List<Tag> findAllPaginated(Integer offset, Integer limit) {
+        return jdbcTemplate.query(String.format(PAGINATION, READ_TAGS, offset, limit), tagMapper);
+    }
+
+    @Override
+    public Integer countAll() {
+        return jdbcTemplate.query(COUNT_TAGS, (rs, rowNum) -> rs.getInt("count")).stream().findAny().get();
     }
 
     @Override

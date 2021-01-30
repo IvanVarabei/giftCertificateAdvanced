@@ -48,9 +48,9 @@ class TagServiceImplTest {
 
     @Test
     void should_invoke_findAll_when_getTags() {
-        tagService.getTags();
+        tagService.getTags(page, size);
 
-        verify(tagRepository).findAll();
+        verify(tagRepository).findAll(offset, size);
     }
 
     @Test
