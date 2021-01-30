@@ -35,11 +35,10 @@ public class TagRepositoryImpl implements TagRepository {
             "select t.id, t.name " +
                     "from \"order\" " +
                     "         join order_item oi on \"order\".id = oi.order_id " +
-                    "    and user_id = (select user_id " +
-                    "                   from (select user_id, sum(cost) as cost_sum " +
-                    "                         from \"order\" " +
-                    "                         group by user_id) as uims " +
-                    "                   order by cost_sum desc " +
+                    "    and user_id = (select user_id  " +
+                    "                   from \"order\"  " +
+                    "                   group by user_id  " +
+                    "                   order by sum(cost) desc  " +
                     "                   limit 1) " +
                     "         join gift_certificate gc on oi.gift_certificate_id = gc.id " +
                     "         join certificate_tag ct on gc.id = ct.gift_certificate_id " +
