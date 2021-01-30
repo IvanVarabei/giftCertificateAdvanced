@@ -1,6 +1,5 @@
 package com.epam.esm.service.impl;
 
-import com.epam.esm.dto.Page;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ErrorMessage;
@@ -9,6 +8,9 @@ import com.epam.esm.mapper.TagConverter;
 import com.epam.esm.repository.TagRepository;
 import com.epam.esm.service.TagService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,17 +31,18 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public Page<TagDto> findPaginated(Integer page, Integer size) {
-        int lastPage = (tagRepository.countAll() + size - 1) / size - 1;
+    public Page<TagDto> findPaginated(Pageable pageRequest) {
+        int size = pageRequest.getPageSize();
+        int page = pageRequest.getPageNumber();
+        int totalTagAmount = tagRepository.countAll();
+        int lastPage = (totalTagAmount + size - 1) / size - 1;
         if (page > lastPage) {
             throw new ResourceNotFoundException(String.format(ErrorMessage.PAGE_NOT_FOUND, size, page, lastPage));
         }
         int offset = size * page;
         List<Tag> foundTags = tagRepository.findAllPaginated(offset, size);
-        Page<TagDto> pageEntity = new Page<>();
-        pageEntity.setContent(foundTags.stream().map(tagConverter::toDTO).collect(Collectors.toList()));
-        pageEntity.setLastPage(lastPage);
-        return pageEntity;
+        return new PageImpl<>(foundTags.stream().map(tagConverter::toDTO).collect(Collectors.toList()),
+                pageRequest, totalTagAmount);
     }
 
     @Override

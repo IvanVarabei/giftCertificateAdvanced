@@ -1,27 +1,28 @@
 package com.epam.esm.controller;
 
-import com.epam.esm.dto.Page;
 import com.epam.esm.dto.TagDto;
-import com.epam.esm.listener.PaginatedResultsRetrievedEvent;
 import com.epam.esm.service.TagService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.hateoas.CollectionModel;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import java.net.URI;
-import java.util.List;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 
 /**
  * The class provides operations having to do with {@link com.epam.esm.entity.Tag}
@@ -52,58 +53,24 @@ public class TagController {
         return ResponseEntity.created(locationUri).body(createdTagDto);
     }
 
+    private final PagedResourcesAssembler<TagDto> pagedResourcesAssembler;
+
     /**
      * The method provides all existing tags.
      *
      * @return list of {@link TagDto}. Response code 200.
      */
     @GetMapping
-    public CollectionModel<TagDto> getTags(@RequestParam(defaultValue = "0") @Min(0) Integer page,
-                                           @RequestParam(defaultValue = "3") @Min(1) Integer size,
-                                           UriComponentsBuilder uriBuilder,
-                                           HttpServletResponse response) {
-        Page<TagDto> resultPage = tagService.findPaginated(page, size);
-        PaginatedResultsRetrievedEvent event = PaginatedResultsRetrievedEvent
-                .builder()
-                .requestMapping(REQUEST_MAPPING)
-                .uriBuilder(uriBuilder)
-                .response(response)
-                .page(page)
-                .lastPage(resultPage.getLastPage())
-                .pageSize(size)
-                .build();
-        eventPublisher.publishEvent(event);
-
-        List<TagDto> tagDtoList = tagService.findPaginated(page, size).getContent();
-        for (final TagDto tagDto : tagDtoList) {
-            Link selfLink = linkTo(methodOn(TagController.class)
+    public PagedModel<EntityModel<TagDto>> getTags(@PageableDefault Pageable pageRequest) {
+        Page<TagDto> tags = tagService.findPaginated(pageRequest);
+        for (TagDto tagDto : tags.getContent()) {
+            Link tagDtoSelfLink = linkTo(methodOn(TagController.class)
                     .getTagById(tagDto.getId())).withSelfRel();
-            tagDto.add(selfLink);
+            tagDto.add(tagDtoSelfLink);
         }
-
-        Link link = linkTo(methodOn(TagController.class)
-                .getTags(page, size, uriBuilder, response)).withSelfRel();
-        CollectionModel<TagDto> result = CollectionModel.of(tagDtoList, link);
-
-        return result;
+        Link selfLink = Link.of(ServletUriComponentsBuilder.fromCurrentRequest().build().toString());
+        return pagedResourcesAssembler.toModel(tags, selfLink);
     }
-//    public ResponseEntity<List<TagDto>> getTags(@RequestParam(defaultValue = "0") @Min(0) Integer page,
-//                                                @RequestParam(defaultValue = "3") @Min(1) Integer size,
-//                                                UriComponentsBuilder uriBuilder,
-//                                                HttpServletResponse response) {
-//        Page<TagDto> resultPage = tagService.findPaginated(page, size);
-//        PaginatedResultsRetrievedEvent event = PaginatedResultsRetrievedEvent
-//                .builder()
-//                .requestMapping(REQUEST_MAPPING)
-//                .uriBuilder(uriBuilder)
-//                .response(response)
-//                .page(page)
-//                .lastPage(resultPage.getLastPage())
-//                .pageSize(size)
-//                .build();
-//        eventPublisher.publishEvent(event);
-//        return ResponseEntity.ok().body(resultPage.getContent());
-//    }
 
     /**
      * The method provide a tag having passed id. If it's absent error will be returned(404).
