@@ -2,6 +2,8 @@ package com.epam.esm.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.springframework.hateoas.RepresentationModel;
 
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -10,8 +12,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class GiftCertificateDto {
+public class GiftCertificateDto extends RepresentationModel<TagDto> {
     @Min(1)
     private Long id;
     @NotBlank

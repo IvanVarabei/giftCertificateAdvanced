@@ -2,12 +2,15 @@ package com.epam.esm.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.springframework.hateoas.RepresentationModel;
 
 import javax.validation.constraints.*;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @AllArgsConstructor
-public class UserDto {
+public class UserDto extends RepresentationModel<UserDto> {
     @NotNull
     @Min(1)
     private Long id;

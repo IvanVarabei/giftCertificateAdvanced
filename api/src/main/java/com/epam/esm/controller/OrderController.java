@@ -37,7 +37,7 @@ public class OrderController {
     }
 
     @DeleteMapping("/{orderId}")
-    public ResponseEntity<GiftCertificateDto> deleteCertificate(@PathVariable("orderId") @Min(1) Long orderId) {
+    public ResponseEntity<GiftCertificateDto> deleteOrder(@PathVariable("orderId") @Min(1) Long orderId) {
         orderService.deleteOrder(orderId);
         return ResponseEntity.noContent().build();
     }
