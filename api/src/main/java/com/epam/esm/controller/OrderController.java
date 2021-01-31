@@ -1,5 +1,6 @@
 package com.epam.esm.controller;
 
+import com.epam.esm.controller.hateoas.DtoHateoas;
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.OrderDto;
 import com.epam.esm.service.OrderService;
@@ -20,6 +21,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 @Validated
 public class OrderController {
     private final OrderService orderService;
+    private final DtoHateoas dtoHateoas;
 
     @PostMapping
     public ResponseEntity<OrderDto> createOrder(@Valid @RequestBody OrderDto orderDto) {

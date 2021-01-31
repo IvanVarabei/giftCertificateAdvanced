@@ -1,26 +1,21 @@
 package com.epam.esm.controller;
 
+import com.epam.esm.controller.hateoas.DtoHateoas;
+import com.epam.esm.controller.hateoas.PaginationHateoas;
+import com.epam.esm.dto.CustomPage;
+import com.epam.esm.dto.CustomPageable;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.service.TagService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
-import java.util.List;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import static org.springframework.http.HttpStatus.CREATED;
 
 
@@ -33,7 +28,8 @@ import static org.springframework.http.HttpStatus.CREATED;
 @Validated
 public class TagController {
     private final TagService tagService;
-    private final PagedResourcesAssembler<TagDto> pagedResourcesAssembler;
+    private final PaginationHateoas<TagDto> paginationHateoas;
+    private final DtoHateoas dtoHateoas;
 
     /**
      * The method allows creating {@link com.epam.esm.entity.Tag}.
@@ -44,7 +40,7 @@ public class TagController {
     @PostMapping
     public ResponseEntity<TagDto> createTag(@RequestBody @Valid TagDto tagDto) {
         TagDto createdTagDto = tagService.createTag(tagDto);
-        attacheHateoas(createdTagDto);
+        dtoHateoas.attachHateoas(createdTagDto);
         return ResponseEntity.status(CREATED).body(createdTagDto);
     }
 
@@ -54,11 +50,17 @@ public class TagController {
      * @return list of {@link TagDto}. Response code 200.
      */
     @GetMapping
-    public PagedModel<EntityModel<TagDto>> getTags(@PageableDefault Pageable pageRequest) {
-        Page<TagDto> tags = tagService.getPaginated(pageRequest);
-        tags.getContent().forEach(this::attacheHateoas);
-        Link selfLink = Link.of(ServletUriComponentsBuilder.fromCurrentRequest().build().toString());
-        return pagedResourcesAssembler.toModel(tags, selfLink);
+    public CustomPage<TagDto> getTags(
+            @Valid CustomPageable pageRequest,
+            UriComponentsBuilder uriBuilder,
+            HttpServletRequest request
+    ) {
+        CustomPage<TagDto> tags = tagService.getPaginated(pageRequest);
+        tags.getContent().forEach(dtoHateoas::attachHateoas);
+        uriBuilder.path(request.getRequestURI());
+        uriBuilder.query(request.getQueryString());
+        paginationHateoas.addPaginationLinks(uriBuilder, tags);
+        return tags;
     }
 
     /**
@@ -70,7 +72,7 @@ public class TagController {
     @GetMapping("/{tagId}")
     public ResponseEntity<TagDto> getTagById(@PathVariable("tagId") @Min(1) Long tagId) {
         TagDto tagDto = tagService.getTagById(tagId);
-        attacheHateoas(tagDto);
+        dtoHateoas.attachHateoas(tagDto);
         return ResponseEntity.ok().body(tagDto);
     }
 
@@ -83,7 +85,9 @@ public class TagController {
      */
     @PutMapping
     public ResponseEntity<TagDto> updateTag(@Valid @RequestBody TagDto tagDto) {
-        return ResponseEntity.ok().body(tagService.updateTag(tagDto));
+        TagDto updatedTag = tagService.updateTag(tagDto);
+        dtoHateoas.attachHateoas(updatedTag);
+        return ResponseEntity.ok().body(updatedTag);
     }
 
     /**
@@ -96,16 +100,5 @@ public class TagController {
     public ResponseEntity<TagDto> deleteTagById(@PathVariable("tagId") @Min(1) Long tagId) {
         tagService.deleteTag(tagId);
         return ResponseEntity.noContent().build();
-    }
-
-    private void attacheHateoas(TagDto tagDto) {
-        Link selfLink = linkTo(methodOn(TagController.class)
-                .getTagById(tagDto.getId())).withSelfRel();
-        Link certificates = linkTo(methodOn(CertificateController.class)
-                .getCertificates(List.of(tagDto.getName()),
-                        null, null, null, null, null))
-                .withRel("certificates");
-        tagDto.add(selfLink);
-        tagDto.add(certificates);
     }
 }

@@ -1,5 +1,7 @@
 package com.epam.esm.service.impl;
 
+import com.epam.esm.dto.CustomPage;
+import com.epam.esm.dto.CustomPageable;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ErrorMessage;
@@ -8,9 +10,6 @@ import com.epam.esm.mapper.TagConverter;
 import com.epam.esm.repository.TagRepository;
 import com.epam.esm.service.TagService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,9 +31,9 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public Page<TagDto> getPaginated(Pageable pageRequest) {
-        int size = pageRequest.getPageSize();
-        int page = pageRequest.getPageNumber();
+    public CustomPage<TagDto> getPaginated(CustomPageable pageRequest) {
+        int size = pageRequest.getSize();
+        int page = pageRequest.getPage();
         int totalTagAmount = tagRepository.countAll();
         int lastPage = (totalTagAmount + size - 1) / size - 1;
         if (page > lastPage) {
@@ -42,7 +41,7 @@ public class TagServiceImpl implements TagService {
         }
         int offset = size * page;
         List<Tag> foundTags = tagRepository.findPaginated(offset, size);
-        return new PageImpl<>(foundTags.stream().map(tagConverter::toDTO).collect(Collectors.toList()),
+        return new CustomPage<>(foundTags.stream().map(tagConverter::toDTO).collect(Collectors.toList()),
                 pageRequest, totalTagAmount);
     }
 

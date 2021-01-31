@@ -1,5 +1,7 @@
 package com.epam.esm.service.impl;
 
+import com.epam.esm.dto.CustomPage;
+import com.epam.esm.dto.CustomPageable;
 import com.epam.esm.dto.UserDto;
 import com.epam.esm.entity.User;
 import com.epam.esm.exception.ErrorMessage;
@@ -8,9 +10,6 @@ import com.epam.esm.mapper.UserConverter;
 import com.epam.esm.repository.UserRepository;
 import com.epam.esm.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,9 +22,9 @@ public class UserServiceImpl implements UserService {
     private final UserConverter userConverter;
 
     @Override
-    public Page<UserDto> getPaginated(Pageable pageRequest) {
-        int size = pageRequest.getPageSize();
-        int page = pageRequest.getPageNumber();
+    public CustomPage<UserDto> getPaginated(CustomPageable pageRequest) {
+        int size = pageRequest.getSize();
+        int page = pageRequest.getPage();
         int totalUserAmount = userRepository.countAll();
         int lastPage = (totalUserAmount + size - 1) / size - 1;
         if (page > lastPage) {
@@ -33,7 +32,7 @@ public class UserServiceImpl implements UserService {
         }
         int offset = size * page;
         List<User> foundUsers = userRepository.findAllPaginated(offset, size);
-        return new PageImpl<>(foundUsers.stream().map(userConverter::toDTO).collect(Collectors.toList()),
+        return new CustomPage<>(foundUsers.stream().map(userConverter::toDTO).collect(Collectors.toList()),
                 pageRequest, totalUserAmount);
     }
 

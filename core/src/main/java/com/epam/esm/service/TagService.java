@@ -1,16 +1,16 @@
 package com.epam.esm.service;
 
+import com.epam.esm.dto.CustomPage;
+import com.epam.esm.dto.CustomPageable;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.entity.Tag;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 public interface TagService {
     TagDto createTag(TagDto tagDto);
 
-    Page<TagDto> getPaginated(Pageable pageRequest);
+    CustomPage<TagDto> getPaginated(CustomPageable pageRequest);
 
     TagDto getTagById(Long tagId);
 

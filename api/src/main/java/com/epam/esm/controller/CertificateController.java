@@ -1,24 +1,18 @@
 package com.epam.esm.controller;
 
-import com.epam.esm.dto.GiftCertificateDto;
-import com.epam.esm.dto.PriceDto;
-import com.epam.esm.dto.SearchCertificateDto;
+import com.epam.esm.controller.hateoas.DtoHateoas;
+import com.epam.esm.controller.hateoas.PaginationHateoas;
+import com.epam.esm.dto.*;
 import com.epam.esm.dto.search.SortByField;
 import com.epam.esm.dto.search.SortOrder;
 import com.epam.esm.service.GiftCertificateService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Pattern;
@@ -35,7 +29,8 @@ import static org.springframework.http.HttpStatus.CREATED;
 @Validated
 public class CertificateController {
     private final GiftCertificateService giftCertificateService;
-    private final PagedResourcesAssembler<GiftCertificateDto> pagedResourcesAssembler;
+    private final PaginationHateoas<GiftCertificateDto> paginationHateoas;
+    private final DtoHateoas dtoHateoas;
 
     /**
      * The method allows creating {@link com.epam.esm.entity.GiftCertificate}.
@@ -47,7 +42,9 @@ public class CertificateController {
     @PostMapping
     public ResponseEntity<GiftCertificateDto> createCertificate(
             @Valid @RequestBody GiftCertificateDto giftCertificateDto) {
-        return ResponseEntity.status(CREATED).body(giftCertificateService.createCertificate(giftCertificateDto));
+        GiftCertificateDto certificateDto = giftCertificateService.createCertificate(giftCertificateDto);
+        dtoHateoas.attachHateoas(certificateDto);
+        return ResponseEntity.status(CREATED).body(certificateDto);
     }
 
     /**
@@ -66,13 +63,15 @@ public class CertificateController {
      * @return Response entity containing the list of certificates. Response code 200.
      */
     @GetMapping
-    public PagedModel<EntityModel<GiftCertificateDto>> getCertificates(
+    public CustomPage<GiftCertificateDto> getCertificates(
             @RequestParam(required = false) List<@Pattern(regexp = "\\w{2,64}") String> tagName,
             @RequestParam(required = false) @Pattern(regexp = "\\w{2,64}") String name,
             @RequestParam(required = false) @Pattern(regexp = ".{2,512}") String description,
             @RequestParam(required = false) SortByField sortByField,
             @RequestParam(required = false) SortOrder sortOrder,
-            @PageableDefault Pageable pageRequest
+            @Valid CustomPageable pageRequest,
+            UriComponentsBuilder uriBuilder,
+            HttpServletRequest request
     ) {
         SearchCertificateDto searchCertificateDto = SearchCertificateDto.builder()
                 .tagNames(tagName)
@@ -82,9 +81,12 @@ public class CertificateController {
                 .sortOrder(sortOrder)
                 .pageRequest(pageRequest)
                 .build();
-        Page<GiftCertificateDto> certificateDtoList = giftCertificateService.getPaginated(searchCertificateDto);
-        Link selfLink = Link.of(ServletUriComponentsBuilder.fromCurrentRequest().build().toString());
-        return pagedResourcesAssembler.toModel(certificateDtoList, selfLink);
+        CustomPage<GiftCertificateDto> certificateDtoPage = giftCertificateService.getPaginated(searchCertificateDto);
+        certificateDtoPage.getContent().forEach(dtoHateoas::attachHateoas);
+        uriBuilder.path(request.getRequestURI());
+        uriBuilder.query(request.getQueryString());
+        paginationHateoas.addPaginationLinks(uriBuilder, certificateDtoPage);
+        return certificateDtoPage;
     }
 
     /**
@@ -96,7 +98,9 @@ public class CertificateController {
     @GetMapping("/{certificateId}")
     public ResponseEntity<GiftCertificateDto> getCertificateById(
             @PathVariable("certificateId") @Min(1) Long certificateId) {
-        return ResponseEntity.ok().body(giftCertificateService.getCertificateById(certificateId));
+        GiftCertificateDto certificateDto = giftCertificateService.getCertificateById(certificateId);
+        dtoHateoas.attachHateoas(certificateDto);
+        return ResponseEntity.ok().body(certificateDto);
     }
 
     /**
@@ -108,7 +112,16 @@ public class CertificateController {
     @PutMapping
     public ResponseEntity<GiftCertificateDto> updateCertificate(
             @Valid @RequestBody GiftCertificateDto giftCertificateDto) {
-        return ResponseEntity.ok().body(giftCertificateService.updateCertificate(giftCertificateDto));
+        GiftCertificateDto certificateDto = giftCertificateService.updateCertificate(giftCertificateDto);
+        dtoHateoas.attachHateoas(certificateDto);
+        return ResponseEntity.ok().body(certificateDto);
+    }
+
+    @PatchMapping
+    public ResponseEntity<GiftCertificateDto> updatePrice(@Valid @RequestBody PriceDto priceDto) {
+        GiftCertificateDto certificateDto = giftCertificateService.updatePrice(priceDto);
+        dtoHateoas.attachHateoas(certificateDto);
+        return ResponseEntity.ok().body(giftCertificateService.updatePrice(priceDto));
     }
 
     /**
@@ -122,10 +135,5 @@ public class CertificateController {
             @PathVariable("certificateId") @Min(1) Long certificateId) {
         giftCertificateService.deleteCertificate(certificateId);
         return ResponseEntity.noContent().build();
-    }
-
-    @PatchMapping
-    public ResponseEntity<GiftCertificateDto> updatePrice(@Valid @RequestBody PriceDto priceDto) {
-        return ResponseEntity.ok().body(giftCertificateService.updatePrice(priceDto));
     }
 }

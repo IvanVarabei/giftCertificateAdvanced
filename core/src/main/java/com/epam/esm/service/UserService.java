@@ -1,11 +1,11 @@
 package com.epam.esm.service;
 
+import com.epam.esm.dto.CustomPage;
+import com.epam.esm.dto.CustomPageable;
 import com.epam.esm.dto.UserDto;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 public interface UserService {
-    Page<UserDto> getPaginated(Pageable pageRequest);
+    CustomPage<UserDto> getPaginated(CustomPageable pageRequest);
 
     UserDto getUserById(Long userId);
 }

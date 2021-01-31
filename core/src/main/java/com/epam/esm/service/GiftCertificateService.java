@@ -1,14 +1,14 @@
 package com.epam.esm.service;
 
+import com.epam.esm.dto.CustomPage;
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.PriceDto;
 import com.epam.esm.dto.SearchCertificateDto;
-import org.springframework.data.domain.Page;
 
 public interface GiftCertificateService {
     GiftCertificateDto createCertificate(GiftCertificateDto giftCertificateDto);
 
-    Page<GiftCertificateDto> getPaginated(SearchCertificateDto searchDto);
+    CustomPage<GiftCertificateDto> getPaginated(SearchCertificateDto searchDto);
 
     GiftCertificateDto getCertificateById(Long certificateId);
 

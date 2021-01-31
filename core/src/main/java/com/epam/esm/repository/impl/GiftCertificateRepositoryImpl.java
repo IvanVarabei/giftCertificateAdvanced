@@ -136,8 +136,8 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
                 sb.append(DESC);
             }
         }
-        int size = searchDto.getPageRequest().getPageSize();
-        int page = searchDto.getPageRequest().getPageNumber();
+        int size = searchDto.getPageRequest().getSize();
+        int page = searchDto.getPageRequest().getPage();
         int offset = size * page;
         String query = String.format(PAGINATION, sb.toString(), offset, size);
         return jdbcTemplate.query(query, certificateMapper, queryParams.toArray());

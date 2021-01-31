@@ -1,6 +1,7 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.config.TimeZoneConfig;
+import com.epam.esm.dto.CustomPage;
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.PriceDto;
 import com.epam.esm.dto.SearchCertificateDto;
@@ -14,8 +15,6 @@ import com.epam.esm.service.GiftCertificateService;
 import com.epam.esm.service.TagService;
 import com.epam.esm.util.DateTimeUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,9 +45,9 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     @Override
-    public Page<GiftCertificateDto> getPaginated(SearchCertificateDto searchDto) {
-        int size = searchDto.getPageRequest().getPageSize();
-        int page = searchDto.getPageRequest().getPageNumber();
+    public CustomPage<GiftCertificateDto> getPaginated(SearchCertificateDto searchDto) {
+        int size = searchDto.getPageRequest().getSize();
+        int page = searchDto.getPageRequest().getPage();
         int totalCertificateAmount = giftCertificateRepository.countAll(searchDto);
         int lastPage = (totalCertificateAmount + size - 1) / size - 1;
         if (page > lastPage) {
@@ -57,7 +56,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         List<GiftCertificate> certificates = giftCertificateRepository.findPaginated(searchDto);
         certificates.forEach(c -> c.setTags(tagService.getTagsByCertificateId(c.getId())));
         certificates.forEach(c -> adjustDateTimeAccordingToClientTimeZone(c, TimeZoneConfig.CLIENT_ZONE));
-        return new PageImpl<>(certificates.stream().map(certificateConverter::toDTO).collect(Collectors.toList()),
+        return new CustomPage<>(certificates.stream().map(certificateConverter::toDTO).collect(Collectors.toList()),
                 searchDto.getPageRequest(), totalCertificateAmount);
     }
 
