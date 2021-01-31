@@ -3,7 +3,6 @@ package com.epam.esm.controller;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.service.TagService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -33,8 +32,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @Validated
 public class TagController {
     private final TagService tagService;
-    private static final String REQUEST_MAPPING = "/api/tags";
-    private final ApplicationEventPublisher eventPublisher;
+    private final PagedResourcesAssembler<TagDto> pagedResourcesAssembler;
 
     /**
      * The method allows creating {@link com.epam.esm.entity.Tag}.
@@ -45,15 +43,12 @@ public class TagController {
     @PostMapping
     public ResponseEntity<TagDto> createTag(@RequestBody @Valid TagDto tagDto) {
         TagDto createdTagDto = tagService.createTag(tagDto);
-        URI locationUri = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(createdTagDto.getId())
-                .toUri();
+        Link selfLink = linkTo(methodOn(TagController.class)
+                .getTagById(tagDto.getId())).withSelfRel();
+        createdTagDto.add(selfLink);
+        URI locationUri = selfLink.toUri();
         return ResponseEntity.created(locationUri).body(createdTagDto);
     }
-
-    private final PagedResourcesAssembler<TagDto> pagedResourcesAssembler;
 
     /**
      * The method provides all existing tags.
