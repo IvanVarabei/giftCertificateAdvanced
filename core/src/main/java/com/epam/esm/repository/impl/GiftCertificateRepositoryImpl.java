@@ -32,7 +32,7 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
 
     private static final String CREATE_CERTIFICATE =
             "insert into gift_certificate (name, description, price, duration, create_date, last_update_date) " +
-                    "values (?, ?, ?, ?, ?, ?);";
+                    "values (?, ?, ?, ?, ?, ?)";
 
     private static final String READ_CERTIFICATES_BASE =
             "select id, name, description, price, duration, create_date, last_update_date from gift_certificate " +
@@ -62,6 +62,10 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
     private static final String DELETE_CERTIFICATE = "delete from gift_certificate where id = ?";
 
     private static final String BLANK = " ";
+
+    private static final String COUNT_CERTIFICATES = "select count(id) from gift_certificate where true ";
+
+    private static final String PAGINATION = "%s offset %s limit %s";
 
     @Override
     public GiftCertificate save(GiftCertificate giftCertificate) {
@@ -99,9 +103,10 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
      * and description ilike '%fr%'
      * order by last_update_date
      * desc
+     * %s offset %s limit %s
      */
     @Override
-    public List<GiftCertificate> findAll(SearchCertificateDto searchDto) {
+    public List<GiftCertificate> findPaginated(SearchCertificateDto searchDto) {
         StringBuilder sb = new StringBuilder(READ_CERTIFICATES_BASE);
         List<String> tags = searchDto.getTagNames();
         List queryParams = new ArrayList<>();
@@ -131,7 +136,71 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
                 sb.append(DESC);
             }
         }
-        return jdbcTemplate.query(sb.toString(), certificateMapper, queryParams.toArray());
+        int size = searchDto.getPageRequest().getPageSize();
+        int page = searchDto.getPageRequest().getPageNumber();
+        int offset = size * page;
+        String query = String.format(PAGINATION, sb.toString(), offset, size);
+        return jdbcTemplate.query(query, certificateMapper, queryParams.toArray());
+    }
+
+    @Override
+    public Integer countAll(SearchCertificateDto searchDto) {
+        StringBuilder sb = new StringBuilder(COUNT_CERTIFICATES);
+        List<String> tags = searchDto.getTagNames();
+        List queryParams = new ArrayList<>();
+        if (tags != null && !tags.isEmpty()) {
+            sb.append(READ_CERTIFICATES_TAGS1)
+                    .append("?, ".repeat(tags.size() - 1))
+                    .append("?")
+                    .append(READ_CERTIFICATES_TAGS2);
+            queryParams.addAll(tags);
+            queryParams.add(tags.size());
+        }
+        if (!StringUtils.isBlank(searchDto.getName())) {
+            sb.append(NAME_FILTER)
+                    .append(searchDto.getName())
+                    .append("%' ");
+        }
+        if (!StringUtils.isBlank(searchDto.getDescription())) {
+            sb.append(DESCRIPTION_FILTER)
+                    .append(searchDto.getDescription())
+                    .append("%' ");
+        }
+        return jdbcTemplate.query(sb.toString(), (rs, rowNum) -> rs.getInt("count"), queryParams.toArray())
+                .stream().findAny().get();
+    }
+
+    private String generateSearchQuery(SearchCertificateDto searchDto, String tableColumns) {
+        StringBuilder sb = new StringBuilder(tableColumns);
+        List<String> tags = searchDto.getTagNames();
+        List queryParams = new ArrayList<>();
+        if (tags != null && !tags.isEmpty()) {
+            sb.append(READ_CERTIFICATES_TAGS1)
+                    .append("?, ".repeat(tags.size() - 1))
+                    .append("?")
+                    .append(READ_CERTIFICATES_TAGS2);
+            queryParams.addAll(tags);
+            queryParams.add(tags.size());
+        }
+        if (!StringUtils.isBlank(searchDto.getName())) {
+            sb.append(NAME_FILTER)
+                    .append(searchDto.getName())
+                    .append("%' ");
+        }
+        if (!StringUtils.isBlank(searchDto.getDescription())) {
+            sb.append(DESCRIPTION_FILTER)
+                    .append(searchDto.getDescription())
+                    .append("%' ");
+        }
+        if (searchDto.getSortByField() != null) {
+            sb.append(SORT_FIELD)
+                    .append(searchDto.getSortByField())
+                    .append(BLANK);
+            if (DESC == searchDto.getSortOrder()) {
+                sb.append(DESC);
+            }
+        }
+        return sb.toString();
     }
 
     @Override

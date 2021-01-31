@@ -9,7 +9,9 @@ import java.util.Optional;
 public interface GiftCertificateRepository {
     GiftCertificate save(GiftCertificate giftCertificate);
 
-    List<GiftCertificate> findAll(SearchCertificateDto searchDto);
+    List<GiftCertificate> findPaginated(SearchCertificateDto searchDto);
+
+    Integer countAll(SearchCertificateDto searchDto);
 
     Optional<GiftCertificate> findById(Long certificateId);
 

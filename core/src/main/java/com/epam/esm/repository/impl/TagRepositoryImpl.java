@@ -73,7 +73,7 @@ public class TagRepositoryImpl implements TagRepository {
     }
 
     @Override
-    public List<Tag> findAllPaginated(Integer offset, Integer limit) {
+    public List<Tag> findPaginated(Integer offset, Integer limit) {
         return jdbcTemplate.query(String.format(PAGINATION, READ_TAGS, offset, limit), tagMapper);
     }
 

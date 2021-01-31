@@ -5,6 +5,7 @@ import com.epam.esm.dto.search.SortOrder;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -17,4 +18,5 @@ public class SearchCertificateDto {
     private String description;
     private SortByField sortByField;
     private SortOrder sortOrder;
+    private Pageable pageRequest;
 }

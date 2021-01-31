@@ -33,14 +33,14 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public OrderDto saveOrder(OrderDto orderDto) {
+    public OrderDto createOrder(OrderDto orderDto) {
         Order order = orderConverter.toEntity(orderDto);
         order.setCreatedDate(LocalDateTime.now(TimeZoneConfig.DATABASE_ZONE));
         BigDecimal cost = order.getOrderItems().stream()
                 .map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         order.setCost(cost);
-        orderRepository.createOrder(order);
+        orderRepository.save(order);
         adjustDateTimeAccordingToClientTimeZone(order, TimeZoneConfig.CLIENT_ZONE);
         return orderConverter.toDTO(order);
     }

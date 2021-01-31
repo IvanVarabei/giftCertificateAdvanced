@@ -31,7 +31,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public Page<TagDto> findPaginated(Pageable pageRequest) {
+    public Page<TagDto> getPaginated(Pageable pageRequest) {
         int size = pageRequest.getPageSize();
         int page = pageRequest.getPageNumber();
         int totalTagAmount = tagRepository.countAll();
@@ -40,7 +40,7 @@ public class TagServiceImpl implements TagService {
             throw new ResourceNotFoundException(String.format(ErrorMessage.PAGE_NOT_FOUND, size, page, lastPage));
         }
         int offset = size * page;
-        List<Tag> foundTags = tagRepository.findAllPaginated(offset, size);
+        List<Tag> foundTags = tagRepository.findPaginated(offset, size);
         return new PageImpl<>(foundTags.stream().map(tagConverter::toDTO).collect(Collectors.toList()),
                 pageRequest, totalTagAmount);
     }

@@ -45,7 +45,7 @@ public class OrderRepositoryImpl implements OrderRepository {
     private final RowMapper<User> userMapper;
 
     @Override
-    public Order createOrder(Order order) {
+    public Order save(Order order) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         LocalDateTime cratedDate;
         cratedDate = DateTimeUtil.toZone(order.getCreatedDate(), TimeZoneConfig.DATABASE_ZONE, ZoneId.systemDefault());

@@ -5,7 +5,7 @@ import com.epam.esm.dto.OrderDto;
 import java.util.Map;
 
 public interface OrderService {
-    OrderDto saveOrder(OrderDto orderDto);
+    OrderDto createOrder(OrderDto orderDto);
 
     Map<Long, OrderDto> getOrdersByUserId(Long userId);
 

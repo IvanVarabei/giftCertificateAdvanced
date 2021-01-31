@@ -14,6 +14,8 @@ import com.epam.esm.service.GiftCertificateService;
 import com.epam.esm.service.TagService;
 import com.epam.esm.util.DateTimeUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,11 +46,19 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     @Override
-    public List<GiftCertificateDto> getCertificates(SearchCertificateDto searchDto) {
-        List<GiftCertificate> certificates = giftCertificateRepository.findAll(searchDto);
+    public Page<GiftCertificateDto> getPaginated(SearchCertificateDto searchDto) {
+        int size = searchDto.getPageRequest().getPageSize();
+        int page = searchDto.getPageRequest().getPageNumber();
+        int totalCertificateAmount = giftCertificateRepository.countAll(searchDto);
+        int lastPage = (totalCertificateAmount + size - 1) / size - 1;
+        if (page > lastPage) {
+            throw new ResourceNotFoundException(String.format(ErrorMessage.PAGE_NOT_FOUND, size, page, lastPage));
+        }
+        List<GiftCertificate> certificates = giftCertificateRepository.findPaginated(searchDto);
         certificates.forEach(c -> c.setTags(tagService.getTagsByCertificateId(c.getId())));
         certificates.forEach(c -> adjustDateTimeAccordingToClientTimeZone(c, TimeZoneConfig.CLIENT_ZONE));
-        return certificates.stream().map(certificateConverter::toDTO).collect(Collectors.toList());
+        return new PageImpl<>(certificates.stream().map(certificateConverter::toDTO).collect(Collectors.toList()),
+                searchDto.getPageRequest(), totalCertificateAmount);
     }
 
     @Override

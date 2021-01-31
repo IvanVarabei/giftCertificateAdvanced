@@ -74,9 +74,9 @@ class CertificateServiceImplTest {
         GiftCertificate certificate2 = new GiftCertificate();
         certificate2.setCreatedDate(LocalDateTime.now());
         certificate2.setUpdatedDate(LocalDateTime.now());
-        when(certificateRepository.findAll(any())).thenReturn(List.of(certificate1, certificate2));
+        when(certificateRepository.findPaginated(any())).thenReturn(List.of(certificate1, certificate2));
 
-        giftCertificateService.getCertificates(null);
+        giftCertificateService.getPaginated(null);
 
         verify(tagService, times(2)).getTagsByCertificateId(any());
     }

@@ -8,7 +8,7 @@ import java.util.Optional;
 public interface TagRepository {
     Tag save(Tag tag);
 
-    List<Tag> findAllPaginated(Integer offset, Integer limit);
+    List<Tag> findPaginated(Integer offset, Integer limit);
 
     Integer countAll();
 

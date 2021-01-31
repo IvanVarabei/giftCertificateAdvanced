@@ -7,9 +7,17 @@ import com.epam.esm.dto.search.SortByField;
 import com.epam.esm.dto.search.SortOrder;
 import com.epam.esm.service.GiftCertificateService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
@@ -27,6 +35,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 @Validated
 public class CertificateController {
     private final GiftCertificateService giftCertificateService;
+    private final PagedResourcesAssembler<GiftCertificateDto> pagedResourcesAssembler;
 
     /**
      * The method allows creating {@link com.epam.esm.entity.GiftCertificate}.
@@ -57,12 +66,13 @@ public class CertificateController {
      * @return Response entity containing the list of certificates. Response code 200.
      */
     @GetMapping
-    public ResponseEntity<List<GiftCertificateDto>> getCertificates(
+    public PagedModel<EntityModel<GiftCertificateDto>> getCertificates(
             @RequestParam(required = false) List<@Pattern(regexp = "\\w{2,64}") String> tagName,
             @RequestParam(required = false) @Pattern(regexp = "\\w{2,64}") String name,
             @RequestParam(required = false) @Pattern(regexp = ".{2,512}") String description,
             @RequestParam(required = false) SortByField sortByField,
-            @RequestParam(required = false) SortOrder sortOrder
+            @RequestParam(required = false) SortOrder sortOrder,
+            @PageableDefault Pageable pageRequest
     ) {
         SearchCertificateDto searchCertificateDto = SearchCertificateDto.builder()
                 .tagNames(tagName)
@@ -70,8 +80,11 @@ public class CertificateController {
                 .description(description)
                 .sortByField(sortByField)
                 .sortOrder(sortOrder)
+                .pageRequest(pageRequest)
                 .build();
-        return ResponseEntity.ok().body(giftCertificateService.getCertificates(searchCertificateDto));
+        Page<GiftCertificateDto> certificateDtoList = giftCertificateService.getPaginated(searchCertificateDto);
+        Link selfLink = Link.of(ServletUriComponentsBuilder.fromCurrentRequest().build().toString());
+        return pagedResourcesAssembler.toModel(certificateDtoList, selfLink);
     }
 
     /**

@@ -10,7 +10,7 @@ import java.util.List;
 public interface TagService {
     TagDto createTag(TagDto tagDto);
 
-    Page<TagDto> findPaginated(Pageable pageRequest);
+    Page<TagDto> getPaginated(Pageable pageRequest);
 
     TagDto getTagById(Long tagId);
 
