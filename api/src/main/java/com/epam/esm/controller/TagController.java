@@ -18,6 +18,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import java.net.URI;
+import java.util.List;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -44,7 +45,7 @@ public class TagController {
     public ResponseEntity<TagDto> createTag(@RequestBody @Valid TagDto tagDto) {
         TagDto createdTagDto = tagService.createTag(tagDto);
         Link selfLink = linkTo(methodOn(TagController.class)
-                .getTagById(tagDto.getId())).withSelfRel();
+                .getTagById(createdTagDto.getId())).withSelfRel();
         createdTagDto.add(selfLink);
         URI locationUri = selfLink.toUri();
         return ResponseEntity.created(locationUri).body(createdTagDto);
@@ -75,7 +76,15 @@ public class TagController {
      */
     @GetMapping("/{tagId}")
     public ResponseEntity<TagDto> getTagById(@PathVariable("tagId") @Min(1) Long tagId) {
-        return ResponseEntity.ok().body(tagService.getTagById(tagId));
+        TagDto tagDto = tagService.getTagById(tagId);
+        Link selfLink = linkTo(methodOn(TagController.class)
+                .getTagById(tagDto.getId())).withSelfRel();
+        Link certificates = linkTo(methodOn(CertificateController.class)
+                .getCertificates(List.of(tagDto.getName()), null, null, null, null))
+                .withRel("certificates");
+        tagDto.add(selfLink);
+        tagDto.add(certificates);
+        return ResponseEntity.ok().body(tagDto);
     }
 
     /**
