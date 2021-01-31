@@ -24,5 +24,5 @@ public interface TagService {
 
     List<Tag> getTagsByCertificateId(Long certificateId);
 
-    TagDto getMostCommonTagOfUserWithHighestCostOfAllOrders();
+    TagDto getPrevalentTagOfMostProfitableUser();
 }

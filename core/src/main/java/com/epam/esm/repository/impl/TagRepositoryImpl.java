@@ -10,7 +10,6 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,15 +59,17 @@ public class TagRepositoryImpl implements TagRepository {
 
     private static final String PAGINATION = "%s offset %s limit %s";
 
+    private static final String[] RETURN_GENERATED_KEY = {"id"};
+
     @Override
     public Tag save(Tag tag) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(CREATE_TAG, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement preparedStatement = connection.prepareStatement(CREATE_TAG, RETURN_GENERATED_KEY);
             preparedStatement.setString(1, tag.getName());
             return preparedStatement;
         }, keyHolder);
-        tag.setId(((Number) keyHolder.getKeys().get("id")).longValue());
+        tag.setId(keyHolder.getKey().longValue());
         return tag;
     }
 
@@ -118,7 +119,7 @@ public class TagRepositoryImpl implements TagRepository {
     }
 
     @Override
-    public Optional<Tag> getMostCommonTagOfUserWithHighestCostOfAllOrders() {
+    public Optional<Tag> getPrevalentTagOfMostProfitableUser() {
         return jdbcTemplate.query(READ_MOST_COMMON_TAG_OF_USER_WITH_THE_HIGHEST_COST_OF_ALL_ORDERS, tagMapper)
                 .stream().findAny();
     }

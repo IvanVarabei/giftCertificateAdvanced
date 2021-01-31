@@ -14,7 +14,6 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -67,14 +66,15 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
 
     private static final String PAGINATION = "%s offset %s limit %s";
 
+    private static final String[] RETURN_GENERATED_KEY = {"id"};
+
     @Override
     public GiftCertificate save(GiftCertificate giftCertificate) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         LocalDateTime createdDate = DateTimeUtil
                 .toZone(giftCertificate.getCreatedDate(), TimeZoneConfig.DATABASE_ZONE, ZoneId.systemDefault());
         jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement =
-                    connection.prepareStatement(CREATE_CERTIFICATE, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement preparedStatement = connection.prepareStatement(CREATE_CERTIFICATE, RETURN_GENERATED_KEY);
             int index = 1;
             preparedStatement.setString(index++, giftCertificate.getName());
             preparedStatement.setString(index++, giftCertificate.getDescription());
@@ -84,7 +84,7 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
             preparedStatement.setTimestamp(index, Timestamp.valueOf(createdDate));
             return preparedStatement;
         }, keyHolder);
-        giftCertificate.setId(((Number) keyHolder.getKeys().get("id")).longValue());
+        giftCertificate.setId(keyHolder.getKey().longValue());
         return giftCertificate;
     }
 

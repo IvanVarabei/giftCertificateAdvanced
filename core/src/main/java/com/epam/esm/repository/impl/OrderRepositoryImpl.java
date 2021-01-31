@@ -14,7 +14,6 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -26,22 +25,31 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class OrderRepositoryImpl implements OrderRepository {
     private final JdbcTemplate jdbcTemplate;
+    private static final String[] RETURN_GENERATED_KEY = {"id"};
+    private final RowMapper<OrderItem> orderItemMapper;
+
     private static final String CREATE_ORDER = "insert into \"order\" (cost, created_date, user_id) values (?, ?, ?)";
+
     private static final String CREATE_ORDER_ITEM = "insert into order_item " +
             "(quantity, order_id, gift_certificate_id) values (?, ?, ?)";
+
     private static final String READ_ORDER_BY_ID =
             "select \"user\".id, username, password, email, cost, created_date from \"order\" " +
                     "join \"user\" on \"user\".id = \"order\".user_id and \"order\".id = ?";
+
     private static final String READ_ORDER_BY_USER_ID =
             "select id, cost, created_date from \"order\" where user_id = ?";
+
     private static final String READ_ORDER_ITEM_BY_ORDER_ID = "select order_item.id, " +
             "order_item.gift_certificate_id as certificateId, name, description, price, duration, quantity " +
             "from order_item join gift_certificate on order_item.gift_certificate_id = gift_certificate.id " +
             "where order_id =?";
+
     private static final String UPDATE_COST = "update \"order\" set cost = ? where id = ?";
+
     private static final String DELETE_ORDER = "delete from \"order\" where id = ?";
+
     private static final String DELETE_ORDER_ITEMS = "delete from order_item where order_id = ?";
-    private final RowMapper<OrderItem> orderItemMapper;
     private final RowMapper<User> userMapper;
 
     @Override
@@ -50,15 +58,14 @@ public class OrderRepositoryImpl implements OrderRepository {
         LocalDateTime cratedDate;
         cratedDate = DateTimeUtil.toZone(order.getCreatedDate(), TimeZoneConfig.DATABASE_ZONE, ZoneId.systemDefault());
         jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement =
-                    connection.prepareStatement(CREATE_ORDER, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement preparedStatement = connection.prepareStatement(CREATE_ORDER, RETURN_GENERATED_KEY);
             int index = 1;
             preparedStatement.setBigDecimal(index++, order.getCost());
             preparedStatement.setTimestamp(index++, Timestamp.valueOf(cratedDate));
             preparedStatement.setLong(index, order.getUser().getId());
             return preparedStatement;
         }, keyHolder);
-        Long orderId = ((Number) keyHolder.getKeys().get("id")).longValue();
+        Long orderId = keyHolder.getKey().longValue();
         order.setId(orderId);
         order.getOrderItems().forEach(item -> saveOrderItem(orderId, item));
         return order;
@@ -114,13 +121,13 @@ public class OrderRepositoryImpl implements OrderRepository {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement =
-                    connection.prepareStatement(CREATE_ORDER_ITEM, Statement.RETURN_GENERATED_KEYS);
+                    connection.prepareStatement(CREATE_ORDER_ITEM, RETURN_GENERATED_KEY);
             int index = 1;
             preparedStatement.setInt(index++, orderItem.getQuantity());
             preparedStatement.setLong(index++, orderId);
             preparedStatement.setLong(index, orderItem.getCertificateId());
             return preparedStatement;
         }, keyHolder);
-        orderItem.setId(((Number) keyHolder.getKeys().get("id")).longValue());
+        orderItem.setId(keyHolder.getKey().longValue());
     }
 }

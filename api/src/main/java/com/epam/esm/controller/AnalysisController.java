@@ -17,7 +17,7 @@ public class AnalysisController {
     private final TagService tagService;
 
     @GetMapping
-    public ResponseEntity<TagDto> getMostCommonTagOfUserWithHighestCostOfAllOrders() {
-        return ResponseEntity.ok().body(tagService.getMostCommonTagOfUserWithHighestCostOfAllOrders());
+    public ResponseEntity<TagDto> getPrevalentTagOfMostProfitableUser() {
+        return ResponseEntity.ok().body(tagService.getPrevalentTagOfMostProfitableUser());
     }
 }

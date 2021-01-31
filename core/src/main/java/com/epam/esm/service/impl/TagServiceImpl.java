@@ -25,6 +25,7 @@ public class TagServiceImpl implements TagService {
     private final TagConverter tagConverter;
 
     @Override
+    @Transactional
     public TagDto createTag(TagDto tagDto) {
         Tag tag = tagConverter.toEntity(tagDto);
         return tagConverter.toDTO(tagRepository.save(tag));
@@ -70,6 +71,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
+    @Transactional
     public List<Tag> bindTags(Long certificateId, List<Tag> tags) {
         tags.forEach(t -> {
             Optional<Tag> tagOptional = tagRepository.findByName(t.getName());
@@ -96,8 +98,9 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public TagDto getMostCommonTagOfUserWithHighestCostOfAllOrders() {
-        Optional<Tag> tagOptional = tagRepository.getMostCommonTagOfUserWithHighestCostOfAllOrders();
-        return tagConverter.toDTO(tagOptional.get());
+    public TagDto getPrevalentTagOfMostProfitableUser() {
+        Tag tag = tagRepository.getPrevalentTagOfMostProfitableUser().orElseThrow(() ->
+                new ResourceNotFoundException(ErrorMessage.ORDER_ITEMS_BOUND_WITH_TAGS_NOT_FOUND));
+        return tagConverter.toDTO(tag);
     }
 }
