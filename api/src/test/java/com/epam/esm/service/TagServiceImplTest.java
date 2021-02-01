@@ -4,11 +4,13 @@ import com.epam.esm.dto.TagDto;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ResourceNotFoundException;
-import com.epam.esm.mapper.impl.TagConverterImpl;
+import com.epam.esm.mapper.TagConverter;
 import com.epam.esm.repository.TagRepository;
 import com.epam.esm.service.impl.TagServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +19,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@SpringBootTest
 class TagServiceImplTest {
+    @Autowired
+    TagConverter tagConverter;
     TagService tagService;
     TagRepository tagRepository;
     Tag tag;
@@ -31,7 +36,7 @@ class TagServiceImplTest {
     @BeforeEach
     public void setUp() {
         tagRepository = mock(TagRepository.class);
-        tagService = new TagServiceImpl(tagRepository, new TagConverterImpl());
+        tagService = new TagServiceImpl(tagRepository, tagConverter);
     }
 
     @Test
@@ -43,9 +48,9 @@ class TagServiceImplTest {
 
     @Test
     void should_invoke_findAll_when_getTags() {
-        tagService.getTags();
+        tagService.getTags(page, size);
 
-        verify(tagRepository).findAll();
+        verify(tagRepository).findAll(offset, size);
     }
 
     @Test

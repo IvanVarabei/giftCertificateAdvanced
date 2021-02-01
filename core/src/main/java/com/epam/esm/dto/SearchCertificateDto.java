@@ -5,16 +5,19 @@ import com.epam.esm.dto.search.SortOrder;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Builder
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class SearchCertificateDto {
     private List<String> tagNames;
     private String name;
     private String description;
     private SortByField sortByField;
     private SortOrder sortOrder;
+    private CustomPageable pageRequest;
 }

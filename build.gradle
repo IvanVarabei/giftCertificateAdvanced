@@ -25,6 +25,9 @@ subprojects {
     }
 
     dependencies {
+        // Spring Boot
+        implementation 'org.springframework.boot:spring-boot-starter-hateoas'
+
         // Spring
         implementation group: 'org.springframework', name: 'spring-context', version: springVersion
         implementation group: 'org.springframework', name: 'spring-jdbc', version: springVersion

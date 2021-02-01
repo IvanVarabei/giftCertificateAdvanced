@@ -1,17 +1,23 @@
 package com.epam.esm.controller;
 
+import com.epam.esm.controller.hateoas.DtoHateoas;
+import com.epam.esm.controller.hateoas.PaginationHateoas;
+import com.epam.esm.dto.CustomPage;
+import com.epam.esm.dto.CustomPageable;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.service.TagService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
-import java.net.URI;
-import java.util.List;
+
+import static org.springframework.http.HttpStatus.CREATED;
+
 
 /**
  * The class provides operations having to do with {@link com.epam.esm.entity.Tag}
@@ -22,6 +28,8 @@ import java.util.List;
 @Validated
 public class TagController {
     private final TagService tagService;
+    private final PaginationHateoas<TagDto> paginationHateoas;
+    private final DtoHateoas dtoHateoas;
 
     /**
      * The method allows creating {@link com.epam.esm.entity.Tag}.
@@ -32,12 +40,8 @@ public class TagController {
     @PostMapping
     public ResponseEntity<TagDto> createTag(@RequestBody @Valid TagDto tagDto) {
         TagDto createdTagDto = tagService.createTag(tagDto);
-        URI locationUri = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(createdTagDto.getId())
-                .toUri();
-        return ResponseEntity.created(locationUri).body(createdTagDto);
+        dtoHateoas.attachHateoas(createdTagDto);
+        return ResponseEntity.status(CREATED).body(createdTagDto);
     }
 
     /**
@@ -46,8 +50,17 @@ public class TagController {
      * @return list of {@link TagDto}. Response code 200.
      */
     @GetMapping
-    public ResponseEntity<List<TagDto>> getTags() {
-        return ResponseEntity.ok().body(tagService.getTags());
+    public CustomPage<TagDto> getTags(
+            @Valid CustomPageable pageRequest,
+            UriComponentsBuilder uriBuilder,
+            HttpServletRequest request
+    ) {
+        CustomPage<TagDto> tags = tagService.getPaginated(pageRequest);
+        tags.getContent().forEach(dtoHateoas::attachHateoas);
+        uriBuilder.path(request.getRequestURI());
+        uriBuilder.query(request.getQueryString());
+        paginationHateoas.addPaginationLinks(uriBuilder, tags);
+        return tags;
     }
 
     /**
@@ -58,7 +71,9 @@ public class TagController {
      */
     @GetMapping("/{tagId}")
     public ResponseEntity<TagDto> getTagById(@PathVariable("tagId") @Min(1) Long tagId) {
-        return ResponseEntity.ok().body(tagService.getTagById(tagId));
+        TagDto tagDto = tagService.getTagById(tagId);
+        dtoHateoas.attachHateoas(tagDto);
+        return ResponseEntity.ok().body(tagDto);
     }
 
     /**
@@ -70,7 +85,9 @@ public class TagController {
      */
     @PutMapping
     public ResponseEntity<TagDto> updateTag(@Valid @RequestBody TagDto tagDto) {
-        return ResponseEntity.ok().body(tagService.updateTag(tagDto));
+        TagDto updatedTag = tagService.updateTag(tagDto);
+        dtoHateoas.attachHateoas(updatedTag);
+        return ResponseEntity.ok().body(updatedTag);
     }
 
     /**

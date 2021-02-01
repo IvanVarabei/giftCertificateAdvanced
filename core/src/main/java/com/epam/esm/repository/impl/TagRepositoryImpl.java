@@ -10,7 +10,6 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,6 +30,22 @@ public class TagRepositoryImpl implements TagRepository {
     private static final String READ_TAGS_BY_CERTIFICATE_ID =
             "SELECT id, name FROM tag JOIN certificate_tag ON tag.id = tag_id WHERE gift_certificate_id = ?";
 
+    private static final String READ_MOST_COMMON_TAG_OF_USER_WITH_THE_HIGHEST_COST_OF_ALL_ORDERS =
+            "select t.id, t.name " +
+                    "from \"order\" " +
+                    "         join order_item oi on \"order\".id = oi.order_id " +
+                    "    and user_id = (select user_id  " +
+                    "                   from \"order\"  " +
+                    "                   group by user_id  " +
+                    "                   order by sum(cost) desc  " +
+                    "                   limit 1) " +
+                    "         join gift_certificate gc on oi.gift_certificate_id = gc.id " +
+                    "         join certificate_tag ct on gc.id = ct.gift_certificate_id " +
+                    "         join tag t on t.id = ct.tag_id " +
+                    "group by t.id, t.name " +
+                    "order by sum(quantity) desc " +
+                    "limit 1";
+
     private static final String UPDATE_TAG = "update tag set name = ? where id = ?";
 
     private static final String DELETE_TAG = "delete from tag where id = ?";
@@ -40,21 +55,32 @@ public class TagRepositoryImpl implements TagRepository {
 
     private static final String UNBIND_TAGS = "delete from certificate_tag where gift_certificate_id = ?";
 
+    private static final String COUNT_TAGS = "select count(id) from tag";
+
+    private static final String PAGINATION = "%s offset %s limit %s";
+
+    private static final String[] RETURN_GENERATED_KEY = {"id"};
+
     @Override
     public Tag save(Tag tag) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(CREATE_TAG, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement preparedStatement = connection.prepareStatement(CREATE_TAG, RETURN_GENERATED_KEY);
             preparedStatement.setString(1, tag.getName());
             return preparedStatement;
         }, keyHolder);
-        tag.setId(((Number) keyHolder.getKeys().get("id")).longValue());
+        tag.setId(keyHolder.getKey().longValue());
         return tag;
     }
 
     @Override
-    public List<Tag> findAll() {
-        return jdbcTemplate.query(READ_TAGS, tagMapper);
+    public List<Tag> findPaginated(Integer offset, Integer limit) {
+        return jdbcTemplate.query(String.format(PAGINATION, READ_TAGS, offset, limit), tagMapper);
+    }
+
+    @Override
+    public Integer countAll() {
+        return jdbcTemplate.query(COUNT_TAGS, (rs, rowNum) -> rs.getInt("count")).stream().findAny().get();
     }
 
     @Override
@@ -90,5 +116,11 @@ public class TagRepositoryImpl implements TagRepository {
     @Override
     public void unbindTagsFromCertificate(Long certificateId) {
         jdbcTemplate.update(UNBIND_TAGS, certificateId);
+    }
+
+    @Override
+    public Optional<Tag> getPrevalentTagOfMostProfitableUser() {
+        return jdbcTemplate.query(READ_MOST_COMMON_TAG_OF_USER_WITH_THE_HIGHEST_COST_OF_ALL_ORDERS, tagMapper)
+                .stream().findAny();
     }
 }

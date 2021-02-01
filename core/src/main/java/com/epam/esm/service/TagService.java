@@ -1,7 +1,8 @@
 package com.epam.esm.service;
 
+import com.epam.esm.dto.CustomPage;
+import com.epam.esm.dto.CustomPageable;
 import com.epam.esm.dto.TagDto;
-import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.List;
 public interface TagService {
     TagDto createTag(TagDto tagDto);
 
-    List<TagDto> getTags();
+    CustomPage<TagDto> getPaginated(CustomPageable pageRequest);
 
     TagDto getTagById(Long tagId);
 
@@ -22,4 +23,6 @@ public interface TagService {
     void unbindTagsFromCertificate(Long id);
 
     List<Tag> getTagsByCertificateId(Long certificateId);
+
+    TagDto getPrevalentTagOfMostProfitableUser();
 }

@@ -14,3 +14,7 @@ VALUES (1, 1),
        (3, 3),
        (3, 2);
 
+INSERT INTO "user"(id, username, password, email)
+VALUES (1, 'Alex', 'qwerty', 'alex@gamil.com'),
+       (2, 'Oleg', 'qwerty', 'oleg@gamil.com');
+

@@ -47,7 +47,7 @@ class GiftCertificateRepositoryImplTest {
                 SortOrder.DESC
         );
 
-        List<GiftCertificate> giftCertificateList = certificateRepository.findAll(searchDto);
+        List<GiftCertificate> giftCertificateList = certificateRepository.findPaginated(searchDto);
         long actualAmount = giftCertificateList.size();
         long checkedAmount = giftCertificateList.stream()
                 .filter(c -> c.getName().contains("e"))

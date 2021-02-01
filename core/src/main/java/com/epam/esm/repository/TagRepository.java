@@ -8,7 +8,9 @@ import java.util.Optional;
 public interface TagRepository {
     Tag save(Tag tag);
 
-    List<Tag> findAll();
+    List<Tag> findPaginated(Integer offset, Integer limit);
+
+    Integer countAll();
 
     Optional<Tag> findById(Long tagId);
 
@@ -23,4 +25,6 @@ public interface TagRepository {
     void bindWithCertificate(Long certificateId, Long tagId);
 
     void unbindTagsFromCertificate(Long certificateId);
+
+    Optional<Tag> getPrevalentTagOfMostProfitableUser();
 }
