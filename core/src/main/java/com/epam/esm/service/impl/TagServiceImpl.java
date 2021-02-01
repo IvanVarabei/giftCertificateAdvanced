@@ -3,10 +3,12 @@ package com.epam.esm.service.impl;
 import com.epam.esm.dto.CustomPage;
 import com.epam.esm.dto.CustomPageable;
 import com.epam.esm.dto.TagDto;
+import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ErrorMessage;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.mapper.TagConverter;
+import com.epam.esm.repository.GiftCertificateRepository;
 import com.epam.esm.repository.TagRepository;
 import com.epam.esm.service.TagService;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,6 +25,7 @@ import java.util.stream.Collectors;
 public class TagServiceImpl implements TagService {
     private final TagRepository tagRepository;
     private final TagConverter tagConverter;
+    private final GiftCertificateRepository certificateRepository;
 
     @Override
     @Transactional
@@ -34,8 +38,8 @@ public class TagServiceImpl implements TagService {
     public CustomPage<TagDto> getPaginated(CustomPageable pageRequest) {
         int size = pageRequest.getSize();
         int page = pageRequest.getPage();
-        int totalTagAmount = tagRepository.countAll();
-        int lastPage = (totalTagAmount + size - 1) / size - 1;
+        long totalTagAmount = tagRepository.countAll();
+        long lastPage = (totalTagAmount + size - 1) / size - 1;
         if (page > lastPage) {
             throw new ResourceNotFoundException(String.format(ErrorMessage.PAGE_NOT_FOUND, size, page, lastPage));
         }
@@ -71,7 +75,8 @@ public class TagServiceImpl implements TagService {
 
     @Override
     @Transactional
-    public List<Tag> bindTags(Long certificateId, List<Tag> tags) {
+    public Set<Tag> bindTags(GiftCertificate certificate, Set<Tag> tags) {
+        Long certificateId = certificate.getId();
         tags.forEach(t -> {
             Optional<Tag> tagOptional = tagRepository.findByName(t.getName());
             if (tagOptional.isEmpty()) {
@@ -89,6 +94,14 @@ public class TagServiceImpl implements TagService {
     @Override
     public void unbindTagsFromCertificate(Long certificateId) {
         tagRepository.unbindTagsFromCertificate(certificateId);
+        GiftCertificate certificate = certificateRepository.findById(certificateId).get();
+
+//        superHero.getMovies().forEach(movie -> {
+//            movie.getSuperHeroes().remove(superHero);
+//        });
+//
+//        // Now remove the superhero
+//        entityManager.remove(superHero);
     }
 
     @Override

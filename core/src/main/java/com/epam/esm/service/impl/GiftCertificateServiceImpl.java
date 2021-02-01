@@ -6,7 +6,6 @@ import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.PriceDto;
 import com.epam.esm.dto.SearchCertificateDto;
 import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ErrorMessage;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.mapper.CertificateConverter;
@@ -38,8 +37,8 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         createdCertificate.setCreatedDate(LocalDateTime.now(TimeZoneConfig.DATABASE_ZONE));
         createdCertificate.setUpdatedDate(createdCertificate.getCreatedDate());
         giftCertificateRepository.save(createdCertificate);
-        List<Tag> tags = tagService.bindTags(createdCertificate.getId(), createdCertificate.getTags());
-        createdCertificate.setTags(tags);
+//        List<Tag> tags = tagService.bindTags(createdCertificate.getId(), createdCertificate.getTags());
+//        createdCertificate.setTags(tags);
         adjustDateTimeAccordingToClientTimeZone(createdCertificate, TimeZoneConfig.CLIENT_ZONE);
         return certificateConverter.toDTO(createdCertificate);
     }
@@ -54,17 +53,17 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
             throw new ResourceNotFoundException(String.format(ErrorMessage.PAGE_NOT_FOUND, size, page, lastPage));
         }
         List<GiftCertificate> certificates = giftCertificateRepository.findPaginated(searchDto);
-        certificates.forEach(c -> c.setTags(tagService.getTagsByCertificateId(c.getId())));
+        // certificates.forEach(c -> c.setTags(tagService.getTagsByCertificateId(c.getId())));
         certificates.forEach(c -> adjustDateTimeAccordingToClientTimeZone(c, TimeZoneConfig.CLIENT_ZONE));
         return new CustomPage<>(certificates.stream().map(certificateConverter::toDTO).collect(Collectors.toList()),
-                searchDto.getPageRequest(), totalCertificateAmount);
+                searchDto.getPageRequest(), (long) totalCertificateAmount);
     }
 
     @Override
     public GiftCertificateDto getCertificateById(Long certificateId) {
         GiftCertificate certificate = giftCertificateRepository.findById(certificateId).orElseThrow(() ->
                 new ResourceNotFoundException(String.format(ErrorMessage.RESOURCE_NOT_FOUND, certificateId)));
-        certificate.setTags(tagService.getTagsByCertificateId(certificateId));
+        //   certificate.setTags(tagService.getTagsByCertificateId(certificateId));
         adjustDateTimeAccordingToClientTimeZone(certificate, TimeZoneConfig.CLIENT_ZONE);
         return certificateConverter.toDTO(certificate);
     }
@@ -81,9 +80,9 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         existed.setDescription(update.getDescription());
         existed.setDuration(update.getDuration());
         existed.setUpdatedDate(LocalDateTime.now(TimeZoneConfig.DATABASE_ZONE));
-        giftCertificateRepository.update(existed);
+        // giftCertificateRepository.update(existed);
         tagService.unbindTagsFromCertificate(existed.getId());
-        existed.setTags(tagService.bindTags(update.getId(), update.getTags()));
+        tagService.bindTags(existed, update.getTags());
         adjustDateTimeAccordingToClientTimeZone(existed, TimeZoneConfig.CLIENT_ZONE);
         return certificateConverter.toDTO(existed);
     }
@@ -106,7 +105,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         existed.setPrice(priceDto.getPrice());
         existed.setUpdatedDate(LocalDateTime.now(TimeZoneConfig.DATABASE_ZONE));
         giftCertificateRepository.updatePrice(existed);
-        existed.setTags(tagService.getTagsByCertificateId(existed.getId()));
+        //    existed.setTags(tagService.getTagsByCertificateId(existed.getId()));
         adjustDateTimeAccordingToClientTimeZone(existed, TimeZoneConfig.CLIENT_ZONE);
         return certificateConverter.toDTO(existed);
     }

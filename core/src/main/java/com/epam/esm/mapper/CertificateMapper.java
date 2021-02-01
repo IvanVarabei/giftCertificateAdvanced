@@ -8,7 +8,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 
 @Component
 public class CertificateMapper implements RowMapper<GiftCertificate> {
@@ -24,7 +23,7 @@ public class CertificateMapper implements RowMapper<GiftCertificate> {
                 rs.getTimestamp("create_date").toInstant(), ZoneOffset.UTC).toLocalDateTime());
         giftCertificate.setUpdatedDate(ZonedDateTime.ofInstant(
                 rs.getTimestamp("last_update_date").toInstant(), ZoneOffset.UTC).toLocalDateTime());
-        giftCertificate.setTags(new ArrayList<>());
+       // giftCertificate.setTags(new ArrayList<>());
         return giftCertificate;
     }
 }

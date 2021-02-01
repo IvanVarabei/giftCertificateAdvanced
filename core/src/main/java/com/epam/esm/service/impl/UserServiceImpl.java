@@ -33,7 +33,7 @@ public class UserServiceImpl implements UserService {
         int offset = size * page;
         List<User> foundUsers = userRepository.findAllPaginated(offset, size);
         return new CustomPage<>(foundUsers.stream().map(userConverter::toDTO).collect(Collectors.toList()),
-                pageRequest, totalUserAmount);
+                pageRequest, (long) totalUserAmount);
     }
 
     @Override

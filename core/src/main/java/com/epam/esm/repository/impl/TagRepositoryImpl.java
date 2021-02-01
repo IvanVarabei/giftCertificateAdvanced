@@ -1,15 +1,16 @@
 package com.epam.esm.repository.impl;
 
+import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.sql.PreparedStatement;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,8 +19,8 @@ import java.util.Optional;
 public class TagRepositoryImpl implements TagRepository {
     private final JdbcTemplate jdbcTemplate;
     private final RowMapper<Tag> tagMapper;
-
-    private static final String CREATE_TAG = "insert into tag (name) values (?)";
+    @PersistenceContext
+    private final EntityManager entityManager;
 
     private static final String READ_TAG_BY_ID = "select id, name from tag where id = ?";
 
@@ -59,48 +60,57 @@ public class TagRepositoryImpl implements TagRepository {
 
     private static final String PAGINATION = "%s offset %s limit %s";
 
-    private static final String[] RETURN_GENERATED_KEY = {"id"};
-
     @Override
     public Tag save(Tag tag) {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(CREATE_TAG, RETURN_GENERATED_KEY);
-            preparedStatement.setString(1, tag.getName());
-            return preparedStatement;
-        }, keyHolder);
-        tag.setId(keyHolder.getKey().longValue());
+        entityManager.persist(tag);
         return tag;
     }
 
     @Override
     public List<Tag> findPaginated(Integer offset, Integer limit) {
-        return jdbcTemplate.query(String.format(PAGINATION, READ_TAGS, offset, limit), tagMapper);
+        return entityManager
+                .createQuery("from Tag", Tag.class)
+                .setFirstResult(offset)
+                .setMaxResults(limit)
+                .getResultList();
     }
 
     @Override
-    public Integer countAll() {
-        return jdbcTemplate.query(COUNT_TAGS, (rs, rowNum) -> rs.getInt("count")).stream().findAny().get();
+    public Long countAll() {
+        Query queryTotal = entityManager.createQuery("select count(id) from Tag ");
+        return (long) queryTotal.getSingleResult();
     }
 
     @Override
     public Optional<Tag> findById(Long tagId) {
-        return jdbcTemplate.query(READ_TAG_BY_ID, tagMapper, tagId).stream().findAny();
+        return Optional.ofNullable(entityManager.find(Tag.class, tagId));
     }
 
     @Override
     public Optional<Tag> findByName(String name) {
-        return jdbcTemplate.query(READ_TAG_BY_NAME, tagMapper, name).stream().findAny();
+        Optional<Tag> tag = entityManager.createQuery("from Tag t where t.name=:name", Tag.class)
+                .setParameter("name", name)
+                .getResultStream().findAny();
+        return tag;
     }
 
     @Override
     public void update(Tag tag) {
-        jdbcTemplate.update(UPDATE_TAG, tag.getName(), tag.getId());
+        entityManager.merge(tag);
     }
 
     @Override
-    public void delete(Long tageId) {
-        jdbcTemplate.update(DELETE_TAG, tageId);
+    public void delete(Long tagId) {
+//        superHero.getMovies().forEach(movie -> {
+//            movie.getSuperHeroes().remove(superHero);
+//        });
+//
+//        // Now remove the superhero
+//        entityManager.remove(superHero);
+
+        entityManager.createQuery("delete from Tag where id=:tagId")
+                .setParameter("tagId", tagId)
+                .executeUpdate();
     }
 
     @Override
@@ -110,7 +120,9 @@ public class TagRepositoryImpl implements TagRepository {
 
     @Override
     public void bindWithCertificate(Long certificateId, Long tagId) {
-        jdbcTemplate.update(BIND_TAG, certificateId, tagId);
+        GiftCertificate certificate = entityManager.find(GiftCertificate.class, certificateId);
+        Tag tag = entityManager.find(Tag.class, tagId);
+        certificate.addTag(tag);
     }
 
     @Override

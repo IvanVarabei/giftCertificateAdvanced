@@ -10,7 +10,7 @@ public interface TagRepository {
 
     List<Tag> findPaginated(Integer offset, Integer limit);
 
-    Integer countAll();
+    Long countAll();
 
     Optional<Tag> findById(Long tagId);
 

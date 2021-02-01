@@ -5,6 +5,7 @@ import com.epam.esm.controller.hateoas.PaginationHateoas;
 import com.epam.esm.dto.CustomPage;
 import com.epam.esm.dto.CustomPageable;
 import com.epam.esm.dto.TagDto;
+import com.epam.esm.repository.TagRepo;
 import com.epam.esm.service.TagService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +31,7 @@ public class TagController {
     private final TagService tagService;
     private final PaginationHateoas<TagDto> paginationHateoas;
     private final DtoHateoas dtoHateoas;
+    private final TagRepo tagRepo;
 
     /**
      * The method allows creating {@link com.epam.esm.entity.Tag}.
@@ -72,7 +74,7 @@ public class TagController {
     @GetMapping("/{tagId}")
     public ResponseEntity<TagDto> getTagById(@PathVariable("tagId") @Min(1) Long tagId) {
         TagDto tagDto = tagService.getTagById(tagId);
-        dtoHateoas.attachHateoas(tagDto);
+        // dtoHateoas.attachHateoas(tagDto);
         return ResponseEntity.ok().body(tagDto);
     }
 

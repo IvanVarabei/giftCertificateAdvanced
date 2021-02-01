@@ -9,12 +9,10 @@ import com.epam.esm.util.DateTimeUtil;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.sql.PreparedStatement;
-import java.sql.Timestamp;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -28,6 +26,8 @@ import static com.epam.esm.dto.search.SortOrder.DESC;
 public class GiftCertificateRepositoryImpl implements GiftCertificateRepository {
     private final JdbcTemplate jdbcTemplate;
     private final CertificateMapper certificateMapper;
+    @PersistenceContext
+    private final EntityManager entityManager;
 
     private static final String CREATE_CERTIFICATE =
             "insert into gift_certificate (name, description, price, duration, create_date, last_update_date) " +
@@ -70,21 +70,9 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
 
     @Override
     public GiftCertificate save(GiftCertificate giftCertificate) {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
         LocalDateTime createdDate = DateTimeUtil
                 .toZone(giftCertificate.getCreatedDate(), TimeZoneConfig.DATABASE_ZONE, ZoneId.systemDefault());
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(CREATE_CERTIFICATE, RETURN_GENERATED_KEY);
-            int index = 1;
-            preparedStatement.setString(index++, giftCertificate.getName());
-            preparedStatement.setString(index++, giftCertificate.getDescription());
-            preparedStatement.setBigDecimal(index++, giftCertificate.getPrice());
-            preparedStatement.setInt(index++, giftCertificate.getDuration());
-            preparedStatement.setTimestamp(index++, Timestamp.valueOf(createdDate));
-            preparedStatement.setTimestamp(index, Timestamp.valueOf(createdDate));
-            return preparedStatement;
-        }, keyHolder);
-        giftCertificate.setId(keyHolder.getKey().longValue());
+        entityManager.persist(giftCertificate);
         return giftCertificate;
     }
 
@@ -146,7 +134,7 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
 
     @Override
     public Optional<GiftCertificate> findById(Long certificateId) {
-        return jdbcTemplate.query(READ_CERTIFICATE_BY_ID, certificateMapper, certificateId).stream().findAny();
+        return Optional.ofNullable(entityManager.find(GiftCertificate.class, certificateId));
     }
 
     @Override
