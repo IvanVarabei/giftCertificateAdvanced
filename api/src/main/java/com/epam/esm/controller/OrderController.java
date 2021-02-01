@@ -25,17 +25,23 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<OrderDto> createOrder(@Valid @RequestBody OrderDto orderDto) {
-        return ResponseEntity.status(CREATED).body(orderService.createOrder(orderDto));
+        OrderDto createdOrderDto = orderService.createOrder(orderDto);
+        dtoHateoas.attachHateoas(createdOrderDto);
+        return ResponseEntity.status(CREATED).body(createdOrderDto);
     }
 
     @GetMapping("/{userId}")
     public ResponseEntity<Map<Long, OrderDto>> getOrdersByUserId(@PathVariable("userId") @Min(1) Long userId) {
-        return ResponseEntity.ok().body(orderService.getOrdersByUserId(userId));
+        Map<Long, OrderDto> orderDtoMap = orderService.getOrdersByUserId(userId);
+        orderDtoMap.values().forEach(dtoHateoas::attachHateoas);
+        return ResponseEntity.ok().body(orderDtoMap);
     }
 
     @PutMapping
     public ResponseEntity<OrderDto> updateOrder(@Valid @RequestBody OrderDto orderDto) {
-        return ResponseEntity.ok().body(orderService.updateOrder(orderDto));
+        OrderDto updatedOrderDto = orderService.updateOrder(orderDto);
+        dtoHateoas.attachHateoas(updatedOrderDto);
+        return ResponseEntity.ok().body(updatedOrderDto);
     }
 
     @DeleteMapping("/{orderId}")

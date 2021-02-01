@@ -54,5 +54,8 @@ public class DtoHateoas {
 
     public void attachHateoas(OrderDto orderDto) {
         attachHateoas(orderDto.getUser());
+        orderDto.getOrderItems()
+                .forEach(orderItemDto -> orderItemDto.getTags()
+                        .forEach(this::attachHateoas));
     }
 }

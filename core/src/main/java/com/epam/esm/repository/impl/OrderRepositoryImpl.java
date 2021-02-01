@@ -25,8 +25,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class OrderRepositoryImpl implements OrderRepository {
     private final JdbcTemplate jdbcTemplate;
-    private static final String[] RETURN_GENERATED_KEY = {"id"};
     private final RowMapper<OrderItem> orderItemMapper;
+    private static final String[] RETURN_GENERATED_KEY = {"id"};
 
     private static final String CREATE_ORDER = "insert into \"order\" (cost, created_date, user_id) values (?, ?, ?)";
 

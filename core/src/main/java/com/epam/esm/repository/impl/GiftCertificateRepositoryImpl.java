@@ -49,6 +49,8 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
 
     private static final String SORT_FIELD = "order by ";
 
+    private static final String PAGINATION = "%s offset %s limit %s";
+
     private static final String READ_CERTIFICATE_BY_ID = "select id, name, description, price, duration, " +
             "create_date, last_update_date from gift_certificate where id = ?";
 
@@ -60,11 +62,9 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
 
     private static final String DELETE_CERTIFICATE = "delete from gift_certificate where id = ?";
 
+    private static final String COUNT_CERTIFICATES_BASE = "select count(id) from gift_certificate where true ";
+
     private static final String BLANK = " ";
-
-    private static final String COUNT_CERTIFICATES = "select count(id) from gift_certificate where true ";
-
-    private static final String PAGINATION = "%s offset %s limit %s";
 
     private static final String[] RETURN_GENERATED_KEY = {"id"};
 
@@ -96,38 +96,19 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
      * SELECT gift_certificate_id
      * FROM certificate_tag
      * LEFT JOIN tag ON tag_id = tag.id
-     * WHERE tag.name IN ('cheap', 'gym')
+     * WHERE tag.name IN ('tag_name_1', 'tag_name_2')
      * GROUP BY gift_certificate_id
      * HAVING COUNT(tag_id) = 2)
-     * and name ilike '%e%'
-     * and description ilike '%fr%'
+     * and name ilike '%name_fragment%'
+     * and description ilike '%description_fragment%'
      * order by last_update_date
      * desc
-     * %s offset %s limit %s
+     * offset %s limit %s
      */
     @Override
     public List<GiftCertificate> findPaginated(SearchCertificateDto searchDto) {
-        StringBuilder sb = new StringBuilder(READ_CERTIFICATES_BASE);
-        List<String> tags = searchDto.getTagNames();
         List queryParams = new ArrayList<>();
-        if (tags != null && !tags.isEmpty()) {
-            sb.append(READ_CERTIFICATES_TAGS1)
-                    .append("?, ".repeat(tags.size() - 1))
-                    .append("?")
-                    .append(READ_CERTIFICATES_TAGS2);
-            queryParams.addAll(tags);
-            queryParams.add(tags.size());
-        }
-        if (!StringUtils.isBlank(searchDto.getName())) {
-            sb.append(NAME_FILTER)
-                    .append(searchDto.getName())
-                    .append("%' ");
-        }
-        if (!StringUtils.isBlank(searchDto.getDescription())) {
-            sb.append(DESCRIPTION_FILTER)
-                    .append(searchDto.getDescription())
-                    .append("%' ");
-        }
+        StringBuilder sb = generateSearchQuery(searchDto, READ_CERTIFICATES_BASE, queryParams);
         if (searchDto.getSortByField() != null) {
             sb.append(SORT_FIELD)
                     .append(searchDto.getSortByField())
@@ -143,64 +124,24 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
         return jdbcTemplate.query(query, certificateMapper, queryParams.toArray());
     }
 
+    /**
+     * select count(id) from gift_certificate where true
+     * and id in (
+     * SELECT gift_certificate_id
+     * FROM certificate_tag
+     * LEFT JOIN tag ON tag_id = tag.id
+     * WHERE tag.name IN ('tag_name_1', 'tag_name_2')
+     * GROUP BY gift_certificate_id
+     * HAVING COUNT(tag_id) = 2)
+     * and name ilike '%name_fragment%'
+     * and description ilike '%description_fragment%'
+     */
     @Override
     public Integer countAll(SearchCertificateDto searchDto) {
-        StringBuilder sb = new StringBuilder(COUNT_CERTIFICATES);
-        List<String> tags = searchDto.getTagNames();
         List queryParams = new ArrayList<>();
-        if (tags != null && !tags.isEmpty()) {
-            sb.append(READ_CERTIFICATES_TAGS1)
-                    .append("?, ".repeat(tags.size() - 1))
-                    .append("?")
-                    .append(READ_CERTIFICATES_TAGS2);
-            queryParams.addAll(tags);
-            queryParams.add(tags.size());
-        }
-        if (!StringUtils.isBlank(searchDto.getName())) {
-            sb.append(NAME_FILTER)
-                    .append(searchDto.getName())
-                    .append("%' ");
-        }
-        if (!StringUtils.isBlank(searchDto.getDescription())) {
-            sb.append(DESCRIPTION_FILTER)
-                    .append(searchDto.getDescription())
-                    .append("%' ");
-        }
+        StringBuilder sb = generateSearchQuery(searchDto, COUNT_CERTIFICATES_BASE, queryParams);
         return jdbcTemplate.query(sb.toString(), (rs, rowNum) -> rs.getInt("count"), queryParams.toArray())
                 .stream().findAny().get();
-    }
-
-    private String generateSearchQuery(SearchCertificateDto searchDto, String tableColumns) {
-        StringBuilder sb = new StringBuilder(tableColumns);
-        List<String> tags = searchDto.getTagNames();
-        List queryParams = new ArrayList<>();
-        if (tags != null && !tags.isEmpty()) {
-            sb.append(READ_CERTIFICATES_TAGS1)
-                    .append("?, ".repeat(tags.size() - 1))
-                    .append("?")
-                    .append(READ_CERTIFICATES_TAGS2);
-            queryParams.addAll(tags);
-            queryParams.add(tags.size());
-        }
-        if (!StringUtils.isBlank(searchDto.getName())) {
-            sb.append(NAME_FILTER)
-                    .append(searchDto.getName())
-                    .append("%' ");
-        }
-        if (!StringUtils.isBlank(searchDto.getDescription())) {
-            sb.append(DESCRIPTION_FILTER)
-                    .append(searchDto.getDescription())
-                    .append("%' ");
-        }
-        if (searchDto.getSortByField() != null) {
-            sb.append(SORT_FIELD)
-                    .append(searchDto.getSortByField())
-                    .append(BLANK);
-            if (DESC == searchDto.getSortOrder()) {
-                sb.append(DESC);
-            }
-        }
-        return sb.toString();
     }
 
     @Override
@@ -226,5 +167,43 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
     @Override
     public void delete(Long giftCertificateId) {
         jdbcTemplate.update(DELETE_CERTIFICATE, giftCertificateId);
+    }
+
+    /**
+     * Generates a query regarding passed params (searchDto and and tableColumns).
+     *
+     * @param tableColumns + following query fragment:
+     *                     and id in (
+     *                     SELECT gift_certificate_id
+     *                     FROM certificate_tag
+     *                     LEFT JOIN tag ON tag_id = tag.id
+     *                     WHERE tag.name IN ('tag_name_1', 'tag_name_2')
+     *                     GROUP BY gift_certificate_id
+     *                     HAVING COUNT(tag_id) = 2)
+     *                     and name ilike '%name_fragment%'
+     *                     and description ilike '%description_fragment%'
+     */
+    private StringBuilder generateSearchQuery(SearchCertificateDto searchDto, String tableColumns, List queryParams) {
+        StringBuilder sb = new StringBuilder(tableColumns);
+        List<String> tags = searchDto.getTagNames();
+        if (tags != null && !tags.isEmpty()) {
+            sb.append(READ_CERTIFICATES_TAGS1)
+                    .append("?, ".repeat(tags.size() - 1))
+                    .append("?")
+                    .append(READ_CERTIFICATES_TAGS2);
+            queryParams.addAll(tags);
+            queryParams.add(tags.size());
+        }
+        if (!StringUtils.isBlank(searchDto.getName())) {
+            sb.append(NAME_FILTER)
+                    .append(searchDto.getName())
+                    .append("%' ");
+        }
+        if (!StringUtils.isBlank(searchDto.getDescription())) {
+            sb.append(DESCRIPTION_FILTER)
+                    .append(searchDto.getDescription())
+                    .append("%' ");
+        }
+        return sb;
     }
 }

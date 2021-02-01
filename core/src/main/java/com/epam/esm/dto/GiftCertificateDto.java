@@ -14,7 +14,7 @@ import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class GiftCertificateDto extends RepresentationModel<TagDto> {
+public class GiftCertificateDto extends RepresentationModel<GiftCertificateDto> {
     @Min(1)
     private Long id;
     @NotBlank
