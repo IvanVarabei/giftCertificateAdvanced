@@ -1,6 +1,5 @@
 package com.epam.esm.repository.impl;
 
-import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
@@ -62,6 +61,7 @@ public class TagRepositoryImpl implements TagRepository {
 
     @Override
     public Tag save(Tag tag) {
+        tag.setId(null);
         entityManager.persist(tag);
         return tag;
     }
@@ -88,10 +88,9 @@ public class TagRepositoryImpl implements TagRepository {
 
     @Override
     public Optional<Tag> findByName(String name) {
-        Optional<Tag> tag = entityManager.createQuery("from Tag t where t.name=:name", Tag.class)
+        return entityManager.createQuery("from Tag t where t.name=:name", Tag.class)
                 .setParameter("name", name)
                 .getResultStream().findAny();
-        return tag;
     }
 
     @Override
@@ -101,16 +100,9 @@ public class TagRepositoryImpl implements TagRepository {
 
     @Override
     public void delete(Long tagId) {
-//        superHero.getMovies().forEach(movie -> {
-//            movie.getSuperHeroes().remove(superHero);
-//        });
-//
-//        // Now remove the superhero
-//        entityManager.remove(superHero);
-
-        entityManager.createQuery("delete from Tag where id=:tagId")
-                .setParameter("tagId", tagId)
-                .executeUpdate();
+        Tag tag = entityManager.find(Tag.class, tagId);
+        tag.getGiftCertificates().forEach(gc -> gc.getTags().remove(tag));
+        entityManager.remove(tag);
     }
 
     @Override
@@ -118,17 +110,17 @@ public class TagRepositoryImpl implements TagRepository {
         return jdbcTemplate.query(READ_TAGS_BY_CERTIFICATE_ID, tagMapper, certificateId);
     }
 
-    @Override
-    public void bindWithCertificate(Long certificateId, Long tagId) {
-        GiftCertificate certificate = entityManager.find(GiftCertificate.class, certificateId);
-        Tag tag = entityManager.find(Tag.class, tagId);
-        certificate.addTag(tag);
-    }
-
-    @Override
-    public void unbindTagsFromCertificate(Long certificateId) {
-        jdbcTemplate.update(UNBIND_TAGS, certificateId);
-    }
+//    @Override
+//    public void bindWithCertificate(Long certificateId, Long tagId) {
+//        GiftCertificate certificate = entityManager.find(GiftCertificate.class, certificateId);
+//        Tag tag = entityManager.find(Tag.class, tagId);
+//        certificate.addTag(tag);
+//    }
+//
+//    @Override
+//    public void unbindTagsFromCertificate(Long certificateId) {
+//        jdbcTemplate.update(UNBIND_TAGS, certificateId);
+//    }
 
     @Override
     public Optional<Tag> getPrevalentTagOfMostProfitableUser() {

@@ -72,6 +72,9 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
     public GiftCertificate save(GiftCertificate giftCertificate) {
         LocalDateTime createdDate = DateTimeUtil
                 .toZone(giftCertificate.getCreatedDate(), TimeZoneConfig.DATABASE_ZONE, ZoneId.systemDefault());
+        giftCertificate.setCreatedDate(createdDate);
+        giftCertificate.setUpdatedDate(createdDate);
+        giftCertificate.getTags().forEach(giftCertificate::addTag);
         entityManager.persist(giftCertificate);
         return giftCertificate;
     }
@@ -141,8 +144,9 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
     public void update(GiftCertificate giftCertificate) {
         LocalDateTime updatedDate = DateTimeUtil
                 .toZone(giftCertificate.getUpdatedDate(), TimeZoneConfig.DATABASE_ZONE, ZoneId.systemDefault());
-        jdbcTemplate.update(UPDATE_CERTIFICATE, giftCertificate.getName(), giftCertificate.getDescription(),
-                giftCertificate.getPrice(), giftCertificate.getDuration(), updatedDate, giftCertificate.getId());
+        giftCertificate.setUpdatedDate(updatedDate);
+        giftCertificate.getTags().forEach(giftCertificate::addTag);
+        entityManager.merge(giftCertificate);
     }
 
     @Override
@@ -154,7 +158,9 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
 
     @Override
     public void delete(Long giftCertificateId) {
-        jdbcTemplate.update(DELETE_CERTIFICATE, giftCertificateId);
+        GiftCertificate certificate = entityManager.find(GiftCertificate.class, giftCertificateId);
+        certificate.getTags().forEach(t -> t.getGiftCertificates().remove(certificate));
+        entityManager.remove(certificate);
     }
 
     /**

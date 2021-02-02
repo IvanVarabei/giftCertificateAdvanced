@@ -22,9 +22,9 @@ public interface TagRepository {
 
     List<Tag> getTagsByCertificateId(Long id);
 
-    void bindWithCertificate(Long certificateId, Long tagId);
-
-    void unbindTagsFromCertificate(Long certificateId);
+//    void bindWithCertificate(Long certificateId, Long tagId);
+//
+//    void unbindTagsFromCertificate(Long certificateId);
 
     Optional<Tag> getPrevalentTagOfMostProfitableUser();
 }

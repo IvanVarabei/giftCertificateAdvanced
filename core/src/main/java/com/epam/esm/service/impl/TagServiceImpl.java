@@ -3,7 +3,6 @@ package com.epam.esm.service.impl;
 import com.epam.esm.dto.CustomPage;
 import com.epam.esm.dto.CustomPageable;
 import com.epam.esm.dto.TagDto;
-import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ErrorMessage;
 import com.epam.esm.exception.ResourceNotFoundException;
@@ -16,8 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -73,41 +70,34 @@ public class TagServiceImpl implements TagService {
         });
     }
 
-    @Override
-    @Transactional
-    public Set<Tag> bindTags(GiftCertificate certificate, Set<Tag> tags) {
-        Long certificateId = certificate.getId();
-        tags.forEach(t -> {
-            Optional<Tag> tagOptional = tagRepository.findByName(t.getName());
-            if (tagOptional.isEmpty()) {
-                t.setId(null);
-                tagRepository.save(t);
-            } else {
-                Tag existedTag = tagOptional.get();
-                t.setId(existedTag.getId());
-            }
-            tagRepository.bindWithCertificate(certificateId, t.getId());
-        });
-        return tags;
-    }
-
-    @Override
-    public void unbindTagsFromCertificate(Long certificateId) {
-        tagRepository.unbindTagsFromCertificate(certificateId);
-        GiftCertificate certificate = certificateRepository.findById(certificateId).get();
-
-//        superHero.getMovies().forEach(movie -> {
-//            movie.getSuperHeroes().remove(superHero);
+//    @Override
+//    @Transactional
+//    public Set<Tag> bindTags(GiftCertificate certificate, Set<Tag> tags) {
+//        Long certificateId = certificate.getId();
+//        tags.forEach(t -> {
+//            Optional<Tag> tagOptional = tagRepository.findByName(t.getName());
+//            if (tagOptional.isEmpty()) {
+//                t.setId(null);
+//                tagRepository.save(t);
+//            } else {
+//                Tag existedTag = tagOptional.get();
+//                t.setId(existedTag.getId());
+//            }
+//            tagRepository.bindWithCertificate(certificateId, t.getId());
 //        });
-//
-//        // Now remove the superhero
-//        entityManager.remove(superHero);
-    }
+//        return tags;
+//    }
 
-    @Override
-    public List<Tag> getTagsByCertificateId(Long certificateId) {
-        return tagRepository.getTagsByCertificateId(certificateId);
-    }
+//    @Override
+//    public void unbindTagsFromCertificate(Long certificateId) {
+//        tagRepository.unbindTagsFromCertificate(certificateId);
+//        GiftCertificate certificate = certificateRepository.findById(certificateId).get();
+//    }
+
+//    @Override
+//    public List<Tag> getTagsByCertificateId(Long certificateId) {
+//        return tagRepository.getTagsByCertificateId(certificateId);
+//    }
 
     @Override
     public TagDto getPrevalentTagOfMostProfitableUser() {

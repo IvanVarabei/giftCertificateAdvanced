@@ -99,7 +99,7 @@ public class CertificateController {
     public ResponseEntity<GiftCertificateDto> getCertificateById(
             @PathVariable("certificateId") @Min(1) Long certificateId) {
         GiftCertificateDto certificateDto = giftCertificateService.getCertificateById(certificateId);
-        dtoHateoas.attachHateoas(certificateDto);
+      //  dtoHateoas.attachHateoas(certificateDto);
         return ResponseEntity.ok().body(certificateDto);
     }
 
@@ -113,7 +113,7 @@ public class CertificateController {
     public ResponseEntity<GiftCertificateDto> updateCertificate(
             @Valid @RequestBody GiftCertificateDto giftCertificateDto) {
         GiftCertificateDto certificateDto = giftCertificateService.updateCertificate(giftCertificateDto);
-        dtoHateoas.attachHateoas(certificateDto);
+        // dtoHateoas.attachHateoas(certificateDto);
         return ResponseEntity.ok().body(certificateDto);
     }
 
