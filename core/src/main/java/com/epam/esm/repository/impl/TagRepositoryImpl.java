@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import java.util.List;
 import java.util.Optional;
 
@@ -62,8 +61,7 @@ public class TagRepositoryImpl implements TagRepository {
 
     @Override
     public Long countAll() {
-        Query queryTotal = entityManager.createQuery("select count(id) from Tag ");
-        return (long) queryTotal.getSingleResult();
+        return entityManager.createQuery("select count(id) from Tag ", Long.class).getSingleResult();
     }
 
     @Override
@@ -84,11 +82,25 @@ public class TagRepositoryImpl implements TagRepository {
     }
 
     @Override
-    public void delete(Long tagId) {
-        Tag tag = entityManager.find(Tag.class, tagId);
-        tag.getGiftCertificates().forEach(gc -> gc.getTags().remove(tag));
+    public void delete(Tag tag) { // todo genric
+//        Tag tag = entityManager.find(Tag.class, tagId); todo move to service
         entityManager.remove(tag);
     }
+
+//    @Override
+//    public void delete(Long tagId) {
+//        Tag tag = entityManager.find(Tag.class, tagId);
+//        List<GiftCertificate> certificates = entityManager
+//                .createQuery("select distinct certificate " +
+//                                "from GiftCertificate certificate " +
+//                                "join certificate.tags tag " +
+//                                "where tag.id = :tagName",
+//                        GiftCertificate.class)
+//                .setParameter("tagName", tag.getId())
+//                .getResultList();
+//        certificates.forEach(c -> c.getTags().remove(tag));
+//        entityManager.remove(tag);
+//    }
 
     @Override
     public List<Tag> getTagsByCertificateId(Long certificateId) {

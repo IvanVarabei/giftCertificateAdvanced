@@ -83,6 +83,7 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
      * offset %s limit %s
      */
     @Override
+    @SuppressWarnings("unchecked")
     public List<GiftCertificate> findPaginated(SearchCertificateDto searchDto) {
         List queryParams = new ArrayList<>();
         StringBuilder sb = generateSearchQuery(searchDto, READ_CERTIFICATES_BASE, queryParams);
@@ -141,9 +142,18 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
         LocalDateTime updatedDate = DateTimeUtil
                 .toZone(giftCertificate.getUpdatedDate(), TimeZoneConfig.DATABASE_ZONE, ZoneId.systemDefault());
         giftCertificate.setUpdatedDate(updatedDate);
-        giftCertificate.getTags().forEach(giftCertificate::addTag);
+        // giftCertificate.getTags().forEach(giftCertificate::addTag);
         entityManager.merge(giftCertificate);
     }
+
+//    @Override
+//    public void update(GiftCertificate giftCertificate) {
+//        LocalDateTime updatedDate = DateTimeUtil
+//                .toZone(giftCertificate.getUpdatedDate(), TimeZoneConfig.DATABASE_ZONE, ZoneId.systemDefault());
+//        giftCertificate.setUpdatedDate(updatedDate);
+//        giftCertificate.getTags().forEach(giftCertificate::addTag);
+//        entityManager.merge(giftCertificate);
+//    }
 
     @Override
     public void updatePrice(GiftCertificate giftCertificate) {

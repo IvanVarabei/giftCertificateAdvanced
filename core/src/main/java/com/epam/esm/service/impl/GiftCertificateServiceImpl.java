@@ -66,7 +66,6 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         adjustDateTimeAccordingToClientTimeZone(certificate, TimeZoneConfig.CLIENT_ZONE);
         return certificateConverter.toDTO(certificate);
     }
-
     @Override
     @Transactional
     public GiftCertificateDto updateCertificate(GiftCertificateDto updateDto) {
@@ -79,13 +78,35 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         existed.setDescription(update.getDescription());
         existed.setDuration(update.getDuration());
         existed.setUpdatedDate(LocalDateTime.now(TimeZoneConfig.DATABASE_ZONE));
-        existed.setTags(update.getTags().stream().map(tag ->
-                tagRepository.findByName(tag.getName()).orElseGet(() -> tagRepository.save(tag))
-        ).collect(Collectors.toSet()));
+        existed.getTags().clear();
+        existed.setTags(update.getTags());
+//        existed.setTags(update.getTags().stream().map(tag ->
+//                tagRepository.findByName(tag.getName()).orElseGet(() -> tagRepository.save(tag))
+//        ).collect(Collectors.toSet()));
         giftCertificateRepository.update(existed);
         adjustDateTimeAccordingToClientTimeZone(existed, TimeZoneConfig.CLIENT_ZONE);
         return certificateConverter.toDTO(existed);
     }
+
+//    @Override
+//    @Transactional
+//    public GiftCertificateDto updateCertificate(GiftCertificateDto updateDto) {
+//        GiftCertificate existed = giftCertificateRepository
+//                .findById(updateDto.getId())
+//                .orElseThrow(() -> new ResourceNotFoundException(String.format(ErrorMessage.RESOURCE_NOT_FOUND, updateDto.getId())));
+//        GiftCertificate update = certificateConverter.toEntity(updateDto);
+//        existed.setName(update.getName());
+//        existed.setPrice(update.getPrice());
+//        existed.setDescription(update.getDescription());
+//        existed.setDuration(update.getDuration());
+//        existed.setUpdatedDate(LocalDateTime.now(TimeZoneConfig.DATABASE_ZONE));
+//        existed.setTags(update.getTags().stream().map(tag ->
+//                tagRepository.findByName(tag.getName()).orElseGet(() -> tagRepository.save(tag))
+//        ).collect(Collectors.toSet()));
+//        giftCertificateRepository.update(existed);
+//        adjustDateTimeAccordingToClientTimeZone(existed, TimeZoneConfig.CLIENT_ZONE);
+//        return certificateConverter.toDTO(existed);
+//    }
 
     @Override
     @Transactional

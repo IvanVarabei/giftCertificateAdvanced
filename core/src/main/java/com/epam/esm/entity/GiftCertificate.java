@@ -25,7 +25,7 @@ public class GiftCertificate {
     private Integer duration;
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.PERSIST})
     @JoinTable(
             name = "certificate_tag",
             joinColumns = {@JoinColumn(name = "gift_certificate_id")},
@@ -35,6 +35,6 @@ public class GiftCertificate {
 
     public void addTag(Tag tag) {
         tags.add(tag);
-        tag.getGiftCertificates().add(this);
+        // tag.getGiftCertificates().add(this);
     }
 }
