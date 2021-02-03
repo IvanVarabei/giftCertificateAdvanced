@@ -48,7 +48,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     public CustomPage<GiftCertificateDto> getPaginated(SearchCertificateDto searchDto) {
         int size = searchDto.getPageRequest().getSize();
         int page = searchDto.getPageRequest().getPage();
-        int totalCertificateAmount = 3;//giftCertificateRepository.countAll(searchDto);
+        int totalCertificateAmount = giftCertificateRepository.countAll(searchDto);
         int lastPage = (totalCertificateAmount + size - 1) / size - 1;
         if (page > lastPage) {
             throw new ResourceNotFoundException(String.format(ErrorMessage.PAGE_NOT_FOUND, size, page, lastPage));
@@ -105,7 +105,6 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         existed.setPrice(priceDto.getPrice());
         existed.setUpdatedDate(LocalDateTime.now(TimeZoneConfig.DATABASE_ZONE));
         giftCertificateRepository.updatePrice(existed);
-        //    existed.setTags(tagService.getTagsByCertificateId(existed.getId()));
         adjustDateTimeAccordingToClientTimeZone(existed, TimeZoneConfig.CLIENT_ZONE);
         return certificateConverter.toDTO(existed);
     }

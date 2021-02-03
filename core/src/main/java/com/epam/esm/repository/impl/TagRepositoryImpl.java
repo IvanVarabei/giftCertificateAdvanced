@@ -21,12 +21,6 @@ public class TagRepositoryImpl implements TagRepository {
     @PersistenceContext
     private final EntityManager entityManager;
 
-    private static final String READ_TAG_BY_ID = "select id, name from tag where id = ?";
-
-    private static final String READ_TAG_BY_NAME = "select id, name from tag where name = ?";
-
-    private static final String READ_TAGS = "select id, name from tag";
-
     private static final String READ_TAGS_BY_CERTIFICATE_ID =
             "SELECT id, name FROM tag JOIN certificate_tag ON tag.id = tag_id WHERE gift_certificate_id = ?";
 
@@ -46,18 +40,9 @@ public class TagRepositoryImpl implements TagRepository {
                     "order by sum(quantity) desc " +
                     "limit 1";
 
-    private static final String UPDATE_TAG = "update tag set name = ? where id = ?";
-
     private static final String DELETE_TAG = "delete from tag where id = ?";
 
-    private static final String BIND_TAG =
-            "insert into certificate_tag (gift_certificate_id, tag_id) values (?, ?)";
-
-    private static final String UNBIND_TAGS = "delete from certificate_tag where gift_certificate_id = ?";
-
     private static final String COUNT_TAGS = "select count(id) from tag";
-
-    private static final String PAGINATION = "%s offset %s limit %s";
 
     @Override
     public Tag save(Tag tag) {
@@ -101,7 +86,7 @@ public class TagRepositoryImpl implements TagRepository {
     @Override
     public void delete(Long tagId) {
         Tag tag = entityManager.find(Tag.class, tagId);
-      //  tag.getGiftCertificates().forEach(gc -> gc.getTags().remove(tag));
+        tag.getGiftCertificates().forEach(gc -> gc.getTags().remove(tag));
         entityManager.remove(tag);
     }
 

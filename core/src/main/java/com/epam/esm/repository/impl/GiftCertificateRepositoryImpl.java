@@ -3,8 +3,6 @@ package com.epam.esm.repository.impl;
 import com.epam.esm.config.TimeZoneConfig;
 import com.epam.esm.dto.SearchCertificateDto;
 import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.entity.GiftCertificate_;
-import com.epam.esm.entity.Tag;
 import com.epam.esm.mapper.CertificateMapper;
 import com.epam.esm.repository.GiftCertificateRepository;
 import com.epam.esm.repository.TagRepository;
@@ -16,17 +14,14 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.Query;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+
+import static com.epam.esm.dto.search.SortOrder.DESC;
 
 @Repository
 @RequiredArgsConstructor
@@ -37,12 +32,8 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
     @PersistenceContext
     private final EntityManager entityManager;
 
-    private static final String CREATE_CERTIFICATE =
-            "insert into gift_certificate (name, description, price, duration, create_date, last_update_date) " +
-                    "values (?, ?, ?, ?, ?, ?)";
-
     private static final String READ_CERTIFICATES_BASE =
-            "select id, name, description, price, duration, create_date, last_update_date from gift_certificate " +
+            "select id, name, description, price, duration, created_date, updated_date from gift_certificate " +
                     "where true ";
 
     private static final String READ_CERTIFICATES_TAGS1 = "and id in (SELECT gift_certificate_id FROM " +
@@ -57,24 +48,11 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
 
     private static final String SORT_FIELD = "order by ";
 
-    private static final String PAGINATION = "%s offset %s limit %s";
-
-    private static final String READ_CERTIFICATE_BY_ID = "select id, name, description, price, duration, " +
-            "create_date, last_update_date from gift_certificate where id = ?";
-
-    private static final String UPDATE_CERTIFICATE = "update gift_certificate set name = ?, description = ?, " +
-            "price = ?, duration = ?, last_update_date = ? where id = ?";
-
-    private static final String UPDATE_PRICE = "update gift_certificate set price = ?, last_update_date = ? " +
-            "where id = ?";
-
     private static final String DELETE_CERTIFICATE = "delete from gift_certificate where id = ?";
 
     private static final String COUNT_CERTIFICATES_BASE = "select count(id) from gift_certificate where true ";
 
     private static final String BLANK = " ";
-
-    private static final String[] RETURN_GENERATED_KEY = {"id"};
 
     @Override
     public GiftCertificate save(GiftCertificate giftCertificate) {
@@ -104,53 +82,29 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
      * desc
      * offset %s limit %s
      */
-
-
     @Override
     public List<GiftCertificate> findPaginated(SearchCertificateDto searchDto) {
-//        List queryParams = new ArrayList<>();
-//        StringBuilder sb = generateSearchQuery(searchDto, READ_CERTIFICATES_BASE, queryParams);
-//        if (searchDto.getSortByField() != null) {
-//            sb.append(SORT_FIELD)
-//                    .append(searchDto.getSortByField())
-//                    .append(BLANK);
-//            if (DESC == searchDto.getSortOrder()) {
-//                sb.append(DESC);
-//            }
-//        }
-//        int size = searchDto.getPageRequest().getSize();
-//        int page = searchDto.getPageRequest().getPage();
-//        int offset = size * page;
-        //String query = String.format(PAGINATION, sb.toString(), offset, size);
-//-----------------------------
-        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<GiftCertificate> criteriaQuery = builder.createQuery(GiftCertificate.class);
-        Root<GiftCertificate> product = criteriaQuery.from(GiftCertificate.class);
-
-        Predicate where = builder.conjunction();
-
-        Set<Tag> tagSet = searchDto.getTagNames().stream()
-                .map(t -> tagRepository.findByName(t).get()).collect(Collectors.toSet());
-        where = builder.and(where, product.join("tags").in(tagSet));
-
-        criteriaQuery.where(where);
-        criteriaQuery.groupBy(product.get(GiftCertificate_.id));
-
-
-        List<GiftCertificate> resultList = entityManager.createQuery(criteriaQuery).getResultList();
-
-
-//        Query query = entityManager.createQuery(
-//                "select gc from GiftCertificate gc " +
-//                        "inner join gc.tags tag where tag.name in :requiredTagsNames " +
-//                        "and gc.name like :name " +
-//                        "and gc.description like :description "
-//                , GiftCertificate.class)
-//                .setParameter("requiredTagsNames", searchDto.getTagNames())
-//                .setParameter("name", "%" + searchDto.getName() + "%")
-//                .setParameter("description", "%" + searchDto.getDescription() + "%")
-//                ;
-        return null;
+        List queryParams = new ArrayList<>();
+        StringBuilder sb = generateSearchQuery(searchDto, READ_CERTIFICATES_BASE, queryParams);
+        if (searchDto.getSortByField() != null) {
+            sb.append(SORT_FIELD)
+                    .append(searchDto.getSortByField())
+                    .append(BLANK);
+            if (DESC == searchDto.getSortOrder()) {
+                sb.append(DESC);
+            }
+        }
+        int size = searchDto.getPageRequest().getSize();
+        int page = searchDto.getPageRequest().getPage();
+        int offset = size * page;
+        Query query = entityManager.createNativeQuery(sb.toString(), GiftCertificate.class);
+        for (int i = 0; i < queryParams.size(); i++) {
+            Object o = queryParams.get(i);
+            query.setParameter(i + 1, o);
+        }
+        return query.setFirstResult(offset)
+                .setMaxResults(size)
+                .getResultList();
     }
 
     /**
@@ -169,8 +123,12 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
     public Integer countAll(SearchCertificateDto searchDto) {
         List queryParams = new ArrayList<>();
         StringBuilder sb = generateSearchQuery(searchDto, COUNT_CERTIFICATES_BASE, queryParams);
-        return jdbcTemplate.query(sb.toString(), (rs, rowNum) -> rs.getInt("count"), queryParams.toArray())
-                .stream().findAny().get();
+        Query query = entityManager.createNativeQuery(sb.toString());
+        for (int i = 0; i < queryParams.size(); i++) {
+            Object o = queryParams.get(i);
+            query.setParameter(i + 1, o);
+        }
+        return ((Number) query.getSingleResult()).intValue();
     }
 
     @Override
@@ -191,7 +149,8 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
     public void updatePrice(GiftCertificate giftCertificate) {
         LocalDateTime updatedDate = DateTimeUtil
                 .toZone(giftCertificate.getUpdatedDate(), TimeZoneConfig.DATABASE_ZONE, ZoneId.systemDefault());
-        jdbcTemplate.update(UPDATE_PRICE, giftCertificate.getPrice(), updatedDate, giftCertificate.getId());
+        giftCertificate.setUpdatedDate(updatedDate);
+        entityManager.merge(giftCertificate);
     }
 
     @Override
