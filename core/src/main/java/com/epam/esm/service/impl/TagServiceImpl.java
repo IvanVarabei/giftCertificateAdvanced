@@ -7,7 +7,6 @@ import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ErrorMessage;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.mapper.TagConverter;
-import com.epam.esm.repository.GiftCertificateRepository;
 import com.epam.esm.repository.TagRepository;
 import com.epam.esm.service.TagService;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +21,6 @@ import java.util.stream.Collectors;
 public class TagServiceImpl implements TagService {
     private final TagRepository tagRepository;
     private final TagConverter tagConverter;
-    private final GiftCertificateRepository certificateRepository;
 
     @Override
     @Transactional
@@ -65,39 +63,10 @@ public class TagServiceImpl implements TagService {
     @Override
     @Transactional
     public void deleteTag(Long tagId) {
-//        tagRepository.findById(tagId).ifPresentOrElse(t -> tagRepository.delete(tagId), () -> {
-//            throw new ResourceNotFoundException(String.format(ErrorMessage.RESOURCE_NOT_FOUND, tagId));
-//        });
+        Tag tag = tagRepository.findById(tagId).orElseThrow(() ->
+                new ResourceNotFoundException(String.format(ErrorMessage.RESOURCE_NOT_FOUND, tagId)));
+        tagRepository.delete(tag);
     }
-
-//    @Override
-//    @Transactional
-//    public Set<Tag> bindTags(GiftCertificate certificate, Set<Tag> tags) {
-//        Long certificateId = certificate.getId();
-//        tags.forEach(t -> {
-//            Optional<Tag> tagOptional = tagRepository.findByName(t.getName());
-//            if (tagOptional.isEmpty()) {
-//                t.setId(null);
-//                tagRepository.save(t);
-//            } else {
-//                Tag existedTag = tagOptional.get();
-//                t.setId(existedTag.getId());
-//            }
-//            tagRepository.bindWithCertificate(certificateId, t.getId());
-//        });
-//        return tags;
-//    }
-
-//    @Override
-//    public void unbindTagsFromCertificate(Long certificateId) {
-//        tagRepository.unbindTagsFromCertificate(certificateId);
-//        GiftCertificate certificate = certificateRepository.findById(certificateId).get();
-//    }
-
-//    @Override
-//    public List<Tag> getTagsByCertificateId(Long certificateId) {
-//        return tagRepository.getTagsByCertificateId(certificateId);
-//    }
 
     @Override
     public TagDto getPrevalentTagOfMostProfitableUser() {

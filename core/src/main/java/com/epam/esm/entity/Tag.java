@@ -4,23 +4,16 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Data
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-//@EqualsAndHashCode(exclude = "giftCertificates")
-//@ToString(exclude = "giftCertificates")
 public class Tag {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "default_generator")
     private Long id;
     @Column(unique = true)
     private String name;
-//    @ManyToMany(mappedBy = "tags", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-//    private Set<GiftCertificate> giftCertificates = new HashSet<>();
 }

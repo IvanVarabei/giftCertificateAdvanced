@@ -3,13 +3,10 @@ package com.epam.esm.repository.impl;
 import com.epam.esm.config.TimeZoneConfig;
 import com.epam.esm.dto.SearchCertificateDto;
 import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.mapper.CertificateMapper;
 import com.epam.esm.repository.GiftCertificateRepository;
-import com.epam.esm.repository.TagRepository;
 import com.epam.esm.util.DateTimeUtil;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -26,9 +23,6 @@ import static com.epam.esm.dto.search.SortOrder.DESC;
 @Repository
 @RequiredArgsConstructor
 public class GiftCertificateRepositoryImpl implements GiftCertificateRepository {
-    private final JdbcTemplate jdbcTemplate;
-    private final CertificateMapper certificateMapper;
-    private final TagRepository tagRepository;
     @PersistenceContext
     private final EntityManager entityManager;
 
@@ -48,8 +42,6 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
 
     private static final String SORT_FIELD = "order by ";
 
-    private static final String DELETE_CERTIFICATE = "delete from gift_certificate where id = ?";
-
     private static final String COUNT_CERTIFICATES_BASE = "select count(id) from gift_certificate where true ";
 
     private static final String BLANK = " ";
@@ -60,7 +52,6 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
                 .toZone(giftCertificate.getCreatedDate(), TimeZoneConfig.DATABASE_ZONE, ZoneId.systemDefault());
         giftCertificate.setCreatedDate(createdDate);
         giftCertificate.setUpdatedDate(createdDate);
-        giftCertificate.getTags().forEach(giftCertificate::addTag); // todo service
         entityManager.persist(giftCertificate);
         return giftCertificate;
     }
@@ -139,21 +130,11 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
 
     @Override
     public void update(GiftCertificate giftCertificate) {
-        LocalDateTime updatedDate = DateTimeUtil
+        LocalDateTime updatedDate = DateTimeUtil // todo better move to service
                 .toZone(giftCertificate.getUpdatedDate(), TimeZoneConfig.DATABASE_ZONE, ZoneId.systemDefault());
         giftCertificate.setUpdatedDate(updatedDate);
-        // giftCertificate.getTags().forEach(giftCertificate::addTag);
         entityManager.merge(giftCertificate);
     }
-
-//    @Override
-//    public void update(GiftCertificate giftCertificate) {
-//        LocalDateTime updatedDate = DateTimeUtil
-//                .toZone(giftCertificate.getUpdatedDate(), TimeZoneConfig.DATABASE_ZONE, ZoneId.systemDefault());
-//        giftCertificate.setUpdatedDate(updatedDate);
-//        giftCertificate.getTags().forEach(giftCertificate::addTag);
-//        entityManager.merge(giftCertificate);
-//    }
 
     @Override
     public void updatePrice(GiftCertificate giftCertificate) {
@@ -164,10 +145,8 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
     }
 
     @Override
-    public void delete(Long giftCertificateId) {
-        GiftCertificate certificate = entityManager.find(GiftCertificate.class, giftCertificateId);
-        //certificate.getTags().forEach(t -> t.getGiftCertificates().remove(certificate));
-        entityManager.remove(certificate);
+    public void delete(GiftCertificate giftCertificate) {
+        entityManager.remove(giftCertificate);
     }
 
     /**

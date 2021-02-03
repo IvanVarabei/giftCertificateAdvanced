@@ -19,5 +19,5 @@ public interface GiftCertificateRepository {
 
     void updatePrice(GiftCertificate giftCertificate);
 
-    void delete(Long giftCertificateId);
+    void delete(GiftCertificate giftCertificate);
 }

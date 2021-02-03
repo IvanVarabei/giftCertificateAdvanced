@@ -1,8 +1,8 @@
 package com.epam.esm.repository.impl;
 
 import com.epam.esm.entity.Tag;
+import com.epam.esm.repository.GenericRepository;
 import com.epam.esm.repository.TagRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -13,8 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-@RequiredArgsConstructor
-public class TagRepositoryImpl implements TagRepository {
+public class TagRepositoryImpl extends GenericRepository<Tag> implements TagRepository {
     private final JdbcTemplate jdbcTemplate;
     private final RowMapper<Tag> tagMapper;
     @PersistenceContext
@@ -42,6 +41,13 @@ public class TagRepositoryImpl implements TagRepository {
     private static final String DELETE_TAG = "delete from tag where id = ?";
 
     private static final String COUNT_TAGS = "select count(id) from tag";
+
+    public TagRepositoryImpl(EntityManager entityManager, JdbcTemplate jdbcTemplate, RowMapper<Tag> tagMapper, EntityManager entityManager1) {
+        super(entityManager);
+        this.jdbcTemplate = jdbcTemplate;
+        this.tagMapper = tagMapper;
+        this.entityManager = entityManager1;
+    }
 
     @Override
     public Tag save(Tag tag) {
@@ -77,51 +83,14 @@ public class TagRepositoryImpl implements TagRepository {
     }
 
     @Override
-    public void update(Tag tag) {
-        entityManager.merge(tag);
-    }
-
-    @Override
-    public void delete(Tag tag) { // todo genric
-//        Tag tag = entityManager.find(Tag.class, tagId); todo move to service
-        entityManager.remove(tag);
-    }
-
-//    @Override
-//    public void delete(Long tagId) {
-//        Tag tag = entityManager.find(Tag.class, tagId);
-//        List<GiftCertificate> certificates = entityManager
-//                .createQuery("select distinct certificate " +
-//                                "from GiftCertificate certificate " +
-//                                "join certificate.tags tag " +
-//                                "where tag.id = :tagName",
-//                        GiftCertificate.class)
-//                .setParameter("tagName", tag.getId())
-//                .getResultList();
-//        certificates.forEach(c -> c.getTags().remove(tag));
-//        entityManager.remove(tag);
-//    }
-
-    @Override
     public List<Tag> getTagsByCertificateId(Long certificateId) {
         return jdbcTemplate.query(READ_TAGS_BY_CERTIFICATE_ID, tagMapper, certificateId);
     }
 
-//    @Override
-//    public void bindWithCertificate(Long certificateId, Long tagId) {
-//        GiftCertificate certificate = entityManager.find(GiftCertificate.class, certificateId);
-//        Tag tag = entityManager.find(Tag.class, tagId);
-//        certificate.addTag(tag);
-//    }
-//
-//    @Override
-//    public void unbindTagsFromCertificate(Long certificateId) {
-//        jdbcTemplate.update(UNBIND_TAGS, certificateId);
-//    }
-
     @Override
     public Optional<Tag> getPrevalentTagOfMostProfitableUser() {
-        return jdbcTemplate.query(READ_MOST_COMMON_TAG_OF_USER_WITH_THE_HIGHEST_COST_OF_ALL_ORDERS, tagMapper)
-                .stream().findAny();
+        return Optional.ofNullable((Tag) entityManager.createNativeQuery(
+                READ_MOST_COMMON_TAG_OF_USER_WITH_THE_HIGHEST_COST_OF_ALL_ORDERS, Tag.class)
+                .getSingleResult());
     }
 }

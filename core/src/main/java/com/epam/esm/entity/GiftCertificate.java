@@ -16,7 +16,8 @@ import java.util.Set;
 @ToString(exclude = "tags")
 public class GiftCertificate {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "default_generator")
+    @SequenceGenerator(name = "default_generator", sequenceName = "gift_certificate_id_seq", allocationSize = 50)
     private Long id;
     @Column(unique = true)
     private String name;
@@ -25,16 +26,13 @@ public class GiftCertificate {
     private Integer duration;
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.PERSIST})
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST,
+            CascadeType.MERGE,
+            CascadeType.REFRESH})
     @JoinTable(
             name = "certificate_tag",
             joinColumns = {@JoinColumn(name = "gift_certificate_id")},
             inverseJoinColumns = {@JoinColumn(name = "tag_id")}
     )
     private Set<Tag> tags = new HashSet<>();
-
-    public void addTag(Tag tag) {
-        tags.add(tag);
-        // tag.getGiftCertificates().add(this);
-    }
 }

@@ -5,7 +5,7 @@ import com.epam.esm.entity.Tag;
 import java.util.List;
 import java.util.Optional;
 
-public interface TagRepository {
+public interface TagRepository extends Repository<Tag> {
     Tag save(Tag tag);
 
     List<Tag> findPaginated(Integer offset, Integer limit);
@@ -15,10 +15,6 @@ public interface TagRepository {
     Optional<Tag> findById(Long tagId);
 
     Optional<Tag> findByName(String name);
-
-    void update(Tag tag);
-
-    void delete(Tag tag);
 
     List<Tag> getTagsByCertificateId(Long id);
 
