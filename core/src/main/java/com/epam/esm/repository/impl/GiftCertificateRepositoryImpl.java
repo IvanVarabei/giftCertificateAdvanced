@@ -3,6 +3,7 @@ package com.epam.esm.repository.impl;
 import com.epam.esm.config.TimeZoneConfig;
 import com.epam.esm.dto.SearchCertificateDto;
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.entity.Tag;
 import com.epam.esm.mapper.CertificateMapper;
 import com.epam.esm.repository.GiftCertificateRepository;
 import com.epam.esm.repository.TagRepository;
@@ -23,6 +24,8 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -125,8 +128,9 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
 
         Predicate where = builder.conjunction();
 
-
-        where = builder.and(where, product.join("tags").in(searchDto.getTagNames()));
+        Set<Tag> tagSet = searchDto.getTagNames().stream()
+                .map(t -> tagRepository.findByName(t).get()).collect(Collectors.toSet());
+        where = builder.and(where, product.join("tags").in(tagSet));
 
 
         criteriaQuery.where(where);
