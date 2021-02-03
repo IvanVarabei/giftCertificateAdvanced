@@ -1,11 +1,11 @@
 package com.epam.esm.controller;
 
-import com.epam.esm.controller.hateoas.DtoHateoas;
-import com.epam.esm.controller.hateoas.PaginationHateoas;
 import com.epam.esm.dto.*;
 import com.epam.esm.dto.search.SortByField;
 import com.epam.esm.dto.search.SortOrder;
 import com.epam.esm.service.GiftCertificateService;
+import com.epam.esm.service.hateoas.HateoasService;
+import com.epam.esm.service.hateoas.PaginationHateoas;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -30,7 +30,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 public class CertificateController {
     private final GiftCertificateService giftCertificateService;
     private final PaginationHateoas<GiftCertificateDto> paginationHateoas;
-    private final DtoHateoas dtoHateoas;
+    private final HateoasService hateoasService;
 
     /**
      * The method allows creating {@link com.epam.esm.entity.GiftCertificate}.
@@ -43,7 +43,7 @@ public class CertificateController {
     public ResponseEntity<GiftCertificateDto> createCertificate(
             @Valid @RequestBody GiftCertificateDto giftCertificateDto) {
         GiftCertificateDto certificateDto = giftCertificateService.createCertificate(giftCertificateDto);
-        dtoHateoas.attachHateoas(certificateDto);
+        hateoasService.attachHateoas(certificateDto);
         return ResponseEntity.status(CREATED).body(certificateDto);
     }
 
@@ -82,7 +82,7 @@ public class CertificateController {
                 .pageRequest(pageRequest)
                 .build();
         CustomPage<GiftCertificateDto> certificateDtoPage = giftCertificateService.getPaginated(searchCertificateDto);
-        certificateDtoPage.getContent().forEach(dtoHateoas::attachHateoas);
+        certificateDtoPage.getContent().forEach(hateoasService::attachHateoas);
         uriBuilder.path(request.getRequestURI());
         uriBuilder.query(request.getQueryString());
         paginationHateoas.addPaginationLinks(uriBuilder, certificateDtoPage);
@@ -120,7 +120,7 @@ public class CertificateController {
     @PatchMapping
     public ResponseEntity<GiftCertificateDto> updatePrice(@Valid @RequestBody PriceDto priceDto) {
         GiftCertificateDto certificateDto = giftCertificateService.updatePrice(priceDto);
-        dtoHateoas.attachHateoas(certificateDto);
+        hateoasService.attachHateoas(certificateDto);
         return ResponseEntity.ok().body(giftCertificateService.updatePrice(priceDto));
     }
 

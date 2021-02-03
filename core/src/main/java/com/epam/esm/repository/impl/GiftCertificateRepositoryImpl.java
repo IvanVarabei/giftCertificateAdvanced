@@ -3,6 +3,7 @@ package com.epam.esm.repository.impl;
 import com.epam.esm.config.TimeZoneConfig;
 import com.epam.esm.dto.SearchCertificateDto;
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.entity.GiftCertificate_;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.mapper.CertificateMapper;
 import com.epam.esm.repository.GiftCertificateRepository;
@@ -81,7 +82,7 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
                 .toZone(giftCertificate.getCreatedDate(), TimeZoneConfig.DATABASE_ZONE, ZoneId.systemDefault());
         giftCertificate.setCreatedDate(createdDate);
         giftCertificate.setUpdatedDate(createdDate);
-        giftCertificate.getTags().forEach(giftCertificate::addTag);
+        giftCertificate.getTags().forEach(giftCertificate::addTag); // todo service
         entityManager.persist(giftCertificate);
         return giftCertificate;
     }
@@ -132,8 +133,10 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
                 .map(t -> tagRepository.findByName(t).get()).collect(Collectors.toSet());
         where = builder.and(where, product.join("tags").in(tagSet));
 
-
         criteriaQuery.where(where);
+        criteriaQuery.groupBy(product.get(GiftCertificate_.id));
+
+
         List<GiftCertificate> resultList = entityManager.createQuery(criteriaQuery).getResultList();
 
 
@@ -194,7 +197,7 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
     @Override
     public void delete(Long giftCertificateId) {
         GiftCertificate certificate = entityManager.find(GiftCertificate.class, giftCertificateId);
-        certificate.getTags().forEach(t -> t.getGiftCertificates().remove(certificate));
+        //certificate.getTags().forEach(t -> t.getGiftCertificates().remove(certificate));
         entityManager.remove(certificate);
     }
 

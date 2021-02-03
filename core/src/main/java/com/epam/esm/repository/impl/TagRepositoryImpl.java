@@ -101,7 +101,7 @@ public class TagRepositoryImpl implements TagRepository {
     @Override
     public void delete(Long tagId) {
         Tag tag = entityManager.find(Tag.class, tagId);
-        tag.getGiftCertificates().forEach(gc -> gc.getTags().remove(tag));
+      //  tag.getGiftCertificates().forEach(gc -> gc.getTags().remove(tag));
         entityManager.remove(tag);
     }
 

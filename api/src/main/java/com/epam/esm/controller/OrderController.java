@@ -1,9 +1,9 @@
 package com.epam.esm.controller;
 
-import com.epam.esm.controller.hateoas.DtoHateoas;
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.OrderDto;
 import com.epam.esm.service.OrderService;
+import com.epam.esm.service.hateoas.HateoasService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -21,26 +21,26 @@ import static org.springframework.http.HttpStatus.CREATED;
 @Validated
 public class OrderController {
     private final OrderService orderService;
-    private final DtoHateoas dtoHateoas;
+    private final HateoasService hateoasService;
 
     @PostMapping
     public ResponseEntity<OrderDto> createOrder(@Valid @RequestBody OrderDto orderDto) {
         OrderDto createdOrderDto = orderService.createOrder(orderDto);
-        dtoHateoas.attachHateoas(createdOrderDto);
+        hateoasService.attachHateoas(createdOrderDto);
         return ResponseEntity.status(CREATED).body(createdOrderDto);
     }
 
     @GetMapping("/{userId}")
     public ResponseEntity<Map<Long, OrderDto>> getOrdersByUserId(@PathVariable("userId") @Min(1) Long userId) {
         Map<Long, OrderDto> orderDtoMap = orderService.getOrdersByUserId(userId);
-        orderDtoMap.values().forEach(dtoHateoas::attachHateoas);
+        orderDtoMap.values().forEach(hateoasService::attachHateoas);
         return ResponseEntity.ok().body(orderDtoMap);
     }
 
     @PutMapping
     public ResponseEntity<OrderDto> updateOrder(@Valid @RequestBody OrderDto orderDto) {
         OrderDto updatedOrderDto = orderService.updateOrder(orderDto);
-        dtoHateoas.attachHateoas(updatedOrderDto);
+        hateoasService.attachHateoas(updatedOrderDto);
         return ResponseEntity.ok().body(updatedOrderDto);
     }
 

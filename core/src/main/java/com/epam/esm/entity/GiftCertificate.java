@@ -36,6 +36,6 @@ public class GiftCertificate {
 
     public void addTag(Tag tag) {
         tags.add(tag);
-        tag.getGiftCertificates().add(this);
+        //tag.getGiftCertificates().add(this);
     }
 }

@@ -1,11 +1,11 @@
 package com.epam.esm.controller;
 
-import com.epam.esm.controller.hateoas.DtoHateoas;
-import com.epam.esm.controller.hateoas.PaginationHateoas;
 import com.epam.esm.dto.CustomPage;
 import com.epam.esm.dto.CustomPageable;
 import com.epam.esm.dto.UserDto;
 import com.epam.esm.service.UserService;
+import com.epam.esm.service.hateoas.HateoasService;
+import com.epam.esm.service.hateoas.PaginationHateoas;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -26,7 +26,7 @@ import javax.validation.constraints.Min;
 public class UserController {
     private final UserService userService;
     private final PaginationHateoas<UserDto> paginationHateoas;
-    private final DtoHateoas dtoHateoas;
+    private final HateoasService hateoasService;
 
     @GetMapping
     public CustomPage<UserDto> getUsers(
@@ -35,7 +35,7 @@ public class UserController {
             HttpServletRequest request
     ) {
         CustomPage<UserDto> users = userService.getPaginated(pageRequest);
-        users.getContent().forEach(dtoHateoas::attachHateoas);
+        users.getContent().forEach(hateoasService::attachHateoas);
         uriBuilder.path(request.getRequestURI());
         uriBuilder.query(request.getQueryString());
         paginationHateoas.addPaginationLinks(uriBuilder, users);
@@ -45,7 +45,7 @@ public class UserController {
     @GetMapping("/{userId}")
     public ResponseEntity<UserDto> getUserById(@PathVariable("userId") @Min(1) Long userId) {
         UserDto userDto = userService.getUserById(userId);
-        dtoHateoas.attachHateoas(userDto);
+        hateoasService.attachHateoas(userDto);
         return ResponseEntity.ok().body(userDto);
     }
 }

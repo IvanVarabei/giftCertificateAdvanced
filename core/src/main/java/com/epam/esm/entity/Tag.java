@@ -1,17 +1,20 @@
 package com.epam.esm.entity;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
 @Data
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(exclude = "giftCertificates")
-@ToString(exclude = "giftCertificates")
+//@EqualsAndHashCode(exclude = "giftCertificates")
+//@ToString(exclude = "giftCertificates")
 public class Tag {
     @Id
     @GeneratedValue
@@ -24,6 +27,6 @@ public class Tag {
 //            joinColumns = {@JoinColumn(name = "tag_id")},
 //            inverseJoinColumns = {@JoinColumn(name = "gift_certificate_id")}
 //    )
-    @ManyToMany(mappedBy = "tags", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-    private Set<GiftCertificate> giftCertificates = new HashSet<>();
+//    @ManyToMany(mappedBy = "tags", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+//    private Set<GiftCertificate> giftCertificates = new HashSet<>();
 }

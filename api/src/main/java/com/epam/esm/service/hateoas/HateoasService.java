@@ -1,4 +1,4 @@
-package com.epam.esm.controller.hateoas;
+package com.epam.esm.service.hateoas;
 
 import com.epam.esm.controller.CertificateController;
 import com.epam.esm.controller.OrderController;
@@ -20,7 +20,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
 @RequiredArgsConstructor
-public class DtoHateoas {
+public class HateoasService {
     private final OrderService orderService;
 
     public void attachHateoas(TagDto tagDto) {

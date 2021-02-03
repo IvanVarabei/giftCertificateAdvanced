@@ -1,4 +1,4 @@
-package com.epam.esm.controller.hateoas;
+package com.epam.esm.service.hateoas;
 
 import com.epam.esm.dto.CustomPage;
 import org.springframework.hateoas.Link;
