@@ -5,6 +5,7 @@ import com.epam.esm.dto.SearchCertificateDto;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.mapper.CertificateMapper;
 import com.epam.esm.repository.GiftCertificateRepository;
+import com.epam.esm.repository.TagRepository;
 import com.epam.esm.util.DateTimeUtil;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -13,19 +14,22 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static com.epam.esm.dto.search.SortOrder.DESC;
-
 @Repository
 @RequiredArgsConstructor
 public class GiftCertificateRepositoryImpl implements GiftCertificateRepository {
     private final JdbcTemplate jdbcTemplate;
     private final CertificateMapper certificateMapper;
+    private final TagRepository tagRepository;
     @PersistenceContext
     private final EntityManager entityManager;
 
@@ -96,23 +100,50 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
      * desc
      * offset %s limit %s
      */
+
+
     @Override
     public List<GiftCertificate> findPaginated(SearchCertificateDto searchDto) {
-        List queryParams = new ArrayList<>();
-        StringBuilder sb = generateSearchQuery(searchDto, READ_CERTIFICATES_BASE, queryParams);
-        if (searchDto.getSortByField() != null) {
-            sb.append(SORT_FIELD)
-                    .append(searchDto.getSortByField())
-                    .append(BLANK);
-            if (DESC == searchDto.getSortOrder()) {
-                sb.append(DESC);
-            }
-        }
-        int size = searchDto.getPageRequest().getSize();
-        int page = searchDto.getPageRequest().getPage();
-        int offset = size * page;
-        String query = String.format(PAGINATION, sb.toString(), offset, size);
-        return jdbcTemplate.query(query, certificateMapper, queryParams.toArray());
+//        List queryParams = new ArrayList<>();
+//        StringBuilder sb = generateSearchQuery(searchDto, READ_CERTIFICATES_BASE, queryParams);
+//        if (searchDto.getSortByField() != null) {
+//            sb.append(SORT_FIELD)
+//                    .append(searchDto.getSortByField())
+//                    .append(BLANK);
+//            if (DESC == searchDto.getSortOrder()) {
+//                sb.append(DESC);
+//            }
+//        }
+//        int size = searchDto.getPageRequest().getSize();
+//        int page = searchDto.getPageRequest().getPage();
+//        int offset = size * page;
+        //String query = String.format(PAGINATION, sb.toString(), offset, size);
+//-----------------------------
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<GiftCertificate> criteriaQuery = builder.createQuery(GiftCertificate.class);
+        Root<GiftCertificate> product = criteriaQuery.from(GiftCertificate.class);
+
+        Predicate where = builder.conjunction();
+
+
+        where = builder.and(where, product.join("tags").in(searchDto.getTagNames()));
+
+
+        criteriaQuery.where(where);
+        List<GiftCertificate> resultList = entityManager.createQuery(criteriaQuery).getResultList();
+
+
+//        Query query = entityManager.createQuery(
+//                "select gc from GiftCertificate gc " +
+//                        "inner join gc.tags tag where tag.name in :requiredTagsNames " +
+//                        "and gc.name like :name " +
+//                        "and gc.description like :description "
+//                , GiftCertificate.class)
+//                .setParameter("requiredTagsNames", searchDto.getTagNames())
+//                .setParameter("name", "%" + searchDto.getName() + "%")
+//                .setParameter("description", "%" + searchDto.getDescription() + "%")
+//                ;
+        return null;
     }
 
     /**

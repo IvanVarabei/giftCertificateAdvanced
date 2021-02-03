@@ -48,7 +48,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     public CustomPage<GiftCertificateDto> getPaginated(SearchCertificateDto searchDto) {
         int size = searchDto.getPageRequest().getSize();
         int page = searchDto.getPageRequest().getPage();
-        int totalCertificateAmount = giftCertificateRepository.countAll(searchDto);
+        int totalCertificateAmount = 3;//giftCertificateRepository.countAll(searchDto);
         int lastPage = (totalCertificateAmount + size - 1) / size - 1;
         if (page > lastPage) {
             throw new ResourceNotFoundException(String.format(ErrorMessage.PAGE_NOT_FOUND, size, page, lastPage));
