@@ -1,6 +1,7 @@
 package com.epam.esm.entity;
 
 import lombok.*;
+import org.hibernate.envers.Audited;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -14,6 +15,7 @@ import java.util.Set;
 @NoArgsConstructor
 @EqualsAndHashCode(exclude = "tags")
 @ToString(exclude = "tags")
+@Audited
 public class GiftCertificate {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "default_generator")

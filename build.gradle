@@ -35,6 +35,7 @@ subprojects {
         // Hibernate
         compileOnly 'org.hibernate:hibernate-jpamodelgen'
         annotationProcessor('org.hibernate:hibernate-jpamodelgen')
+        compile 'org.hibernate:hibernate-envers'
         runtimeOnly 'org.postgresql:postgresql'
 
         // Spring
