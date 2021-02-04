@@ -31,7 +31,7 @@ public class UserServiceImpl implements UserService {
             throw new ResourceNotFoundException(String.format(ErrorMessage.PAGE_NOT_FOUND, size, page, lastPage));
         }
         int offset = size * page;
-        List<User> foundUsers = userRepository.findAllPaginated(offset, size);
+        List<User> foundUsers = userRepository.findPaginated(offset, size);
         return new CustomPage<>(foundUsers.stream().map(userConverter::toDTO).collect(Collectors.toList()),
                 pageRequest, totalUserAmount);
     }

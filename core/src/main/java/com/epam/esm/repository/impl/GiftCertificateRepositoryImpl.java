@@ -3,9 +3,9 @@ package com.epam.esm.repository.impl;
 import com.epam.esm.config.TimeZoneConfig;
 import com.epam.esm.dto.SearchCertificateDto;
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.repository.GenericRepository;
 import com.epam.esm.repository.GiftCertificateRepository;
 import com.epam.esm.util.DateTimeUtil;
-import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
@@ -16,13 +16,12 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static com.epam.esm.dto.search.SortOrder.DESC;
 
 @Repository
-@RequiredArgsConstructor
-public class GiftCertificateRepositoryImpl implements GiftCertificateRepository {
+public class GiftCertificateRepositoryImpl extends GenericRepository<GiftCertificate>
+        implements GiftCertificateRepository {
     @PersistenceContext
     private final EntityManager entityManager;
 
@@ -46,14 +45,9 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
 
     private static final String BLANK = " ";
 
-    @Override
-    public GiftCertificate save(GiftCertificate giftCertificate) {
-        LocalDateTime createdDate = DateTimeUtil
-                .toZone(giftCertificate.getCreatedDate(), TimeZoneConfig.DATABASE_ZONE, ZoneId.systemDefault());
-        giftCertificate.setCreatedDate(createdDate);
-        giftCertificate.setUpdatedDate(createdDate);
-        entityManager.persist(giftCertificate);
-        return giftCertificate;
+    public GiftCertificateRepositoryImpl(EntityManager entityManager) {
+        super(entityManager, GiftCertificate.class);
+        this.entityManager = entityManager;
     }
 
     /**
@@ -126,29 +120,11 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
     }
 
     @Override
-    public Optional<GiftCertificate> findById(Long certificateId) {
-        return Optional.ofNullable(entityManager.find(GiftCertificate.class, certificateId));
-    }
-
-    @Override
-    public void update(GiftCertificate giftCertificate) {
-        LocalDateTime updatedDate = DateTimeUtil // todo better move to service
-                .toZone(giftCertificate.getUpdatedDate(), TimeZoneConfig.DATABASE_ZONE, ZoneId.systemDefault());
-        giftCertificate.setUpdatedDate(updatedDate);
-        entityManager.merge(giftCertificate);
-    }
-
-    @Override
     public void updatePrice(GiftCertificate giftCertificate) {
         LocalDateTime updatedDate = DateTimeUtil
                 .toZone(giftCertificate.getUpdatedDate(), TimeZoneConfig.DATABASE_ZONE, ZoneId.systemDefault());
         giftCertificate.setUpdatedDate(updatedDate);
         entityManager.merge(giftCertificate);
-    }
-
-    @Override
-    public void delete(GiftCertificate giftCertificate) {
-        entityManager.remove(giftCertificate);
     }
 
     /**
@@ -165,6 +141,7 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
      *                     and name ilike '%name_fragment%'
      *                     and description ilike '%description_fragment%'
      */
+    @SuppressWarnings("unchecked")
     private StringBuilder generateSearchQuery(SearchCertificateDto searchDto, String tableColumns, List queryParams) {
         StringBuilder sb = new StringBuilder(tableColumns);
         List<String> tags = searchDto.getTagNames();

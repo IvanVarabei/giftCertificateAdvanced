@@ -32,14 +32,8 @@ public class TagRepositoryImpl extends GenericRepository<Tag> implements TagRepo
                     "limit 1";
 
     public TagRepositoryImpl(EntityManager entityManager) {
-        super(entityManager);
+        super(entityManager, Tag.class);
         this.entityManager = entityManager;
-    }
-
-    @Override
-    public Tag save(Tag tag) {
-        entityManager.persist(tag);
-        return tag;
     }
 
     @Override
@@ -54,11 +48,6 @@ public class TagRepositoryImpl extends GenericRepository<Tag> implements TagRepo
     @Override
     public Long countAll() {
         return entityManager.createQuery("select count(id) from Tag ", Long.class).getSingleResult();
-    }
-
-    @Override
-    public Optional<Tag> findById(Long tagId) {
-        return Optional.ofNullable(entityManager.find(Tag.class, tagId));
     }
 
     @Override

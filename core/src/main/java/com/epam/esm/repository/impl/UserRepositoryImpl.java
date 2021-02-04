@@ -17,7 +17,7 @@ public class UserRepositoryImpl implements UserRepository {
     private final EntityManager entityManager;
 
     @Override
-    public List<User> findAllPaginated(Integer offset, Integer limit) {
+    public List<User> findPaginated(Integer offset, Integer limit) {
         return entityManager
                 .createQuery("from User", User.class)
                 .setFirstResult(offset)
