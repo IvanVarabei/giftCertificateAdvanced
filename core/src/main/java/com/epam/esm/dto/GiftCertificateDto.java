@@ -18,7 +18,7 @@ public class GiftCertificateDto extends RepresentationModel<GiftCertificateDto> 
     @Min(1)
     private Long id;
     @NotBlank
-    @Pattern(regexp = "[\\w\\s]{2,64}")
+    @Pattern(regexp = "[\\w\\s'`]{2,64}")
     private String name;
     @NotBlank
     @Pattern(regexp = ".{2,512}")

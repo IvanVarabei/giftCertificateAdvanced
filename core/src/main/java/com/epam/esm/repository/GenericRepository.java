@@ -10,12 +10,12 @@ public class GenericRepository<T> implements Repository<T> {
     }
 
     @Override
-    public void update(T t) {
-        entityManager.merge(t);
+    public T update(T t) {
+        return entityManager.merge(t);
     }
 
     @Override
     public void delete(T t) {
-        entityManager.remove(t);
+        entityManager.remove(entityManager.contains(t) ? t : entityManager.merge(t));
     }
 }

@@ -72,7 +72,7 @@ public class TagController {
     @GetMapping("/{tagId}")
     public ResponseEntity<TagDto> getTagById(@PathVariable("tagId") @Min(1) Long tagId) {
         TagDto tagDto = tagService.getTagById(tagId);
-        // dtoHateoas.attachHateoas(tagDto);
+        hateoasService.attachHateoas(tagDto);
         return ResponseEntity.ok().body(tagDto);
     }
 

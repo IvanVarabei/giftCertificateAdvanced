@@ -11,7 +11,7 @@ public interface GiftCertificateRepository {
 
     List<GiftCertificate> findPaginated(SearchCertificateDto searchDto);
 
-    Integer countAll(SearchCertificateDto searchDto);
+    Long countAll(SearchCertificateDto searchDto);
 
     Optional<GiftCertificate> findById(Long certificateId);
 

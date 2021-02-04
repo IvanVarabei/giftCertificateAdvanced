@@ -1,14 +1,19 @@
 package com.epam.esm.entity;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+
+import javax.persistence.*;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
-public class User extends BaseEntity {
+@Entity
+@Table(name = "\"user\"")
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "default_generator")
+    private Long id;
+    @Column(unique = true)
     private String username;
     private String password;
+    @Column(unique = true)
     private String email;
 }

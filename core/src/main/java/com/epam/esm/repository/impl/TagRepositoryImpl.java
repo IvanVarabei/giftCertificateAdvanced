@@ -3,8 +3,6 @@ package com.epam.esm.repository.impl;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.repository.GenericRepository;
 import com.epam.esm.repository.TagRepository;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -14,13 +12,8 @@ import java.util.Optional;
 
 @Repository
 public class TagRepositoryImpl extends GenericRepository<Tag> implements TagRepository {
-    private final JdbcTemplate jdbcTemplate;
-    private final RowMapper<Tag> tagMapper;
     @PersistenceContext
     private final EntityManager entityManager;
-
-    private static final String READ_TAGS_BY_CERTIFICATE_ID =
-            "SELECT id, name FROM tag JOIN certificate_tag ON tag.id = tag_id WHERE gift_certificate_id = ?";
 
     private static final String READ_MOST_COMMON_TAG_OF_USER_WITH_THE_HIGHEST_COST_OF_ALL_ORDERS =
             "select t.id, t.name " +
@@ -38,20 +31,13 @@ public class TagRepositoryImpl extends GenericRepository<Tag> implements TagRepo
                     "order by sum(quantity) desc " +
                     "limit 1";
 
-    private static final String DELETE_TAG = "delete from tag where id = ?";
-
-    private static final String COUNT_TAGS = "select count(id) from tag";
-
-    public TagRepositoryImpl(EntityManager entityManager, JdbcTemplate jdbcTemplate, RowMapper<Tag> tagMapper, EntityManager entityManager1) {
+    public TagRepositoryImpl(EntityManager entityManager) {
         super(entityManager);
-        this.jdbcTemplate = jdbcTemplate;
-        this.tagMapper = tagMapper;
-        this.entityManager = entityManager1;
+        this.entityManager = entityManager;
     }
 
     @Override
     public Tag save(Tag tag) {
-        tag.setId(null);
         entityManager.persist(tag);
         return tag;
     }
@@ -76,21 +62,10 @@ public class TagRepositoryImpl extends GenericRepository<Tag> implements TagRepo
     }
 
     @Override
-    public Optional<Tag> findByName(String name) {
-        return entityManager.createQuery("from Tag t where t.name=:name", Tag.class)
-                .setParameter("name", name)
-                .getResultStream().findAny();
-    }
-
-    @Override
-    public List<Tag> getTagsByCertificateId(Long certificateId) {
-        return jdbcTemplate.query(READ_TAGS_BY_CERTIFICATE_ID, tagMapper, certificateId);
-    }
-
-    @Override
+    @SuppressWarnings("unchecked")
     public Optional<Tag> getPrevalentTagOfMostProfitableUser() {
-        return Optional.ofNullable((Tag) entityManager.createNativeQuery(
+        return entityManager.createNativeQuery(
                 READ_MOST_COMMON_TAG_OF_USER_WITH_THE_HIGHEST_COST_OF_ALL_ORDERS, Tag.class)
-                .getSingleResult());
+                .getResultList().stream().findAny();
     }
 }

@@ -29,11 +29,8 @@ public class UserController {
     private final HateoasService hateoasService;
 
     @GetMapping
-    public CustomPage<UserDto> getUsers(
-            @Valid CustomPageable pageRequest,
-            UriComponentsBuilder uriBuilder,
-            HttpServletRequest request
-    ) {
+    public CustomPage<UserDto> getUsers(@Valid CustomPageable pageRequest, UriComponentsBuilder uriBuilder,
+                                        HttpServletRequest request) {
         CustomPage<UserDto> users = userService.getPaginated(pageRequest);
         users.getContent().forEach(hateoasService::attachHateoas);
         uriBuilder.path(request.getRequestURI());

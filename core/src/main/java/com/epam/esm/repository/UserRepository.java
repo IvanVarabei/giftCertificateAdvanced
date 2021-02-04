@@ -8,7 +8,7 @@ import java.util.Optional;
 public interface UserRepository {
     List<User> findAllPaginated(Integer offset, Integer limit);
 
-    Integer countAll();
+    Long countAll();
 
     Optional<User> findById(Long userId);
 }

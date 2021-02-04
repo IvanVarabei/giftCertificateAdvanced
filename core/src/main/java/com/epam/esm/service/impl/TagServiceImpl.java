@@ -26,6 +26,7 @@ public class TagServiceImpl implements TagService {
     @Transactional
     public TagDto createTag(TagDto tagDto) {
         Tag tag = tagConverter.toEntity(tagDto);
+        tag.setId(null);
         return tagConverter.toDTO(tagRepository.save(tag));
     }
 
@@ -51,12 +52,13 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
+    @Transactional
     public TagDto updateTag(TagDto tagDto) {
         Long tagId = tagDto.getId();
         Tag existed = tagRepository.findById(tagId).orElseThrow(() ->
                 new ResourceNotFoundException(String.format(ErrorMessage.RESOURCE_NOT_FOUND, tagId)));
         existed.setName(tagDto.getName());
-        tagRepository.update(existed);
+        existed = tagRepository.update(existed);
         return tagConverter.toDTO(existed);
     }
 

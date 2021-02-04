@@ -49,15 +49,15 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     public CustomPage<GiftCertificateDto> getPaginated(SearchCertificateDto searchDto) {
         int size = searchDto.getPageRequest().getSize();
         int page = searchDto.getPageRequest().getPage();
-        int totalCertificateAmount = giftCertificateRepository.countAll(searchDto);
-        int lastPage = (totalCertificateAmount + size - 1) / size - 1;
+        long totalCertificateAmount = giftCertificateRepository.countAll(searchDto);
+        long lastPage = (totalCertificateAmount + size - 1) / size - 1;
         if (page > lastPage) {
             throw new ResourceNotFoundException(String.format(ErrorMessage.PAGE_NOT_FOUND, size, page, lastPage));
         }
         List<GiftCertificate> certificates = giftCertificateRepository.findPaginated(searchDto);
         certificates.forEach(c -> adjustDateTimeAccordingToClientTimeZone(c, TimeZoneConfig.CLIENT_ZONE));
         return new CustomPage<>(certificates.stream().map(certificateConverter::toDTO).collect(Collectors.toList()),
-                searchDto.getPageRequest(), (long) totalCertificateAmount);
+                searchDto.getPageRequest(), totalCertificateAmount);
     }
 
     @Override
@@ -73,14 +73,14 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     public GiftCertificateDto updateCertificate(GiftCertificateDto updateDto) {
         GiftCertificate existed = giftCertificateRepository
                 .findById(updateDto.getId())
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(ErrorMessage.RESOURCE_NOT_FOUND, updateDto.getId())));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        String.format(ErrorMessage.RESOURCE_NOT_FOUND, updateDto.getId())));
         GiftCertificate update = certificateConverter.toEntity(updateDto);
         existed.setName(update.getName());
         existed.setPrice(update.getPrice());
         existed.setDescription(update.getDescription());
         existed.setDuration(update.getDuration());
         existed.setUpdatedDate(LocalDateTime.now(TimeZoneConfig.DATABASE_ZONE));
-        existed.getTags().clear();
         existed.setTags(update.getTags());
         giftCertificateRepository.update(existed);
         adjustDateTimeAccordingToClientTimeZone(existed, TimeZoneConfig.CLIENT_ZONE);
@@ -100,7 +100,8 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     public GiftCertificateDto updatePrice(PriceDto priceDto) {
         GiftCertificate existed = giftCertificateRepository
                 .findById(priceDto.getId())
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(ErrorMessage.RESOURCE_NOT_FOUND, priceDto.getId())));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        String.format(ErrorMessage.RESOURCE_NOT_FOUND, priceDto.getId())));
         existed.setPrice(priceDto.getPrice());
         existed.setUpdatedDate(LocalDateTime.now(TimeZoneConfig.DATABASE_ZONE));
         giftCertificateRepository.updatePrice(existed);

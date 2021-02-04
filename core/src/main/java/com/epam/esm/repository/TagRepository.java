@@ -14,13 +14,5 @@ public interface TagRepository extends Repository<Tag> {
 
     Optional<Tag> findById(Long tagId);
 
-    Optional<Tag> findByName(String name);
-
-    List<Tag> getTagsByCertificateId(Long id);
-
-//    void bindWithCertificate(Long certificateId, Long tagId);
-//
-//    void unbindTagsFromCertificate(Long certificateId);
-
     Optional<Tag> getPrevalentTagOfMostProfitableUser();
 }

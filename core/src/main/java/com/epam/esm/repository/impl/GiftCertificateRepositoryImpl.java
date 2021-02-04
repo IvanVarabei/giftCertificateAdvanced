@@ -110,9 +110,11 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
      * HAVING COUNT(tag_id) = 2)
      * and name ilike '%name_fragment%'
      * and description ilike '%description_fragment%'
+     *
+     * @return
      */
     @Override
-    public Integer countAll(SearchCertificateDto searchDto) {
+    public Long countAll(SearchCertificateDto searchDto) {
         List queryParams = new ArrayList<>();
         StringBuilder sb = generateSearchQuery(searchDto, COUNT_CERTIFICATES_BASE, queryParams);
         Query query = entityManager.createNativeQuery(sb.toString());
@@ -120,7 +122,7 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
             Object o = queryParams.get(i);
             query.setParameter(i + 1, o);
         }
-        return ((Number) query.getSingleResult()).intValue();
+        return ((Number) query.getSingleResult()).longValue();
     }
 
     @Override

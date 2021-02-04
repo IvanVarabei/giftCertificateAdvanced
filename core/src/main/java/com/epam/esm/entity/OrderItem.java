@@ -1,22 +1,18 @@
 package com.epam.esm.entity;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
 
-import java.math.BigDecimal;
-import java.util.List;
+import javax.persistence.*;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
-public class OrderItem extends BaseEntity {
+@Entity(name = "OrderItem")
+@Table(name = "\"order_item\"")
+public class OrderItem {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "default_generator")
     private Long id;
-    private String name;
-    private String description;
-    private BigDecimal price;
-    private Integer duration;
-    private List<Tag> tags;
     private Integer quantity;
-    private Long certificateId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "gift_certificate_id")
+    private GiftCertificate certificate;
 }

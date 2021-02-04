@@ -54,8 +54,6 @@ public class HateoasService {
 
     public void attachHateoas(OrderDto orderDto) {
         attachHateoas(orderDto.getUser());
-        orderDto.getOrderItems()
-                .forEach(orderItemDto -> orderItemDto.getTags()
-                        .forEach(this::attachHateoas));
+        orderDto.getOrderItems().forEach(orderItemDto -> attachHateoas(orderItemDto.getCertificate()));
     }
 }

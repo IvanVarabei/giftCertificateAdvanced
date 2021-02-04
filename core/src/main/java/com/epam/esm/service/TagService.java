@@ -15,11 +15,5 @@ public interface TagService {
 
     void deleteTag(Long tagId);
 
-//    Set<Tag> bindTags(GiftCertificate certificate, Set<Tag> tags);
-//
-//    void unbindTagsFromCertificate(Long id);
-
-//    List<Tag> getTagsByCertificateId(Long certificateId);
-
     TagDto getPrevalentTagOfMostProfitableUser();
 }
