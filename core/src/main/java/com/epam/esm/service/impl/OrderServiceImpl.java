@@ -53,7 +53,6 @@ public class OrderServiceImpl implements OrderService {
                 new ResourceNotFoundException(String.format(ErrorMessage.RESOURCE_NOT_FOUND, userId)));
         List<Order> orders = orderRepository.findOrdersByUserId(userId);
         return orders.stream()
-                .map(o -> adjustDateTimeAccordingToClientTimeZone(o, TimeZoneConfig.CLIENT_ZONE))
                 .map(orderConverter::toDTO)
                 .collect(Collectors.toMap(OrderDto::getId, o -> o));
     }
@@ -81,9 +80,8 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.delete(order);
     }
 
-    private Order adjustDateTimeAccordingToClientTimeZone(Order order, ZoneId toZone) {
+    private void adjustDateTimeAccordingToClientTimeZone(Order order, ZoneId toZone) {
         ZoneId repositoryZone = TimeZoneConfig.DATABASE_ZONE;
         order.setCreatedDate(DateTimeUtil.toZone(order.getCreatedDate(), repositoryZone, toZone));
-        return order;
     }
 }

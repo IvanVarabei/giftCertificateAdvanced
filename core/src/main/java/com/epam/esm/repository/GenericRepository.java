@@ -14,8 +14,6 @@ public class GenericRepository<T> implements CustomCrudRepository<T> {
 
     @Override
     public T save(T t) {
-//        LocalDateTime cratedDate;
-//        cratedDate = DateTimeUtil.toZone(order.getCreatedDate(), TimeZoneConfig.DATABASE_ZONE, ZoneId.systemDefault());
         entityManager.persist(t);
         return t;
     }

@@ -1,19 +1,15 @@
 package com.epam.esm.repository.impl;
 
-import com.epam.esm.config.TimeZoneConfig;
 import com.epam.esm.dto.SearchCertificateDto;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.repository.GenericRepository;
 import com.epam.esm.repository.GiftCertificateRepository;
-import com.epam.esm.util.DateTimeUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -121,9 +117,6 @@ public class GiftCertificateRepositoryImpl extends GenericRepository<GiftCertifi
 
     @Override
     public void updatePrice(GiftCertificate giftCertificate) {
-        LocalDateTime updatedDate = DateTimeUtil
-                .toZone(giftCertificate.getUpdatedDate(), TimeZoneConfig.DATABASE_ZONE, ZoneId.systemDefault());
-        giftCertificate.setUpdatedDate(updatedDate);
         entityManager.merge(giftCertificate);
     }
 
