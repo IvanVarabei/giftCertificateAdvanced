@@ -12,9 +12,6 @@ import java.util.Optional;
 
 @Repository
 public class TagRepositoryImpl extends GenericRepository<Tag> implements TagRepository {
-    @PersistenceContext
-    private final EntityManager entityManager;
-
     private static final String READ_MOST_COMMON_TAG_OF_USER_WITH_THE_HIGHEST_COST_OF_ALL_ORDERS =
             "select t.id, t.name " +
                     "from \"order\" " +
@@ -30,6 +27,9 @@ public class TagRepositoryImpl extends GenericRepository<Tag> implements TagRepo
                     "group by t.id, t.name " +
                     "order by sum(quantity) desc " +
                     "limit 1";
+
+    @PersistenceContext
+    private final EntityManager entityManager;
 
     public TagRepositoryImpl(EntityManager entityManager) {
         super(entityManager, Tag.class);

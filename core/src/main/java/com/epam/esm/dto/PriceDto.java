@@ -13,6 +13,7 @@ public class PriceDto {
     @Min(1)
     @NotNull
     private Long id;
+
     @NotNull
     @DecimalMin(value = "0.0", inclusive = false)
     @Digits(integer = 7, fraction = 2)

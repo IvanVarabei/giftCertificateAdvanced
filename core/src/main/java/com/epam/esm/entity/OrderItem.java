@@ -11,7 +11,9 @@ public class OrderItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "default_generator")
     private Long id;
+
     private Integer quantity;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "gift_certificate_id")
     private GiftCertificate certificate;

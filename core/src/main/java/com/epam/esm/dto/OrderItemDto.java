@@ -13,8 +13,10 @@ import javax.validation.constraints.Positive;
 @NoArgsConstructor
 public class OrderItemDto {
     private Long id;
+
     @Valid
     private GiftCertificateDto certificate;
+
     @NotNull
     @Positive
     private Integer quantity;

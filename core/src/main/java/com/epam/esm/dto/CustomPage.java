@@ -6,8 +6,8 @@ import org.springframework.hateoas.RepresentationModel;
 
 import java.util.Collection;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class CustomPage<T> extends RepresentationModel<CustomPage<?>> {
     private Collection<T> content;
     private Integer size;

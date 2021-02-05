@@ -16,6 +16,7 @@ public class Tag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "default_generator")
     private Long id;
+
     @Column(unique = true)
     private String name;
 }

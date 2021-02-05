@@ -21,16 +21,20 @@ public class GiftCertificate {
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "default_generator")
     @SequenceGenerator(name = "default_generator", sequenceName = "gift_certificate_id_seq", allocationSize = 1)
     private Long id;
+
     @Column(unique = true)
     private String name;
+
     private String description;
     private BigDecimal price;
     private Integer duration;
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST,
-            CascadeType.MERGE,
-            CascadeType.REFRESH})
+
+    @ManyToMany(
+            fetch = FetchType.LAZY,
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}
+    )
     @JoinTable(
             name = "certificate_tag",
             joinColumns = {@JoinColumn(name = "gift_certificate_id")},

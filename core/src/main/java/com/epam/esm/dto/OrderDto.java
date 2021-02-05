@@ -19,11 +19,14 @@ import java.util.List;
 public class OrderDto {
     @Min(1)
     private Long id;
+
     @NotNull
     @Valid
     private UserDto user;
+
     private List<@Valid OrderItemDto> orderItems = new ArrayList<>();
     private BigDecimal cost;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdDate;
 }

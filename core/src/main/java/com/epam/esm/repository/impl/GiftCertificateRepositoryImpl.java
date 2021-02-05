@@ -18,9 +18,6 @@ import static com.epam.esm.dto.search.SortOrder.DESC;
 @Repository
 public class GiftCertificateRepositoryImpl extends GenericRepository<GiftCertificate>
         implements GiftCertificateRepository {
-    @PersistenceContext
-    private final EntityManager entityManager;
-
     private static final String READ_CERTIFICATES_BASE =
             "select id, name, description, price, duration, created_date, updated_date from gift_certificate " +
                     "where true ";
@@ -40,6 +37,9 @@ public class GiftCertificateRepositoryImpl extends GenericRepository<GiftCertifi
     private static final String COUNT_CERTIFICATES_BASE = "select count(id) from gift_certificate where true ";
 
     private static final String BLANK = " ";
+
+    @PersistenceContext
+    private final EntityManager entityManager;
 
     public GiftCertificateRepositoryImpl(EntityManager entityManager) {
         super(entityManager, GiftCertificate.class);

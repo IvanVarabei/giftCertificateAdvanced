@@ -50,3 +50,56 @@ create table order_item
     order_id            integer not null references "order" on delete cascade,
     gift_certificate_id integer not null references gift_certificate
 );
+
+--AUDIT TABLES
+create table revinfo
+(
+    rev      integer not null primary key,
+    revtstmp bigint
+);
+
+create table certificate_tag_aud
+(
+    rev                 integer not null references revinfo,
+    gift_certificate_id bigint  not null,
+    tag_id              bigint  not null,
+    revtype             smallint,
+    constraint certificate_tag_aud_pkey
+        primary key (rev, gift_certificate_id, tag_id)
+);
+
+create table gift_certificate_aud
+(
+    id           bigint  not null,
+    rev          integer not null references revinfo,
+    revtype      smallint,
+    created_date timestamp,
+    description  varchar(255),
+    duration     integer,
+    name         varchar(255),
+    price        numeric(19, 2),
+    updated_date timestamp,
+    constraint gift_certificate_aud_pkey
+        primary key (id, rev)
+);
+
+create table order_aud
+(
+    id           bigint  not null,
+    rev          integer not null references revinfo,
+    revtype      smallint,
+    cost         numeric(16, 2),
+    created_date timestamp,
+    constraint order_aud_pkey
+        primary key (id, rev)
+);
+
+create table tag_aud
+(
+    id      bigint  not null,
+    rev     integer not null references revinfo,
+    revtype smallint,
+    name    varchar(255),
+    constraint tag_aud_pkey
+        primary key (id, rev)
+);

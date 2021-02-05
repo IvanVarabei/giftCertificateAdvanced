@@ -18,7 +18,7 @@ subprojects {
         options.encoding = 'UTF-8'
     }
 
-    compileJava.dependsOn clean
+    compileJava.dependsOn clean // todo delete
 
     repositories {
         mavenCentral()
