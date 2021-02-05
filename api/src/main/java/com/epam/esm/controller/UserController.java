@@ -28,6 +28,14 @@ public class UserController {
     private final PaginationHateoas<UserDto> paginationHateoas;
     private final HateoasService hateoasService;
 
+    /**
+     * The method provides all existing users paginated.
+     *
+     * @param pageRequest created automatically from uri params (page, size).
+     * @param uriBuilder  is necessary for creating hateoas pagination.
+     * @param request     is necessary for creating hateoas pagination.
+     * @return Response entity containing page object. Response code 200.
+     */
     @GetMapping
     public CustomPage<UserDto> getUsers(@Valid CustomPageable pageRequest, UriComponentsBuilder uriBuilder,
                                         HttpServletRequest request) {
@@ -39,6 +47,12 @@ public class UserController {
         return users;
     }
 
+    /**
+     * The method provide a user having passed id. If it's absent error will be returned(404).
+     *
+     * @param userId should be positive integer number.
+     * @return TagDto. Response code 200.
+     */
     @GetMapping("/{userId}")
     public ResponseEntity<UserDto> getUserById(@PathVariable("userId") @Min(1) Long userId) {
         UserDto userDto = userService.getUserById(userId);

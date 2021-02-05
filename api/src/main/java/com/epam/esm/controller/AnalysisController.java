@@ -16,6 +16,11 @@ public class AnalysisController {
     private final TagService tagService;
     private final HateoasService hateoasService;
 
+    /**
+     * The method finds the most widely used tag of a user with the highest cost of all orders.
+     *
+     * @return found tag
+     */
     @GetMapping
     public ResponseEntity<TagDto> getPrevalentTagOfMostProfitableUser() {
         TagDto tagDto = tagService.getPrevalentTagOfMostProfitableUser();

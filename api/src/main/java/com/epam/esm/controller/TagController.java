@@ -18,10 +18,6 @@ import javax.validation.constraints.Min;
 
 import static org.springframework.http.HttpStatus.CREATED;
 
-
-/**
- * The class provides operations having to do with {@link com.epam.esm.entity.Tag}
- */
 @RestController
 @RequestMapping("/api/tags")
 @RequiredArgsConstructor
@@ -45,9 +41,12 @@ public class TagController {
     }
 
     /**
-     * The method provides all existing tags.
+     * The method provides all existing tags paginated.
      *
-     * @return list of {@link TagDto}. Response code 200.
+     * @param pageRequest created automatically from uri params (page, size).
+     * @param uriBuilder  is necessary for creating hateoas pagination.
+     * @param request     is necessary for creating hateoas pagination.
+     * @return Response entity containing page object. Response code 200.
      */
     @GetMapping
     public CustomPage<TagDto> getTags(

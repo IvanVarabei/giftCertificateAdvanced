@@ -19,7 +19,6 @@ import java.util.Set;
 public class GiftCertificate {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "default_generator")
-    @SequenceGenerator(name = "default_generator", sequenceName = "gift_certificate_id_seq", allocationSize = 1)
     private Long id;
 
     @Column(unique = true)

@@ -20,9 +20,6 @@ import java.util.List;
 
 import static org.springframework.http.HttpStatus.CREATED;
 
-/**
- * The class provides operations having to do with {@link com.epam.esm.entity.GiftCertificate}
- */
 @RestController
 @RequestMapping("/api/certificates")
 @RequiredArgsConstructor
@@ -33,7 +30,7 @@ public class CertificateController {
     private final HateoasService hateoasService;
 
     /**
-     * The method allows creating {@link com.epam.esm.entity.GiftCertificate}.
+     * The method allows {@link com.epam.esm.entity.GiftCertificate} creating.
      *
      * @param giftCertificateDto should be valid according to {@link GiftCertificateDto}. Otherwise, certificate won't
      *                           be created. Error will be returned(400).
@@ -48,7 +45,7 @@ public class CertificateController {
     }
 
     /**
-     * The method allows a client to get certificates with tags. All params are optional and can be used in conjunction:
+     * The method allows a client to get certificates paginated. All params are optional and can be used in conjunction:
      * <ul>
      *  <li>by tag name</li>
      *  <li>search by part of name/description</li>
@@ -60,7 +57,10 @@ public class CertificateController {
      * @param description or part of gift certificate's description.
      * @param sortByField can be either name or last updated date.
      * @param sortOrder   either ascending or descending.
-     * @return Response entity containing the list of certificates. Response code 200.
+     * @param pageRequest created automatically from uri params (page, size).
+     * @param uriBuilder  is necessary for creating hateoas pagination.
+     * @param request     is necessary for creating hateoas pagination.
+     * @return Response entity containing page object. Response code 200.
      */
     @GetMapping
     public CustomPage<GiftCertificateDto> getCertificates(
@@ -117,6 +117,12 @@ public class CertificateController {
         return ResponseEntity.ok().body(certificateDto);
     }
 
+    /**
+     * Provides ability to update only price using lightweight dto. So client shouldn't send the whole object.
+     *
+     * @param priceDto contains certificateId and new price.
+     * @return the whole certificate object having all fields populated.
+     */
     @PatchMapping
     public ResponseEntity<GiftCertificateDto> updatePrice(@Valid @RequestBody PriceDto priceDto) {
         GiftCertificateDto certificateDto = giftCertificateService.updatePrice(priceDto);
