@@ -90,14 +90,6 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     @Override
     @Transactional
-    public void deleteCertificate(Long certificateId) {
-        GiftCertificate certificate = giftCertificateRepository.findById(certificateId).orElseThrow(() ->
-                new ResourceNotFoundException(String.format(ErrorMessage.RESOURCE_NOT_FOUND, certificateId)));
-        giftCertificateRepository.delete(certificate);
-    }
-
-    @Override
-    @Transactional
     public GiftCertificateDto updatePrice(PriceDto priceDto) {
         GiftCertificate existed = giftCertificateRepository
                 .findById(priceDto.getId())
@@ -110,6 +102,14 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         updatedDate = DateTimeUtil.toZone(updatedDate, TimeZoneConfig.DATABASE_ZONE, TimeZoneConfig.CLIENT_ZONE);
         existed.setUpdatedDate(updatedDate);
         return certificateConverter.toDTO(existed);
+    }
+
+    @Override
+    @Transactional
+    public void deleteCertificate(Long certificateId) {
+        GiftCertificate certificate = giftCertificateRepository.findById(certificateId).orElseThrow(() ->
+                new ResourceNotFoundException(String.format(ErrorMessage.RESOURCE_NOT_FOUND, certificateId)));
+        giftCertificateRepository.delete(certificate);
     }
 
     private void adjustDateTimeAccordingToClientTimeZone(GiftCertificate certificate, ZoneId toZone) {
