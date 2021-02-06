@@ -16,5 +16,7 @@ core/out/
 core/src/main/generated/
 core/src/test/generated_test/
 
+dml/
+
 core/catalina.home_IS_UNDEFINED/
 catalina.home_IS_UNDEFINED/
