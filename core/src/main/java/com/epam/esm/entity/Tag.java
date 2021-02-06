@@ -5,7 +5,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.envers.Audited;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 
 @Data
 @Entity
@@ -14,9 +17,8 @@ import javax.persistence.*;
 @Audited
 public class Tag {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "default_generator")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
     private String name;
 }

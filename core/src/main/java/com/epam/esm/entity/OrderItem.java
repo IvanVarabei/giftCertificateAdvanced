@@ -5,11 +5,11 @@ import lombok.Data;
 import javax.persistence.*;
 
 @Data
-@Entity(name = "OrderItem")
-@Table(name = "\"order_item\"")
+@Entity
+@Table
 public class OrderItem {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "default_generator")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private Integer quantity;

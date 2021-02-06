@@ -15,7 +15,7 @@ import java.util.List;
 @Audited
 public class Order {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "default_generator")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

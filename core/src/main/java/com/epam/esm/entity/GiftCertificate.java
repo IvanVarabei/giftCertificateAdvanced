@@ -18,12 +18,10 @@ import java.util.Set;
 @Audited
 public class GiftCertificate {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "default_generator")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
     private String name;
-
     private String description;
     private BigDecimal price;
     private Integer duration;
