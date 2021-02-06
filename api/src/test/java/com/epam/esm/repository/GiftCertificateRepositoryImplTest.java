@@ -32,6 +32,7 @@ class GiftCertificateRepositoryImplTest {
         certificate.setPrice(new BigDecimal(100));
         certificate.setDuration(5);
         certificate.setCreatedDate(LocalDateTime.now());
+        certificate.setUpdatedDate(LocalDateTime.now());
         certificateRepository.save(certificate);
 
         Assertions.assertNotNull(certificate.getId());
@@ -74,6 +75,7 @@ class GiftCertificateRepositoryImplTest {
         initialCertificate.setPrice(BigDecimal.ONE);
         initialCertificate.setDuration(2);
         initialCertificate.setCreatedDate(LocalDateTime.now());
+        initialCertificate.setUpdatedDate(LocalDateTime.now());
         Long id = certificateRepository.save(initialCertificate).getId();
 
         GiftCertificate update = new GiftCertificate();
@@ -98,6 +100,7 @@ class GiftCertificateRepositoryImplTest {
         initialCertificate.setPrice(BigDecimal.ONE);
         initialCertificate.setDuration(2);
         initialCertificate.setCreatedDate(LocalDateTime.now());
+        initialCertificate.setUpdatedDate(LocalDateTime.now());
         GiftCertificate savedCertificate = certificateRepository.save(initialCertificate);
 
         certificateRepository.delete(savedCertificate);

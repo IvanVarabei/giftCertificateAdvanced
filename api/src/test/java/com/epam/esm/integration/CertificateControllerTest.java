@@ -106,6 +106,7 @@ class CertificateControllerTest {
         certificate.setPrice(BigDecimal.TEN);
         certificate.setDuration(1);
         certificate.setCreatedDate(LocalDateTime.now());
+        certificate.setUpdatedDate(LocalDateTime.now());
         Long id = certificateRepository.save(certificate).getId();
 
         String responseAsString = mockMvc
@@ -128,6 +129,7 @@ class CertificateControllerTest {
         certificate.setPrice(BigDecimal.TEN);
         certificate.setDuration(1);
         certificate.setCreatedDate(LocalDateTime.now());
+        certificate.setUpdatedDate(LocalDateTime.now());
         Long id = certificateRepository.save(certificate).getId();
 
         GiftCertificateDto certificateDto = new GiftCertificateDto();
@@ -162,6 +164,7 @@ class CertificateControllerTest {
         certificate.setPrice(BigDecimal.TEN);
         certificate.setDuration(1);
         certificate.setCreatedDate(LocalDateTime.now());
+        certificate.setUpdatedDate(LocalDateTime.now());
         Long id = certificateRepository.save(certificate).getId();
 
         mockMvc.perform(delete("/api/certificates/" + id))
