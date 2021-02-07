@@ -1,6 +1,6 @@
 package com.epam.esm.repository;
 
-import com.epam.esm.config.EmbeddedTestConfig;
+import com.epam.esm.dto.CustomPageable;
 import com.epam.esm.dto.SearchCertificateDto;
 import com.epam.esm.dto.search.SortByField;
 import com.epam.esm.dto.search.SortOrder;
@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 
+import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,12 +19,12 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
-@ContextConfiguration(classes = {EmbeddedTestConfig.class})
 class GiftCertificateRepositoryImplTest {
     @Autowired
     GiftCertificateRepository certificateRepository;
 
     @Test
+    @Transactional
     void should_id_not_be_null_when_save() {
         GiftCertificate certificate = new GiftCertificate();
         certificate.setName("name test 11");
@@ -32,6 +32,7 @@ class GiftCertificateRepositoryImplTest {
         certificate.setPrice(new BigDecimal(100));
         certificate.setDuration(5);
         certificate.setCreatedDate(LocalDateTime.now());
+        certificate.setUpdatedDate(LocalDateTime.now());
         certificateRepository.save(certificate);
 
         Assertions.assertNotNull(certificate.getId());
@@ -39,13 +40,14 @@ class GiftCertificateRepositoryImplTest {
 
     @Test
     void should_return_certificates_corresponding_the_search_dto() {
-        SearchCertificateDto searchDto = new SearchCertificateDto(
-                List.of("cheap"),
-                "e",
-                "f",
-                SortByField.NAME,
-                SortOrder.DESC
-        );
+        SearchCertificateDto searchDto = SearchCertificateDto.builder()
+                .pageRequest(new CustomPageable())
+                .tagNames(List.of("cheap"))
+                .name("e")
+                .description("f")
+                .sortByField(SortByField.NAME)
+                .sortOrder(SortOrder.DESC)
+                .build();
 
         List<GiftCertificate> giftCertificateList = certificateRepository.findPaginated(searchDto);
         long actualAmount = giftCertificateList.size();
@@ -65,6 +67,7 @@ class GiftCertificateRepositoryImplTest {
     }
 
     @Test
+    @Transactional
     void should_be_updated_name_after_update() {
         GiftCertificate initialCertificate = new GiftCertificate();
         initialCertificate.setName("initialName");
@@ -72,6 +75,7 @@ class GiftCertificateRepositoryImplTest {
         initialCertificate.setPrice(BigDecimal.ONE);
         initialCertificate.setDuration(2);
         initialCertificate.setCreatedDate(LocalDateTime.now());
+        initialCertificate.setUpdatedDate(LocalDateTime.now());
         Long id = certificateRepository.save(initialCertificate).getId();
 
         GiftCertificate update = new GiftCertificate();
@@ -88,6 +92,7 @@ class GiftCertificateRepositoryImplTest {
     }
 
     @Test
+    @Transactional
     void should_be_empty_optional_after_delete_when_find_by_id() {
         GiftCertificate initialCertificate = new GiftCertificate();
         initialCertificate.setName("testDelete");
@@ -95,10 +100,11 @@ class GiftCertificateRepositoryImplTest {
         initialCertificate.setPrice(BigDecimal.ONE);
         initialCertificate.setDuration(2);
         initialCertificate.setCreatedDate(LocalDateTime.now());
-        Long id = certificateRepository.save(initialCertificate).getId();
+        initialCertificate.setUpdatedDate(LocalDateTime.now());
+        GiftCertificate savedCertificate = certificateRepository.save(initialCertificate);
 
-        certificateRepository.delete(id);
+        certificateRepository.delete(savedCertificate);
 
-        assertEquals(Optional.empty(), certificateRepository.findById(id));
+        assertEquals(Optional.empty(), certificateRepository.findById(savedCertificate.getId()));
     }
 }

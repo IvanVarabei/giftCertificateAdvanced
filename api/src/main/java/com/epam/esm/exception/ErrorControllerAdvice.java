@@ -4,16 +4,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.convert.ConversionFailedException;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.http.HttpStatus;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
@@ -22,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -32,59 +30,21 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class ErrorControllerAdvice {
     /**
-     * Handles following cases:
-     * <ul>
-     *  <li>Enum request parameters don't match enum members</li>
-     *  <li>A path variable can't be parsed to an integer</li>
-     * </ul>
+     * Run if url is not supported (404)
      */
-    @ResponseBody
     @ExceptionHandler
-    public ResponseEntity<ExceptionDto> handle(MethodArgumentTypeMismatchException ex) {
-        String parameterName = ex.getName();
-        String message;
-        if (ex.getCause().getClass().equals(ConversionFailedException.class)) {
-            String enumValues = Arrays.stream(ex.getRequiredType().getEnumConstants())
-                    .map(Object::toString)
-                    .collect(Collectors.joining(", "));
-            message = String.format("Parameter '%s' must be either null or one of the following values: %s",
-                    parameterName, enumValues);
-        } else {
-            message = String.format("Parameter '%s' is wrong. %s", parameterName, ex.getMessage());
-        }
+    public ResponseEntity<ExceptionDto> handle(NoHandlerFoundException ex) {
         ExceptionDto exceptionDto = new ExceptionDto();
-        exceptionDto.setErrorMessage(message);
-        exceptionDto.setErrorCode(400);
+        exceptionDto.setErrorMessage(ex.getMessage());
+        exceptionDto.setErrorCode(NOT_FOUND.value());
         exceptionDto.setTimestamp(LocalDateTime.now());
-        return ResponseEntity.badRequest().body(exceptionDto);
+        return ResponseEntity.status(NOT_FOUND).body(exceptionDto);
     }
 
     /**
-     * Handles errors from @Valid
+     * Handles errors from @Validated
      */
     @ExceptionHandler
-    @ResponseBody
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<List<ExceptionDto>> handle(MethodArgumentNotValidException ex) {
-        List<ExceptionDto> exceptionDtoList = new ArrayList<>();
-        ex.getBindingResult().getAllErrors().forEach(error -> {
-            String errorMessage = error.getDefaultMessage();
-            String fieldName = ((FieldError) error).getField();
-            ExceptionDto exceptionDto = new ExceptionDto();
-            exceptionDto.setErrorMessage(String.format("%s - %s", fieldName, errorMessage));
-            exceptionDto.setErrorCode(400);
-            exceptionDto.setTimestamp(LocalDateTime.now());
-            exceptionDtoList.add(exceptionDto);
-        });
-        return ResponseEntity.badRequest().body(exceptionDtoList);
-    }
-
-    /**
-     * Handle errors from @Validated
-     */
-    @ExceptionHandler
-    @ResponseBody
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<List<ExceptionDto>> handle(ConstraintViolationException ex) {
         List<ExceptionDto> exceptionDtoList = new ArrayList<>();
         ex.getConstraintViolations()
@@ -96,7 +56,7 @@ public class ErrorControllerAdvice {
                     String fullMessage = String.format("%s.%s value '%s' %s", className, property, invalidValue, message);
                     ExceptionDto exceptionDto = new ExceptionDto();
                     exceptionDto.setErrorMessage(fullMessage);
-                    exceptionDto.setErrorCode(400);
+                    exceptionDto.setErrorCode(4001);
                     exceptionDto.setTimestamp(LocalDateTime.now());
                     exceptionDtoList.add(exceptionDto);
                 });
@@ -104,9 +64,72 @@ public class ErrorControllerAdvice {
     }
 
     /**
-     * Handle custom exception ResourceNotFoundException
+     * Handles following cases:
+     * <ul>
+     *  <li>Enum request parameters don't match enum members</li>
+     *  <li>A path variable can't be parsed to an integer</li>
+     * </ul>
      */
-    @ExceptionHandler(ResourceNotFoundException.class)
+    @ExceptionHandler
+    public ResponseEntity<ExceptionDto> handle(MethodArgumentTypeMismatchException ex) {
+        String parameterName = ex.getName();
+        String message;
+        if (ex.getCause().getClass().equals(ConversionFailedException.class)) {
+            String enumValues = Arrays.stream(Objects.requireNonNull(ex.getRequiredType()).getEnumConstants())
+                    .map(Object::toString)
+                    .collect(Collectors.joining(", "));
+            message = String.format("Parameter '%s' must be either null or one of the following values: %s",
+                    parameterName, enumValues);
+        } else {
+            message = String.format("Parameter '%s' is wrong. %s", parameterName, ex.getMessage());
+        }
+        ExceptionDto exceptionDto = new ExceptionDto();
+        exceptionDto.setErrorMessage(message);
+        exceptionDto.setErrorCode(4001);
+        exceptionDto.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.badRequest().body(exceptionDto);
+    }
+
+    /**
+     * Handles errors from @Valid
+     */
+    @ExceptionHandler
+    public ResponseEntity<List<ExceptionDto>> handle(MethodArgumentNotValidException ex) {
+        List<ExceptionDto> exceptionDtoList = new ArrayList<>();
+        ex.getBindingResult().getAllErrors().forEach(error -> {
+            String errorMessage = error.getDefaultMessage();
+            String fieldName = ((FieldError) error).getField();
+            ExceptionDto exceptionDto = new ExceptionDto();
+            exceptionDto.setErrorMessage(String.format("%s - %s", fieldName, errorMessage));
+            exceptionDto.setErrorCode(4001);
+            exceptionDto.setTimestamp(LocalDateTime.now());
+            exceptionDtoList.add(exceptionDto);
+        });
+        return ResponseEntity.badRequest().body(exceptionDtoList);
+    }
+
+    /**
+     * Handles not valid parameters "page", "size" when {@link com.epam.esm.dto.CustomPage} is being created
+     */
+    @ExceptionHandler
+    public ResponseEntity<List<ExceptionDto>> handle(BindException ex) {
+        List<ExceptionDto> exceptionDtoList = new ArrayList<>();
+        ex.getBindingResult().getAllErrors().forEach(error -> {
+            String errorMessage = error.getDefaultMessage();
+            String fieldName = ((FieldError) error).getField();
+            ExceptionDto exceptionDto = new ExceptionDto();
+            exceptionDto.setErrorMessage(String.format("%s - %s", fieldName, errorMessage));
+            exceptionDto.setErrorCode(4001);
+            exceptionDto.setTimestamp(LocalDateTime.now());
+            exceptionDtoList.add(exceptionDto);
+        });
+        return ResponseEntity.badRequest().body(exceptionDtoList);
+    }
+
+    /**
+     * Handles custom exception ResourceNotFoundException
+     */
+    @ExceptionHandler
     public ResponseEntity<ExceptionDto> handle(ResourceNotFoundException ex) {
         ExceptionDto exceptionDto = new ExceptionDto();
         exceptionDto.setErrorMessage(ex.getMessage());
@@ -116,41 +139,28 @@ public class ErrorControllerAdvice {
     }
 
     /**
-     * Run if url is not supported
+     * Handles duplicate key error
      */
-    @ExceptionHandler(NoHandlerFoundException.class)
-    public ResponseEntity<ExceptionDto> handle(NoHandlerFoundException ex) {
+    @ExceptionHandler
+    public ResponseEntity<ExceptionDto> handle(DataIntegrityViolationException ex) {
+        Throwable cause = ex.getCause().getCause();
+        String errorMessage = cause.getLocalizedMessage();
         ExceptionDto exceptionDto = new ExceptionDto();
-        exceptionDto.setErrorMessage(ex.getMessage());
-        exceptionDto.setErrorCode(NOT_FOUND.value());
-        exceptionDto.setTimestamp(LocalDateTime.now());
-        return ResponseEntity.status(NOT_FOUND).body(exceptionDto);
-    }
-
-    @ExceptionHandler(DuplicateKeyException.class)
-    public ResponseEntity<ExceptionDto> handle(DuplicateKeyException ex) {
-        ExceptionDto exceptionDto = new ExceptionDto();
-        exceptionDto.setErrorMessage(ex.getLocalizedMessage());
-        exceptionDto.setErrorCode(40901);
-        exceptionDto.setTimestamp(LocalDateTime.now());
-        return ResponseEntity.status(409).body(exceptionDto);
-    }
-
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ExceptionDto> handle(HttpMessageNotReadableException ex) {
-        ExceptionDto exceptionDto = new ExceptionDto();
-        exceptionDto.setErrorMessage(ex.getMessage());
-        exceptionDto.setErrorCode(400);
+        exceptionDto.setErrorMessage(errorMessage);
+        exceptionDto.setErrorCode(4001);
         exceptionDto.setTimestamp(LocalDateTime.now());
         return ResponseEntity.badRequest().body(exceptionDto);
     }
 
-    @ExceptionHandler(Throwable.class)
-    public ResponseEntity<ExceptionDto> handle(Throwable e) {
-        log.error(e.getMessage(), e);
+    /**
+     * Catches all unexpected exceptions
+     */
+    @ExceptionHandler
+    public ResponseEntity<ExceptionDto> handle(Throwable ex) {
+        log.error(ex.getMessage(), ex);
         ExceptionDto exceptionDto = new ExceptionDto();
-        exceptionDto.setErrorMessage(e.getMessage());
-        exceptionDto.setErrorCode(500);
+        exceptionDto.setErrorMessage(ex.getMessage());
+        exceptionDto.setErrorCode(5001);
         exceptionDto.setTimestamp(LocalDateTime.now());
         return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(exceptionDto);
     }

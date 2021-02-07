@@ -1,7 +1,6 @@
-package com.epam.esm.controller.hateoas;
+package com.epam.esm.service.hateoas;
 
 import com.epam.esm.controller.CertificateController;
-import com.epam.esm.controller.OrderController;
 import com.epam.esm.controller.TagController;
 import com.epam.esm.controller.UserController;
 import com.epam.esm.dto.GiftCertificateDto;
@@ -20,7 +19,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
 @RequiredArgsConstructor
-public class DtoHateoas {
+public class HateoasService {
     private final OrderService orderService;
 
     public void attachHateoas(TagDto tagDto) {
@@ -46,7 +45,7 @@ public class DtoHateoas {
         Link selfLink = linkTo(UserController.class).slash(userId).withSelfRel();
         userDto.add(selfLink);
         if (orderService.getOrdersByUserId(userId).size() > 0) {
-            Link ordersLink = linkTo(methodOn(OrderController.class)
+            Link ordersLink = linkTo(methodOn(UserController.class)
                     .getOrdersByUserId(userId)).withRel("allOrders");
             userDto.add(ordersLink);
         }
@@ -54,8 +53,6 @@ public class DtoHateoas {
 
     public void attachHateoas(OrderDto orderDto) {
         attachHateoas(orderDto.getUser());
-        orderDto.getOrderItems()
-                .forEach(orderItemDto -> orderItemDto.getTags()
-                        .forEach(this::attachHateoas));
+        orderDto.getOrderItems().forEach(orderItemDto -> attachHateoas(orderItemDto.getCertificate()));
     }
 }

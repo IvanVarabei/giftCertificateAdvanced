@@ -1,19 +1,37 @@
 package com.epam.esm.entity;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
+import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
-public class Order extends BaseEntity {
+@Entity
+@Table(name = "\"order\"")
+@Audited
+public class Order {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    @NotAudited
     private User user;
+
     private LocalDateTime createdDate;
+
+    @OneToMany(
+            orphanRemoval = true,
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}
+    )
+    @JoinColumn(name = "order_id", nullable = false)
+    @NotAudited
     private List<OrderItem> orderItems;
+
     private BigDecimal cost;
 }

@@ -1,6 +1,6 @@
 package com.epam.esm.integration;
 
-import com.epam.esm.config.EmbeddedTestConfig;
+import com.epam.esm.dto.CustomPage;
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.entity.GiftCertificate;
@@ -12,12 +12,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
+import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -25,7 +26,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ContextConfiguration(classes = {EmbeddedTestConfig.class})
 class CertificateControllerTest {
     @Autowired
     GiftCertificateRepository certificateRepository;
@@ -41,7 +41,7 @@ class CertificateControllerTest {
         certificateDto.setDescription("test description");
         certificateDto.setPrice(BigDecimal.TEN);
         certificateDto.setDuration(1);
-        certificateDto.setTags(List.of(new TagDto(null, "testCreateCertificateTagName")));
+        certificateDto.setTags(Set.of(new TagDto(null, "testCreateCertificateTagName")));
 
         String responseAsString = mockMvc
                 .perform(post("/api/certificates")
@@ -54,7 +54,7 @@ class CertificateControllerTest {
         GiftCertificateDto createdCertificate = objectMapper.readValue(responseAsString, GiftCertificateDto.class);
 
         assertNotNull(createdCertificate.getId());
-        assertNotNull(createdCertificate.getTags().get(0).getId());
+        assertNotNull(createdCertificate.getTags().stream().findAny().get().getId());
     }
 
     @Test
@@ -74,6 +74,7 @@ class CertificateControllerTest {
     }
 
     @Test
+    @Transactional
     void should_return_not_empty_list_of_certificates_after_get_method() throws Exception {
         GiftCertificate certificate = new GiftCertificate();
         certificate.setName("testGetAll");
@@ -81,6 +82,7 @@ class CertificateControllerTest {
         certificate.setPrice(BigDecimal.TEN);
         certificate.setDuration(1);
         certificate.setCreatedDate(LocalDateTime.now());
+        certificate.setUpdatedDate(LocalDateTime.now());
         certificateRepository.save(certificate);
 
         String responseAsString = mockMvc
@@ -89,13 +91,14 @@ class CertificateControllerTest {
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
-        List<GiftCertificate> foundCertificates = objectMapper.readValue(responseAsString, new TypeReference<>() {
+        CustomPage<GiftCertificateDto> foundPage = objectMapper.readValue(responseAsString, new TypeReference<>() {
         });
 
-        assertFalse(foundCertificates.isEmpty());
+        assertFalse(foundPage.getContent().isEmpty());
     }
 
     @Test
+    @Transactional
     void should_return_certificate_having_specified_id_when_get_by_id() throws Exception {
         GiftCertificate certificate = new GiftCertificate();
         certificate.setName("testGetById");
@@ -103,6 +106,7 @@ class CertificateControllerTest {
         certificate.setPrice(BigDecimal.TEN);
         certificate.setDuration(1);
         certificate.setCreatedDate(LocalDateTime.now());
+        certificate.setUpdatedDate(LocalDateTime.now());
         Long id = certificateRepository.save(certificate).getId();
 
         String responseAsString = mockMvc
@@ -117,6 +121,7 @@ class CertificateControllerTest {
     }
 
     @Test
+    @Transactional
     void should_return_certificate_having_updated_fields_after_update() throws Exception {
         GiftCertificate certificate = new GiftCertificate();
         certificate.setName("testUpdate");
@@ -124,6 +129,7 @@ class CertificateControllerTest {
         certificate.setPrice(BigDecimal.TEN);
         certificate.setDuration(1);
         certificate.setCreatedDate(LocalDateTime.now());
+        certificate.setUpdatedDate(LocalDateTime.now());
         Long id = certificateRepository.save(certificate).getId();
 
         GiftCertificateDto certificateDto = new GiftCertificateDto();
@@ -132,7 +138,7 @@ class CertificateControllerTest {
         certificateDto.setDescription("updated description");
         certificateDto.setPrice(BigDecimal.ONE);
         certificateDto.setDuration(2);
-        certificateDto.setTags(List.of(new TagDto(null, "newCreatedTag")));
+        certificateDto.setTags(Set.of(new TagDto(null, "newCreatedTag")));
 
         String responseAsString = mockMvc
                 .perform(put("/api/certificates")
@@ -146,10 +152,11 @@ class CertificateControllerTest {
         GiftCertificateDto updatedCertificate = objectMapper.readValue(responseAsString, GiftCertificateDto.class);
 
         assertEquals("updated name", updatedCertificate.getName());
-        assertEquals("newCreatedTag", updatedCertificate.getTags().get(0).getName());
+        assertEquals("newCreatedTag", updatedCertificate.getTags().stream().findAny().get().getName());
     }
 
     @Test
+    @Transactional
     void repository_should_return_empty_optional_after_delete() throws Exception {
         GiftCertificate certificate = new GiftCertificate();
         certificate.setName("testDelete");
@@ -157,6 +164,7 @@ class CertificateControllerTest {
         certificate.setPrice(BigDecimal.TEN);
         certificate.setDuration(1);
         certificate.setCreatedDate(LocalDateTime.now());
+        certificate.setUpdatedDate(LocalDateTime.now());
         Long id = certificateRepository.save(certificate).getId();
 
         mockMvc.perform(delete("/api/certificates/" + id))

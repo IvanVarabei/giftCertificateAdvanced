@@ -1,6 +1,6 @@
 package com.epam.esm.integration;
 
-import com.epam.esm.config.EmbeddedTestConfig;
+import com.epam.esm.dto.CustomPage;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ExceptionDto;
@@ -11,9 +11,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,7 +22,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ContextConfiguration(classes = {EmbeddedTestConfig.class})
 class TagControllerTest {
     @Autowired
     TagRepository tagRepository;
@@ -63,6 +62,7 @@ class TagControllerTest {
     }
 
     @Test
+    @Transactional
     void should_return_not_empty_list_of_tags_when_get_all() throws Exception {
         Tag tag = new Tag();
         tag.setName("testGetAll");
@@ -74,13 +74,14 @@ class TagControllerTest {
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
-        List<Tag> foundTags = objectMapper.readValue(responseAsString, new TypeReference<>() {
+        CustomPage<Tag> foundPage = objectMapper.readValue(responseAsString, new TypeReference<>() {
         });
 
-        assertFalse(foundTags.isEmpty());
+        assertFalse(foundPage.getContent().isEmpty());
     }
 
     @Test
+    @Transactional
     void should_return_tag_having_specified_id() throws Exception {
         Tag tag = new Tag();
         tag.setName("testGeById");
@@ -98,6 +99,7 @@ class TagControllerTest {
     }
 
     @Test
+    @Transactional
     void find_by_id_should_return_empty_optional_after_delete() throws Exception {
         Tag tag = new Tag();
         tag.setName("testGetDelete");

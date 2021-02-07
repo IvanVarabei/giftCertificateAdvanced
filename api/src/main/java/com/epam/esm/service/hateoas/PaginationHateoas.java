@@ -1,4 +1,4 @@
-package com.epam.esm.controller.hateoas;
+package com.epam.esm.service.hateoas;
 
 import com.epam.esm.dto.CustomPage;
 import org.springframework.hateoas.Link;
@@ -9,7 +9,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class PaginationHateoas<T> {
     public void addPaginationLinks(UriComponentsBuilder uriBuilder, CustomPage<T> customPage) {
         int page = customPage.getNumber();
-        int lastPage = customPage.getTotalPages() - 1;
+        long lastPage = customPage.getTotalPages() - 1;
         int pageSize = customPage.getSize();
         String uriCurrentPage = constructCurrentPageUri(uriBuilder, page, pageSize);
         customPage.add(Link.of(uriCurrentPage).withSelfRel());
@@ -59,14 +59,14 @@ public class PaginationHateoas<T> {
                 .build().encode().toUriString();
     }
 
-    private String constructLastPageUri(UriComponentsBuilder uriBuilder, int lastPage, int size) {
+    private String constructLastPageUri(UriComponentsBuilder uriBuilder, long lastPage, int size) {
         return uriBuilder
                 .replaceQueryParam("page", lastPage)
                 .replaceQueryParam("size", size)
                 .build().encode().toUriString();
     }
 
-    private boolean hasNextPage(int page, int lastPage) {
+    private boolean hasNextPage(int page, long lastPage) {
         return page < lastPage;
     }
 
@@ -78,7 +78,7 @@ public class PaginationHateoas<T> {
         return hasPreviousPage(page);
     }
 
-    private boolean hasLastPage(int page, int lastPage) {
+    private boolean hasLastPage(int page, long lastPage) {
         return lastPage > 0 && hasNextPage(page, lastPage);
     }
 }

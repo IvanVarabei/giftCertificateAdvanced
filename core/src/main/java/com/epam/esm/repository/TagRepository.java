@@ -5,26 +5,10 @@ import com.epam.esm.entity.Tag;
 import java.util.List;
 import java.util.Optional;
 
-public interface TagRepository {
-    Tag save(Tag tag);
-
+public interface TagRepository extends CustomCrudRepository<Tag> {
     List<Tag> findPaginated(Integer offset, Integer limit);
 
-    Integer countAll();
-
-    Optional<Tag> findById(Long tagId);
-
-    Optional<Tag> findByName(String name);
-
-    void update(Tag tag);
-
-    void delete(Long tagId);
-
-    List<Tag> getTagsByCertificateId(Long id);
-
-    void bindWithCertificate(Long certificateId, Long tagId);
-
-    void unbindTagsFromCertificate(Long certificateId);
+    Long countAll();
 
     Optional<Tag> getPrevalentTagOfMostProfitableUser();
 }

@@ -1,11 +1,11 @@
 package com.epam.esm.controller;
 
-import com.epam.esm.controller.hateoas.DtoHateoas;
-import com.epam.esm.controller.hateoas.PaginationHateoas;
 import com.epam.esm.dto.CustomPage;
 import com.epam.esm.dto.CustomPageable;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.service.TagService;
+import com.epam.esm.service.hateoas.HateoasService;
+import com.epam.esm.service.hateoas.PaginationHateoas;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -18,10 +18,6 @@ import javax.validation.constraints.Min;
 
 import static org.springframework.http.HttpStatus.CREATED;
 
-
-/**
- * The class provides operations having to do with {@link com.epam.esm.entity.Tag}
- */
 @RestController
 @RequestMapping("/api/tags")
 @RequiredArgsConstructor
@@ -29,7 +25,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 public class TagController {
     private final TagService tagService;
     private final PaginationHateoas<TagDto> paginationHateoas;
-    private final DtoHateoas dtoHateoas;
+    private final HateoasService hateoasService;
 
     /**
      * The method allows creating {@link com.epam.esm.entity.Tag}.
@@ -40,14 +36,17 @@ public class TagController {
     @PostMapping
     public ResponseEntity<TagDto> createTag(@RequestBody @Valid TagDto tagDto) {
         TagDto createdTagDto = tagService.createTag(tagDto);
-        dtoHateoas.attachHateoas(createdTagDto);
+        hateoasService.attachHateoas(createdTagDto);
         return ResponseEntity.status(CREATED).body(createdTagDto);
     }
 
     /**
-     * The method provides all existing tags.
+     * The method provides all existing tags paginated.
      *
-     * @return list of {@link TagDto}. Response code 200.
+     * @param pageRequest created automatically from uri params (page, size).
+     * @param uriBuilder  is necessary for creating hateoas pagination.
+     * @param request     is necessary for creating hateoas pagination.
+     * @return Response entity containing page object. Response code 200.
      */
     @GetMapping
     public CustomPage<TagDto> getTags(
@@ -56,7 +55,7 @@ public class TagController {
             HttpServletRequest request
     ) {
         CustomPage<TagDto> tags = tagService.getPaginated(pageRequest);
-        tags.getContent().forEach(dtoHateoas::attachHateoas);
+        tags.getContent().forEach(hateoasService::attachHateoas);
         uriBuilder.path(request.getRequestURI());
         uriBuilder.query(request.getQueryString());
         paginationHateoas.addPaginationLinks(uriBuilder, tags);
@@ -72,7 +71,7 @@ public class TagController {
     @GetMapping("/{tagId}")
     public ResponseEntity<TagDto> getTagById(@PathVariable("tagId") @Min(1) Long tagId) {
         TagDto tagDto = tagService.getTagById(tagId);
-        dtoHateoas.attachHateoas(tagDto);
+        hateoasService.attachHateoas(tagDto);
         return ResponseEntity.ok().body(tagDto);
     }
 
@@ -86,7 +85,7 @@ public class TagController {
     @PutMapping
     public ResponseEntity<TagDto> updateTag(@Valid @RequestBody TagDto tagDto) {
         TagDto updatedTag = tagService.updateTag(tagDto);
-        dtoHateoas.attachHateoas(updatedTag);
+        hateoasService.attachHateoas(updatedTag);
         return ResponseEntity.ok().body(updatedTag);
     }
 

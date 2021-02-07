@@ -1,35 +1,17 @@
 package com.epam.esm.repository.impl;
 
 import com.epam.esm.entity.Tag;
+import com.epam.esm.repository.GenericRepository;
 import com.epam.esm.repository.TagRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.sql.PreparedStatement;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-@RequiredArgsConstructor
-public class TagRepositoryImpl implements TagRepository {
-    private final JdbcTemplate jdbcTemplate;
-    private final RowMapper<Tag> tagMapper;
-
-    private static final String CREATE_TAG = "insert into tag (name) values (?)";
-
-    private static final String READ_TAG_BY_ID = "select id, name from tag where id = ?";
-
-    private static final String READ_TAG_BY_NAME = "select id, name from tag where name = ?";
-
-    private static final String READ_TAGS = "select id, name from tag";
-
-    private static final String READ_TAGS_BY_CERTIFICATE_ID =
-            "SELECT id, name FROM tag JOIN certificate_tag ON tag.id = tag_id WHERE gift_certificate_id = ?";
-
+public class TagRepositoryImpl extends GenericRepository<Tag> implements TagRepository {
     private static final String READ_MOST_COMMON_TAG_OF_USER_WITH_THE_HIGHEST_COST_OF_ALL_ORDERS =
             "select t.id, t.name " +
                     "from \"order\" " +
@@ -46,81 +28,33 @@ public class TagRepositoryImpl implements TagRepository {
                     "order by sum(quantity) desc " +
                     "limit 1";
 
-    private static final String UPDATE_TAG = "update tag set name = ? where id = ?";
+    @PersistenceContext
+    private final EntityManager entityManager;
 
-    private static final String DELETE_TAG = "delete from tag where id = ?";
-
-    private static final String BIND_TAG =
-            "insert into certificate_tag (gift_certificate_id, tag_id) values (?, ?)";
-
-    private static final String UNBIND_TAGS = "delete from certificate_tag where gift_certificate_id = ?";
-
-    private static final String COUNT_TAGS = "select count(id) from tag";
-
-    private static final String PAGINATION = "%s offset %s limit %s";
-
-    private static final String[] RETURN_GENERATED_KEY = {"id"};
-
-    @Override
-    public Tag save(Tag tag) {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(CREATE_TAG, RETURN_GENERATED_KEY);
-            preparedStatement.setString(1, tag.getName());
-            return preparedStatement;
-        }, keyHolder);
-        tag.setId(keyHolder.getKey().longValue());
-        return tag;
+    public TagRepositoryImpl(EntityManager entityManager) {
+        super(entityManager, Tag.class);
+        this.entityManager = entityManager;
     }
 
     @Override
     public List<Tag> findPaginated(Integer offset, Integer limit) {
-        return jdbcTemplate.query(String.format(PAGINATION, READ_TAGS, offset, limit), tagMapper);
+        return entityManager
+                .createQuery("from Tag", Tag.class)
+                .setFirstResult(offset)
+                .setMaxResults(limit)
+                .getResultList();
     }
 
     @Override
-    public Integer countAll() {
-        return jdbcTemplate.query(COUNT_TAGS, (rs, rowNum) -> rs.getInt("count")).stream().findAny().get();
+    public Long countAll() {
+        return entityManager.createQuery("select count(id) from Tag ", Long.class).getSingleResult();
     }
 
     @Override
-    public Optional<Tag> findById(Long tagId) {
-        return jdbcTemplate.query(READ_TAG_BY_ID, tagMapper, tagId).stream().findAny();
-    }
-
-    @Override
-    public Optional<Tag> findByName(String name) {
-        return jdbcTemplate.query(READ_TAG_BY_NAME, tagMapper, name).stream().findAny();
-    }
-
-    @Override
-    public void update(Tag tag) {
-        jdbcTemplate.update(UPDATE_TAG, tag.getName(), tag.getId());
-    }
-
-    @Override
-    public void delete(Long tageId) {
-        jdbcTemplate.update(DELETE_TAG, tageId);
-    }
-
-    @Override
-    public List<Tag> getTagsByCertificateId(Long certificateId) {
-        return jdbcTemplate.query(READ_TAGS_BY_CERTIFICATE_ID, tagMapper, certificateId);
-    }
-
-    @Override
-    public void bindWithCertificate(Long certificateId, Long tagId) {
-        jdbcTemplate.update(BIND_TAG, certificateId, tagId);
-    }
-
-    @Override
-    public void unbindTagsFromCertificate(Long certificateId) {
-        jdbcTemplate.update(UNBIND_TAGS, certificateId);
-    }
-
-    @Override
+    @SuppressWarnings("unchecked")
     public Optional<Tag> getPrevalentTagOfMostProfitableUser() {
-        return jdbcTemplate.query(READ_MOST_COMMON_TAG_OF_USER_WITH_THE_HIGHEST_COST_OF_ALL_ORDERS, tagMapper)
-                .stream().findAny();
+        return entityManager.createNativeQuery(
+                READ_MOST_COMMON_TAG_OF_USER_WITH_THE_HIGHEST_COST_OF_ALL_ORDERS, Tag.class)
+                .getResultList().stream().findAny();
     }
 }

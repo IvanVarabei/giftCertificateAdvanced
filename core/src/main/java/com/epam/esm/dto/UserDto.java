@@ -7,16 +7,18 @@ import org.springframework.hateoas.RepresentationModel;
 
 import javax.validation.constraints.*;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
+@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 public class UserDto extends RepresentationModel<UserDto> {
     @NotNull
     @Min(1)
     private Long id;
+
     @NotBlank
-    @Pattern(regexp = "[\\w\\s]{2,64}")
+    @Pattern(regexp = "[\\w\\s\\.]{2,64}")
     private String username;
+
     @NotBlank
     @Email
     private String email;

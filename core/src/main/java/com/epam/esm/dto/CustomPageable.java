@@ -12,6 +12,7 @@ import javax.validation.constraints.Min;
 public class CustomPageable {
     @Min(1)
     private Integer size = 10;
+
     @Min(0)
     private Integer page = 0;
 }

@@ -1,9 +1,10 @@
 package com.epam.esm.service;
 
+import com.epam.esm.dto.CustomPageable;
 import com.epam.esm.dto.GiftCertificateDto;
-import com.epam.esm.dto.TagDto;
+import com.epam.esm.dto.PriceDto;
+import com.epam.esm.dto.SearchCertificateDto;
 import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.mapper.CertificateConverter;
 import com.epam.esm.repository.GiftCertificateRepository;
@@ -15,8 +16,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,7 +24,6 @@ import static org.mockito.Mockito.*;
 
 @SpringBootTest
 class CertificateServiceImplTest {
-    TagService tagService;
     GiftCertificateRepository certificateRepository;
     GiftCertificateService giftCertificateService;
     GiftCertificate certificate;
@@ -44,41 +42,41 @@ class CertificateServiceImplTest {
     }
 
     @BeforeEach
-    public void setUp() {
-        tagService = mock(TagService.class);
+    void setUp() {
         certificateRepository = mock(GiftCertificateRepository.class);
-        giftCertificateService = new GiftCertificateServiceImpl(certificateRepository, tagService,
-                certificateConverter);
+        giftCertificateService = new GiftCertificateServiceImpl(certificateRepository, certificateConverter);
     }
 
     @Test
-    void should_invoke_tagService_bindTags_when_createCertificate() {
-        GiftCertificateDto certificateDto = mock(GiftCertificateDto.class);
-        TagDto tagDto = new TagDto(null, "testBindingTags");
-        Tag convertedTag = new Tag();
-        convertedTag.setName("testBindingTags");
-        when(certificateDto.getTags()).thenReturn(List.of(tagDto));
-        when(certificateDto.getCreatedDate()).thenReturn(LocalDateTime.now());
-        when(certificateDto.getUpdatedDate()).thenReturn(LocalDateTime.now());
+    void should_invoke_certificateRepository_update_when_createCertificate() {
+        GiftCertificateDto certificateDto = new GiftCertificateDto();
+        when(certificateRepository.save(any())).thenReturn(certificate);
 
         giftCertificateService.createCertificate(certificateDto);
 
-        verify(tagService).bindTags(null, List.of(convertedTag));
+        verify(certificateRepository).update(certificate);
     }
 
     @Test
-    void should_invoke_tagService_getTagsByCertificateId_two_times_when_findAll() {
-        GiftCertificate certificate1 = new GiftCertificate();
-        certificate1.setCreatedDate(LocalDateTime.now());
-        certificate1.setUpdatedDate(LocalDateTime.now());
-        GiftCertificate certificate2 = new GiftCertificate();
-        certificate2.setCreatedDate(LocalDateTime.now());
-        certificate2.setUpdatedDate(LocalDateTime.now());
-        when(certificateRepository.findPaginated(any())).thenReturn(List.of(certificate1, certificate2));
+    void should_invoke_findPaginated_when_getPaginated() {
+        SearchCertificateDto searchDto = SearchCertificateDto.builder()
+                .pageRequest(new CustomPageable(3, 4))
+                .build();
+        when(certificateRepository.countAll(searchDto)).thenReturn(20L);
 
-        giftCertificateService.getPaginated(null);
+        giftCertificateService.getPaginated(searchDto);
 
-        verify(tagService, times(2)).getTagsByCertificateId(any());
+        verify(certificateRepository).findPaginated(searchDto);
+    }
+
+    @Test
+    void if_requested_page_grater_than_last_page_exception_thrown() {
+        SearchCertificateDto searchDto = SearchCertificateDto.builder()
+                .pageRequest(new CustomPageable(3, 7))
+                .build();
+        when(certificateRepository.countAll(searchDto)).thenReturn(20L);
+
+        assertThrows(ResourceNotFoundException.class, () -> giftCertificateService.getPaginated(searchDto));
     }
 
     @Test
@@ -88,16 +86,15 @@ class CertificateServiceImplTest {
 
     @Test
     void returns_certificate_having_specified_id_when_getCertificateById() {
-        when(certificateRepository.findById(any())).thenReturn(Optional.ofNullable(certificate));
-        when(tagService.getTagsByCertificateId(any())).thenReturn(new ArrayList<>());
+        when(certificateRepository.findById(any())).thenReturn(Optional.of(certificate));
 
-        GiftCertificateDto certificateDTO = giftCertificateService.getCertificateById(1L);
+        GiftCertificateDto certificateDTO = giftCertificateService.getCertificateById(certificate.getId());
 
         assertNotNull(certificateDTO.getId());
-        assertEquals("name test 1", certificateDTO.getName());
-        assertEquals("description test 1", certificateDTO.getDescription());
-        assertEquals(new BigDecimal(100), certificateDTO.getPrice());
-        assertEquals((Integer) 5, certificateDTO.getDuration());
+        assertEquals(certificate.getName(), certificateDTO.getName());
+        assertEquals(certificate.getDescription(), certificateDTO.getDescription());
+        assertEquals(certificate.getPrice(), certificateDTO.getPrice());
+        assertEquals(certificate.getDuration(), certificateDTO.getDuration());
     }
 
     @Test
@@ -112,12 +109,40 @@ class CertificateServiceImplTest {
     }
 
     @Test
+    void should_throw_ResourceNotFoundException_when_certificate_not_found_when_update() {
+        GiftCertificateDto certificateDto = new GiftCertificateDto();
+        certificateDto.setId(certificate.getId());
+
+        assertThrows(ResourceNotFoundException.class, () -> giftCertificateService.updateCertificate(certificateDto));
+    }
+
+    @Test
+    void should_return_updated_certificate_dto_when_update_price() {
+        PriceDto priceDto = new PriceDto();
+        priceDto.setId(certificate.getId());
+        priceDto.setPrice(BigDecimal.valueOf(25));
+        when(certificateRepository.findById(certificate.getId())).thenReturn(Optional.of(certificate));
+
+        GiftCertificateDto expectedCertificateDto = giftCertificateService.updatePrice(priceDto);
+
+        assertEquals(priceDto.getPrice(), expectedCertificateDto.getPrice());
+    }
+
+    @Test
+    void should_throw_ResourceNotFoundException_when_certificate_not_found_when_update_price() {
+        PriceDto priceDto = new PriceDto();
+        priceDto.setId(certificate.getId());
+
+        assertThrows(ResourceNotFoundException.class, () -> giftCertificateService.updatePrice(priceDto));
+    }
+
+    @Test
     void should_invoke_certificateRepository_delete_when_deleteCertificate() {
-        when(certificateRepository.findById(1L)).thenReturn(Optional.of(certificate));
+        when(certificateRepository.findById(certificate.getId())).thenReturn(Optional.of(certificate));
 
         giftCertificateService.deleteCertificate(1L);
 
-        verify(certificateRepository).delete(1L);
+        verify(certificateRepository).delete(certificate);
     }
 
     @Test

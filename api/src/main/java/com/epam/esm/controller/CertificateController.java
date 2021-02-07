@@ -1,11 +1,11 @@
 package com.epam.esm.controller;
 
-import com.epam.esm.controller.hateoas.DtoHateoas;
-import com.epam.esm.controller.hateoas.PaginationHateoas;
 import com.epam.esm.dto.*;
 import com.epam.esm.dto.search.SortByField;
 import com.epam.esm.dto.search.SortOrder;
 import com.epam.esm.service.GiftCertificateService;
+import com.epam.esm.service.hateoas.HateoasService;
+import com.epam.esm.service.hateoas.PaginationHateoas;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -20,9 +20,6 @@ import java.util.List;
 
 import static org.springframework.http.HttpStatus.CREATED;
 
-/**
- * The class provides operations having to do with {@link com.epam.esm.entity.GiftCertificate}
- */
 @RestController
 @RequestMapping("/api/certificates")
 @RequiredArgsConstructor
@@ -30,10 +27,10 @@ import static org.springframework.http.HttpStatus.CREATED;
 public class CertificateController {
     private final GiftCertificateService giftCertificateService;
     private final PaginationHateoas<GiftCertificateDto> paginationHateoas;
-    private final DtoHateoas dtoHateoas;
+    private final HateoasService hateoasService;
 
     /**
-     * The method allows creating {@link com.epam.esm.entity.GiftCertificate}.
+     * The method allows {@link com.epam.esm.entity.GiftCertificate} creating.
      *
      * @param giftCertificateDto should be valid according to {@link GiftCertificateDto}. Otherwise, certificate won't
      *                           be created. Error will be returned(400).
@@ -43,12 +40,12 @@ public class CertificateController {
     public ResponseEntity<GiftCertificateDto> createCertificate(
             @Valid @RequestBody GiftCertificateDto giftCertificateDto) {
         GiftCertificateDto certificateDto = giftCertificateService.createCertificate(giftCertificateDto);
-        dtoHateoas.attachHateoas(certificateDto);
+        hateoasService.attachHateoas(certificateDto);
         return ResponseEntity.status(CREATED).body(certificateDto);
     }
 
     /**
-     * The method allows a client to get certificates with tags. All params are optional and can be used in conjunction:
+     * The method allows a client to get certificates paginated. All params are optional and can be used in conjunction:
      * <ul>
      *  <li>by tag name</li>
      *  <li>search by part of name/description</li>
@@ -60,7 +57,10 @@ public class CertificateController {
      * @param description or part of gift certificate's description.
      * @param sortByField can be either name or last updated date.
      * @param sortOrder   either ascending or descending.
-     * @return Response entity containing the list of certificates. Response code 200.
+     * @param pageRequest created automatically from uri params (page, size).
+     * @param uriBuilder  is necessary for creating hateoas pagination.
+     * @param request     is necessary for creating hateoas pagination.
+     * @return Response entity containing page object. Response code 200.
      */
     @GetMapping
     public CustomPage<GiftCertificateDto> getCertificates(
@@ -82,7 +82,7 @@ public class CertificateController {
                 .pageRequest(pageRequest)
                 .build();
         CustomPage<GiftCertificateDto> certificateDtoPage = giftCertificateService.getPaginated(searchCertificateDto);
-        certificateDtoPage.getContent().forEach(dtoHateoas::attachHateoas);
+        certificateDtoPage.getContent().forEach(hateoasService::attachHateoas);
         uriBuilder.path(request.getRequestURI());
         uriBuilder.query(request.getQueryString());
         paginationHateoas.addPaginationLinks(uriBuilder, certificateDtoPage);
@@ -99,7 +99,7 @@ public class CertificateController {
     public ResponseEntity<GiftCertificateDto> getCertificateById(
             @PathVariable("certificateId") @Min(1) Long certificateId) {
         GiftCertificateDto certificateDto = giftCertificateService.getCertificateById(certificateId);
-        dtoHateoas.attachHateoas(certificateDto);
+        hateoasService.attachHateoas(certificateDto);
         return ResponseEntity.ok().body(certificateDto);
     }
 
@@ -113,15 +113,21 @@ public class CertificateController {
     public ResponseEntity<GiftCertificateDto> updateCertificate(
             @Valid @RequestBody GiftCertificateDto giftCertificateDto) {
         GiftCertificateDto certificateDto = giftCertificateService.updateCertificate(giftCertificateDto);
-        dtoHateoas.attachHateoas(certificateDto);
+        hateoasService.attachHateoas(certificateDto);
         return ResponseEntity.ok().body(certificateDto);
     }
 
+    /**
+     * Provides ability to update only price using lightweight dto. So client shouldn't send the whole object.
+     *
+     * @param priceDto contains certificateId and new price.
+     * @return the whole certificate object having all fields populated.
+     */
     @PatchMapping
     public ResponseEntity<GiftCertificateDto> updatePrice(@Valid @RequestBody PriceDto priceDto) {
         GiftCertificateDto certificateDto = giftCertificateService.updatePrice(priceDto);
-        dtoHateoas.attachHateoas(certificateDto);
-        return ResponseEntity.ok().body(giftCertificateService.updatePrice(priceDto));
+        hateoasService.attachHateoas(certificateDto);
+        return ResponseEntity.ok().body(certificateDto);
     }
 
     /**

@@ -1,22 +1,41 @@
 package com.epam.esm.entity;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.*;
+import org.hibernate.envers.Audited;
 
+import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
-public class GiftCertificate extends BaseEntity {
+@Entity
+@AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode(exclude = "tags")
+@ToString(exclude = "tags")
+@Audited
+public class GiftCertificate {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private String name;
     private String description;
     private BigDecimal price;
     private Integer duration;
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
-    private List<Tag> tags;
+
+    @ManyToMany(
+            fetch = FetchType.LAZY,
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}
+    )
+    @JoinTable(
+            name = "certificate_tag",
+            joinColumns = {@JoinColumn(name = "gift_certificate_id")},
+            inverseJoinColumns = {@JoinColumn(name = "tag_id")}
+    )
+    private Set<Tag> tags = new HashSet<>();
 }
