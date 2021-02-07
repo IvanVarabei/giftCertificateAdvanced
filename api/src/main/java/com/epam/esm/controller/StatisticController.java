@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/analysis")
+@RequestMapping("/api/statistics")
 @RequiredArgsConstructor
-public class AnalysisController {
+public class StatisticController {
     private final TagService tagService;
     private final HateoasService hateoasService;
 
@@ -21,7 +21,7 @@ public class AnalysisController {
      *
      * @return found tag
      */
-    @GetMapping
+    @GetMapping("/prevalent")
     public ResponseEntity<TagDto> getPrevalentTagOfMostProfitableUser() {
         TagDto tagDto = tagService.getPrevalentTagOfMostProfitableUser();
         hateoasService.attachHateoas(tagDto);

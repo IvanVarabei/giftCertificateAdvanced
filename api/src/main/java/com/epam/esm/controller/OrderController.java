@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
-import java.util.Map;
 
 import static org.springframework.http.HttpStatus.CREATED;
 
@@ -35,19 +34,6 @@ public class OrderController {
         OrderDto createdOrderDto = orderService.createOrder(orderDto);
         hateoasService.attachHateoas(createdOrderDto);
         return ResponseEntity.status(CREATED).body(createdOrderDto);
-    }
-
-    /**
-     * Returns current orders of a user having passed userId.
-     *
-     * @param userId of user whose orders are wanted.
-     * @return map (key: orderId)
-     */
-    @GetMapping("/{userId}")
-    public ResponseEntity<Map<Long, OrderDto>> getOrdersByUserId(@PathVariable("userId") @Min(1) Long userId) {
-        Map<Long, OrderDto> orderDtoMap = orderService.getOrdersByUserId(userId);
-        orderDtoMap.values().forEach(hateoasService::attachHateoas);
-        return ResponseEntity.ok().body(orderDtoMap);
     }
 
     /**

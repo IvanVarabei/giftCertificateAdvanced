@@ -1,7 +1,6 @@
 package com.epam.esm.service.hateoas;
 
 import com.epam.esm.controller.CertificateController;
-import com.epam.esm.controller.OrderController;
 import com.epam.esm.controller.TagController;
 import com.epam.esm.controller.UserController;
 import com.epam.esm.dto.GiftCertificateDto;
@@ -46,7 +45,7 @@ public class HateoasService {
         Link selfLink = linkTo(UserController.class).slash(userId).withSelfRel();
         userDto.add(selfLink);
         if (orderService.getOrdersByUserId(userId).size() > 0) {
-            Link ordersLink = linkTo(methodOn(OrderController.class)
+            Link ordersLink = linkTo(methodOn(UserController.class)
                     .getOrdersByUserId(userId)).withRel("allOrders");
             userDto.add(ordersLink);
         }

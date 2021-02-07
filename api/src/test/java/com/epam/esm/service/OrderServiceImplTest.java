@@ -25,7 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
-public class OrderServiceImplTest {
+class OrderServiceImplTest {
     OrderRepository orderRepository;
     UserRepository userRepository;
     OrderService orderService;
@@ -41,7 +41,7 @@ public class OrderServiceImplTest {
     }
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         orderRepository = mock(OrderRepository.class);
         userRepository = mock(UserRepository.class);
         orderService = new OrderServiceImpl(orderRepository, userRepository, orderConverter);

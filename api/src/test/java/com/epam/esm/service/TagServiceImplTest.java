@@ -26,7 +26,7 @@ class TagServiceImplTest {
     TagRepository tagRepository;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         tagRepository = mock(TagRepository.class);
         tagService = new TagServiceImpl(tagRepository, tagConverter);
     }

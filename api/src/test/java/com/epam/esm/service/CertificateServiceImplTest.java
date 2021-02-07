@@ -42,7 +42,7 @@ class CertificateServiceImplTest {
     }
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         certificateRepository = mock(GiftCertificateRepository.class);
         giftCertificateService = new GiftCertificateServiceImpl(certificateRepository, certificateConverter);
     }

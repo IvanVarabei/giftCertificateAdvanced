@@ -16,7 +16,7 @@ public class UserDto extends RepresentationModel<UserDto> {
     private Long id;
 
     @NotBlank
-    @Pattern(regexp = "[\\w\\s]{2,64}")
+    @Pattern(regexp = "[\\w\\s\\.]{2,64}")
     private String username;
 
     @NotBlank
