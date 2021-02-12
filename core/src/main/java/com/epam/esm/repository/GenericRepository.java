@@ -1,14 +1,15 @@
 package com.epam.esm.repository;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.Optional;
 
 public class GenericRepository<T> implements CustomCrudRepository<T> {
-    private final EntityManager entityManager;
+    @PersistenceContext
+    protected EntityManager entityManager;
     private final Class<T> clazz;
 
-    public GenericRepository(EntityManager entityManager, Class<T> clazz) {
-        this.entityManager = entityManager;
+    public GenericRepository(Class<T> clazz) {
         this.clazz = clazz;
     }
 
