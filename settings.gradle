@@ -1,1 +1,3 @@
 rootProject.name = 'giftCertificateAdvanced'
+include 'api'
+include 'core'
