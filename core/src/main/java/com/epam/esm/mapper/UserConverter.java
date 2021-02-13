@@ -13,4 +13,6 @@ import org.springframework.stereotype.Component;
         unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface UserConverter {
     UserDto toDTO(User user);
+
+    User toUser(UserDto userDto);
 }

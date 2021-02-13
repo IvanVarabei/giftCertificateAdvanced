@@ -13,14 +13,10 @@ import java.util.Set;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(exclude = "tags")
+@EqualsAndHashCode(exclude = "tags", callSuper = true)
 @ToString(exclude = "tags")
 @Audited
-public class GiftCertificate {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+public class GiftCertificate extends BaseEntity {
     private String name;
     private String description;
     private BigDecimal price;

@@ -30,7 +30,9 @@ public class OrderController {
      * @return ResponseEntity witch contains created order with generated id. Response code 201.
      */
     @PostMapping
-    public ResponseEntity<OrderDto> createOrder(@Valid @RequestBody OrderDto orderDto) {
+    public ResponseEntity<OrderDto> createOrder(@Valid @RequestBody OrderDto orderDto,
+                                                @RequestParam @Min(1) Long userId) {
+        orderDto.setId(userId);
         OrderDto createdOrderDto = orderService.createOrder(orderDto);
         hateoasService.attachHateoas(createdOrderDto);
         return ResponseEntity.status(CREATED).body(createdOrderDto);
@@ -43,7 +45,9 @@ public class OrderController {
      * @return updated order wrapped into {@link OrderDto}. Response code 200.
      */
     @PutMapping
-    public ResponseEntity<OrderDto> updateOrder(@Valid @RequestBody OrderDto orderDto) {
+    public ResponseEntity<OrderDto> updateOrder(@Valid @RequestBody OrderDto orderDto,
+                                                @RequestParam @Min(1) Long userId) {
+        orderDto.setId(userId);
         OrderDto updatedOrderDto = orderService.updateOrder(orderDto);
         hateoasService.attachHateoas(updatedOrderDto);
         return ResponseEntity.ok().body(updatedOrderDto);

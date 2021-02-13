@@ -19,4 +19,13 @@ VALUES (1, 1),
 INSERT INTO "user"(id, username, password, email)
 VALUES (1, 'Alex', 'qwerty', 'alex@gamil.com'),
        (2, 'Oleg', 'qwerty', 'oleg@gamil.com');
+alter sequence user_id_seq restart with 3;
+
+INSERT INTO role(id, name)
+values (1, 'ROLE_USER'),
+       (2, 'ROLE_ADMIN');
+
+INSERT INTO user_role(user_id, role_id)
+VALUES (1, 1),
+       (2, 2);
 

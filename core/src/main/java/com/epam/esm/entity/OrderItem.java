@@ -1,17 +1,15 @@
 package com.epam.esm.entity;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 
 @Data
 @Entity
 @Table
-public class OrderItem {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+@EqualsAndHashCode(callSuper = true)
+public class OrderItem extends BaseEntity {
     private Integer quantity;
 
     @ManyToOne(fetch = FetchType.LAZY)
