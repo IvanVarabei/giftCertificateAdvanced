@@ -31,21 +31,8 @@ create table "user"
     username varchar(64)  not null,
     password varchar(64)  not null,
     email    varchar(256) not null,
-    constraint unique_username unique (username),
+    role     varchar(64)  not null,
     constraint unique_email unique (email)
-);
-
-create table role
-(
-    id   serial not null primary key,
-    name varchar(128)
-);
-
-create table user_role
-(
-    user_id integer not null references "user" on delete cascade,
-    role_id integer not null references role on delete cascade,
-    primary key (user_id, role_id)
 );
 
 create table "order"

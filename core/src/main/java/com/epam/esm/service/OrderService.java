@@ -9,6 +9,8 @@ public interface OrderService {
 
     Map<Long, OrderDto> getOrdersByUserId(Long userId);
 
+    OrderDto getOrderById(Long orderId);
+
     OrderDto updateOrder(OrderDto orderDto);
 
     void deleteOrder(Long orderId);

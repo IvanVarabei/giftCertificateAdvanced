@@ -58,6 +58,12 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public OrderDto getOrderById(Long orderId) {
+        return orderConverter.toDTO(orderRepository.findById(orderId).orElseThrow(() ->
+                new ResourceNotFoundException(String.format(ErrorMessage.RESOURCE_NOT_FOUND, orderId))));
+    }
+
+    @Override
     @Transactional
     public OrderDto updateOrder(OrderDto orderDto) {
         Order existed = orderRepository.findById(orderDto.getId()).orElseThrow(() ->

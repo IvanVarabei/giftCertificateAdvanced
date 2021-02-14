@@ -5,7 +5,9 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -146,10 +148,28 @@ public class ErrorControllerAdvice {
         Throwable cause = ex.getCause().getCause();
         String errorMessage = cause.getLocalizedMessage();
         ExceptionDto exceptionDto = new ExceptionDto();
-        exceptionDto.setErrorMessage(errorMessage);
-        exceptionDto.setErrorCode(4001);
+        exceptionDto.setErrorMessage(errorMessage); // todo custom message
+        exceptionDto.setErrorCode(40001);
         exceptionDto.setTimestamp(LocalDateTime.now());
         return ResponseEntity.badRequest().body(exceptionDto);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ExceptionDto> handle(ResourceAlreadyExistException ex) {
+        ExceptionDto exceptionDto = new ExceptionDto();
+        exceptionDto.setErrorMessage(ex.getMessage());
+        exceptionDto.setErrorCode(40001);
+        exceptionDto.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exceptionDto);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ExceptionDto> handle(AuthenticationException ex) {
+        ExceptionDto exceptionDto = new ExceptionDto();
+        exceptionDto.setErrorMessage(ex.getMessage());
+        exceptionDto.setErrorCode(40301);
+        exceptionDto.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exceptionDto);
     }
 
     /**

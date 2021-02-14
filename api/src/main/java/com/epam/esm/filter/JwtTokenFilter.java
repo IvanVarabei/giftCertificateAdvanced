@@ -1,5 +1,6 @@
-package com.epam.esm.security;
+package com.epam.esm.filter;
 
+import com.epam.esm.security.JwtTokenProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.GenericFilterBean;

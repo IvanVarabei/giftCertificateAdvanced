@@ -1,20 +1,34 @@
 package com.epam.esm.config;
 
+import com.epam.esm.filter.FilterChainExceptionHandlerFilter;
 import com.epam.esm.security.JwtConfigurer;
 import com.epam.esm.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 
+/**
+ * {@link org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity} parameters:
+ * securedEnabled = true enables @Secured annotation.
+ * jsr250Enabled = true enables @RolesAllowed annotation.
+ * prePostEnabled = true enables @PreAuthorize, @PostAuthorize, @PreFilter, @PostFilter annotations.
+ */
 @Configuration
 @RequiredArgsConstructor
+@EnableGlobalMethodSecurity(
+        securedEnabled = true,
+        jsr250Enabled = true,
+        prePostEnabled = true
+)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtTokenProvider jwtTokenProvider;
+    private final FilterChainExceptionHandlerFilter filterChainExceptionHandlerFilter;
 
     @Bean
     @Override
@@ -25,28 +39,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
+                .addFilterBefore(filterChainExceptionHandlerFilter, ChannelProcessingFilter.class)
                 .httpBasic().disable()
                 .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/api/auth/login").permitAll()
-                .antMatchers("/api/auth/signup").permitAll()
-
-                .antMatchers(HttpMethod.GET, "/api/certificates/*").permitAll()
-                .antMatchers(HttpMethod.POST, "/api/certificates/*").hasRole("ADMIN")
-                .antMatchers(HttpMethod.DELETE, "/api/certificates/*").hasRole("ADMIN")
-                .antMatchers(HttpMethod.PUT, "/api/certificates/*").hasRole("ADMIN")
-                .antMatchers(HttpMethod.PATCH, "/api/certificates/*").hasRole("ADMIN")
-
-                .antMatchers(HttpMethod.GET, "/api/tags/*").permitAll()
-                .antMatchers(HttpMethod.POST, "/api/tags/*").hasRole("ADMIN")
-                .antMatchers(HttpMethod.DELETE, "/api/tags/*").hasRole("ADMIN")
-
-                .antMatchers("/api/statistics/*").hasRole("ADMIN")
-
-                .antMatchers("/api/orders/*").hasAnyRole("ADMIN", "USER")
-
+                .antMatchers("/api/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .apply(new JwtConfigurer(jwtTokenProvider));

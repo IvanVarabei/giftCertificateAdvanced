@@ -1,6 +1,6 @@
 package com.epam.esm.mapper;
 
-
+import com.epam.esm.dto.AuthenticationRequestDto;
 import com.epam.esm.dto.UserDto;
 import com.epam.esm.entity.User;
 import org.mapstruct.InjectionStrategy;
@@ -14,5 +14,5 @@ import org.springframework.stereotype.Component;
 public interface UserConverter {
     UserDto toDTO(User user);
 
-    User toUser(UserDto userDto);
+    User toUser(AuthenticationRequestDto authenticationRequestDto);
 }

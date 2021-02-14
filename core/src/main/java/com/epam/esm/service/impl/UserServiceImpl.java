@@ -1,15 +1,15 @@
 package com.epam.esm.service.impl;
 
+import com.epam.esm.dto.AuthenticationRequestDto;
 import com.epam.esm.dto.CustomPage;
 import com.epam.esm.dto.CustomPageable;
-import com.epam.esm.dto.SignupUserDto;
 import com.epam.esm.dto.UserDto;
 import com.epam.esm.entity.Role;
 import com.epam.esm.entity.User;
 import com.epam.esm.exception.ErrorMessage;
+import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.mapper.UserConverter;
-import com.epam.esm.repository.RoleRepository;
 import com.epam.esm.repository.UserRepository;
 import com.epam.esm.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -26,16 +26,19 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserConverter userConverter;
-    private final RoleRepository roleRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
-    public UserDto register(SignupUserDto signupUserDto) {
-        User user = userConverter.toUser(signupUserDto.getUserDto());
-        Role roleUser = roleRepository.findByName("ROLE_USER");
-        user.setRoles(List.of(roleUser));
-        user.setPassword(passwordEncoder.encode(signupUserDto.getPassword()));
+    public UserDto register(AuthenticationRequestDto authenticationRequestDto) {
+        String email = authenticationRequestDto.getEmail();
+        userRepository.findByEmail(email).ifPresent(r -> {
+            throw new ResourceAlreadyExistException(String.format(ErrorMessage.USER_ALREADY_EXISTS, email));
+        });
+        User user = userConverter.toUser(authenticationRequestDto);
+        user.setRole(Role.ROLE_USER);
+        user.setUsername("defaultUsername");
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userConverter.toDTO(userRepository.save(user));
     }
 
@@ -62,8 +65,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findByUsername(String username) {
-        return userRepository.findByUsername(username).orElseThrow(() ->
-                new UsernameNotFoundException(String.format(ErrorMessage.USER_NOT_FOUND, username)));
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email).orElseThrow(() ->
+                new UsernameNotFoundException(String.format(ErrorMessage.USER_NOT_FOUND, email)));
     }
 }

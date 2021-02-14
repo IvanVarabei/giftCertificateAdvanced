@@ -9,7 +9,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.stream.Collectors;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -17,15 +17,13 @@ public class JwtUserDetailsService implements UserDetailsService {
     private final UserService userService;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userService.findByUsername(username);
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        User user = userService.getUserByEmail(email);
         return new JwtUser(
                 user.getId(),
                 user.getUsername(),
-                user.getEmail(),
                 user.getPassword(),
-                user.getRoles().stream()
-                        .map(r -> new SimpleGrantedAuthority(r.getName())).collect(Collectors.toList()),
+                List.of(new SimpleGrantedAuthority(user.getRole().name())),
                 true
         );
     }

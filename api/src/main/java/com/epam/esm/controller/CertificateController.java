@@ -12,6 +12,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
@@ -37,6 +38,7 @@ public class CertificateController {
      * @return ResponseEntity witch contains created certificate with generated id. Response code 201.
      */
     @PostMapping
+    @RolesAllowed("ADMIN")
     public ResponseEntity<GiftCertificateDto> createCertificate(
             @Valid @RequestBody GiftCertificateDto giftCertificateDto) {
         GiftCertificateDto certificateDto = giftCertificateService.createCertificate(giftCertificateDto);
@@ -110,6 +112,7 @@ public class CertificateController {
      * @return updated certificate wrapped into {@link GiftCertificateDto}. Response code 200.
      */
     @PutMapping
+    @RolesAllowed("ADMIN")
     public ResponseEntity<GiftCertificateDto> updateCertificate(
             @Valid @RequestBody GiftCertificateDto giftCertificateDto) {
         GiftCertificateDto certificateDto = giftCertificateService.updateCertificate(giftCertificateDto);
@@ -124,6 +127,7 @@ public class CertificateController {
      * @return the whole certificate object having all fields populated.
      */
     @PatchMapping
+    @RolesAllowed("ADMIN")
     public ResponseEntity<GiftCertificateDto> updatePrice(@Valid @RequestBody PriceDto priceDto) {
         GiftCertificateDto certificateDto = giftCertificateService.updatePrice(priceDto);
         hateoasService.attachHateoas(certificateDto);
@@ -137,6 +141,7 @@ public class CertificateController {
      * @return responseEntity having empty body. Response code 204.
      */
     @DeleteMapping("/{certificateId}")
+    @RolesAllowed("ADMIN")
     public ResponseEntity<GiftCertificateDto> deleteCertificate(
             @PathVariable("certificateId") @Min(1) Long certificateId) {
         giftCertificateService.deleteCertificate(certificateId);

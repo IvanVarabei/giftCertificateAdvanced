@@ -3,12 +3,15 @@ package com.epam.esm.controller;
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.OrderDto;
 import com.epam.esm.service.OrderService;
+import com.epam.esm.service.SecurityService;
 import com.epam.esm.service.hateoas.HateoasService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 
@@ -21,6 +24,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 public class OrderController {
     private final OrderService orderService;
     private final HateoasService hateoasService;
+    private final SecurityService securityService;
 
     /**
      * The method allows {@link com.epam.esm.entity.Order} creating.
@@ -30,9 +34,9 @@ public class OrderController {
      * @return ResponseEntity witch contains created order with generated id. Response code 201.
      */
     @PostMapping
-    public ResponseEntity<OrderDto> createOrder(@Valid @RequestBody OrderDto orderDto,
-                                                @RequestParam @Min(1) Long userId) {
-        orderDto.setId(userId);
+    @RolesAllowed({"ADMIN", "USER"})
+    public ResponseEntity<OrderDto> createOrder(@Valid @RequestBody OrderDto orderDto, Authentication authentication) {
+        securityService.ifUserIdNotMatchingThrowException(authentication, orderDto.getUser().getId());
         OrderDto createdOrderDto = orderService.createOrder(orderDto);
         hateoasService.attachHateoas(createdOrderDto);
         return ResponseEntity.status(CREATED).body(createdOrderDto);
@@ -45,9 +49,9 @@ public class OrderController {
      * @return updated order wrapped into {@link OrderDto}. Response code 200.
      */
     @PutMapping
-    public ResponseEntity<OrderDto> updateOrder(@Valid @RequestBody OrderDto orderDto,
-                                                @RequestParam @Min(1) Long userId) {
-        orderDto.setId(userId);
+    @RolesAllowed({"ADMIN", "USER"})
+    public ResponseEntity<OrderDto> updateOrder(@Valid @RequestBody OrderDto orderDto, Authentication authentication) {
+        securityService.ifUserIdNotMatchingThrowException(authentication, orderDto.getUser().getId());
         OrderDto updatedOrderDto = orderService.updateOrder(orderDto);
         hateoasService.attachHateoas(updatedOrderDto);
         return ResponseEntity.ok().body(updatedOrderDto);
@@ -60,7 +64,11 @@ public class OrderController {
      * @return responseEntity having empty body. Response code 204.
      */
     @DeleteMapping("/{orderId}")
-    public ResponseEntity<GiftCertificateDto> deleteOrder(@PathVariable("orderId") @Min(1) Long orderId) {
+    @RolesAllowed({"ADMIN", "USER"})
+    public ResponseEntity<GiftCertificateDto> deleteOrder(@PathVariable("orderId") @Min(1) Long orderId,
+                                                          Authentication authentication) {
+        OrderDto orderDto = orderService.getOrderById(orderId);
+        securityService.ifUserIdNotMatchingThrowException(authentication, orderDto.getUser().getId());
         orderService.deleteOrder(orderId);
         return ResponseEntity.noContent().build();
     }

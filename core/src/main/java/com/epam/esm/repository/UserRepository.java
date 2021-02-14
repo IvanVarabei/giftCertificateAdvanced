@@ -11,4 +11,6 @@ public interface UserRepository extends CustomCrudRepository<User> {
     Long countAll();
 
     Optional<User> findByUsername(String username);
+
+    Optional<User> findByEmail(String email);
 }
