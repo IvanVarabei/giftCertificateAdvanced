@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class TagRepositoryImplTest {
     @Autowired
     TagRepository tagRepository;
+
     @Autowired
     GiftCertificateRepository certificateRepository;
 

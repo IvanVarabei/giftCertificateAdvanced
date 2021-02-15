@@ -8,6 +8,7 @@ import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
@@ -122,7 +123,7 @@ public class ErrorControllerAdvice {
             String fieldName = ((FieldError) error).getField();
             ExceptionDto exceptionDto = new ExceptionDto();
             exceptionDto.setErrorMessage(String.format("%s - %s", fieldName, errorMessage));
-            exceptionDto.setErrorCode(4001);
+            exceptionDto.setErrorCode(40001);
             exceptionDto.setTimestamp(LocalDateTime.now());
             exceptionDtoList.add(exceptionDto);
         });
@@ -142,6 +143,18 @@ public class ErrorControllerAdvice {
     }
 
     /**
+     * Handles custom exception ResourceAlreadyExistException
+     */
+    @ExceptionHandler
+    public ResponseEntity<ExceptionDto> handle(ResourceAlreadyExistException ex) {
+        ExceptionDto exceptionDto = new ExceptionDto();
+        exceptionDto.setErrorMessage(ex.getMessage());
+        exceptionDto.setErrorCode(40001);
+        exceptionDto.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.badRequest().body(exceptionDto);
+    }
+
+    /**
      * Handles duplicate key error
      */
     @ExceptionHandler
@@ -157,17 +170,23 @@ public class ErrorControllerAdvice {
         return ResponseEntity.badRequest().body(exceptionDto);
     }
 
-    @ExceptionHandler
-    public ResponseEntity<ExceptionDto> handle(ResourceAlreadyExistException ex) {
-        ExceptionDto exceptionDto = new ExceptionDto();
-        exceptionDto.setErrorMessage(ex.getMessage());
-        exceptionDto.setErrorCode(40001);
-        exceptionDto.setTimestamp(LocalDateTime.now());
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exceptionDto);
-    }
-
+    /**
+     * Run if JWT token is expired or invalid
+     */
     @ExceptionHandler
     public ResponseEntity<ExceptionDto> handle(AuthenticationException ex) {
+        ExceptionDto exceptionDto = new ExceptionDto();
+        exceptionDto.setErrorMessage(ex.getMessage());
+        exceptionDto.setErrorCode(40101);
+        exceptionDto.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(exceptionDto);
+    }
+
+    /**
+     * Run if a user doesn't have required role
+     */
+    @ExceptionHandler
+    public ResponseEntity<ExceptionDto> handle(AccessDeniedException ex) {
         ExceptionDto exceptionDto = new ExceptionDto();
         exceptionDto.setErrorMessage(ex.getMessage());
         exceptionDto.setErrorCode(40301);

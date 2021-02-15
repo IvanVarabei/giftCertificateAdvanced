@@ -22,6 +22,7 @@ import static org.mockito.Mockito.*;
 class TagServiceImplTest {
     @Autowired
     TagConverter tagConverter;
+
     TagService tagService;
     TagRepository tagRepository;
 

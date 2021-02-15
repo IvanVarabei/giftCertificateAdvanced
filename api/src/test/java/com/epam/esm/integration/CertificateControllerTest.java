@@ -4,18 +4,27 @@ import com.epam.esm.dto.CustomPage;
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.entity.Role;
 import com.epam.esm.exception.ExceptionDto;
 import com.epam.esm.repository.GiftCertificateRepository;
+import com.epam.esm.security.JwtTokenProvider;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.servlet.MockMvc;
 
+import javax.sql.DataSource;
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -26,13 +35,28 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CertificateControllerTest {
     @Autowired
     GiftCertificateRepository certificateRepository;
+
     @Autowired
     ObjectMapper objectMapper;
+
     @Autowired
     MockMvc mockMvc;
+
+    String token;
+
+    @BeforeAll
+    void setup(@Autowired DataSource dataSource, @Autowired JwtTokenProvider tokenProvider) throws SQLException {
+        try (Connection connection = dataSource.getConnection()) {
+            Statement statement = connection.createStatement();
+            statement.executeUpdate("INSERT INTO \"user\" (username, password, email, role) " +
+                    "VALUES ('Alex', 'qwerty', 'testCertificateController@gamil.com', 'ROLE_ADMIN')");
+        }
+        token = "Bearer_" + tokenProvider.createToken("testCertificateController@gamil.com", Role.ROLE_ADMIN);
+    }
 
     @Test
     void should_return_created_certificate_having_generated_id() throws Exception {
@@ -46,7 +70,8 @@ class CertificateControllerTest {
         String responseAsString = mockMvc
                 .perform(post("/api/certificates")
                         .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(certificateDto)))
+                        .content(objectMapper.writeValueAsString(certificateDto))
+                        .header(HttpHeaders.AUTHORIZATION, token))
                 .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
@@ -143,7 +168,8 @@ class CertificateControllerTest {
         String responseAsString = mockMvc
                 .perform(put("/api/certificates")
                         .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(certificateDto)))
+                        .content(objectMapper.writeValueAsString(certificateDto))
+                        .header(HttpHeaders.AUTHORIZATION, token))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -167,7 +193,7 @@ class CertificateControllerTest {
         certificate.setUpdatedDate(LocalDateTime.now());
         Long id = certificateRepository.save(certificate).getId();
 
-        mockMvc.perform(delete("/api/certificates/" + id))
+        mockMvc.perform(delete("/api/certificates/" + id).header(HttpHeaders.AUTHORIZATION, token))
                 .andExpect(status().is(204));
 
         assertFalse(certificateRepository.findById(id).isPresent());

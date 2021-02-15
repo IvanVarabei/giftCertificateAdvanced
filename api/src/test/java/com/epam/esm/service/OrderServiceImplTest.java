@@ -26,12 +26,13 @@ import static org.mockito.Mockito.*;
 
 @SpringBootTest
 class OrderServiceImplTest {
+    @Autowired
+    OrderConverter orderConverter;
+
     OrderRepository orderRepository;
     UserRepository userRepository;
     OrderService orderService;
     Order order;
-    @Autowired
-    OrderConverter orderConverter;
 
     {
         order = new Order();

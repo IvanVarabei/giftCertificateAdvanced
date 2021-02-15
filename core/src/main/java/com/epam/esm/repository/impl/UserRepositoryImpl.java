@@ -29,13 +29,6 @@ public class UserRepositoryImpl extends GenericRepository<User> implements UserR
     }
 
     @Override
-    public Optional<User> findByUsername(String username) {
-        return entityManager.createQuery("select u from User u where u.username = :username", User.class)
-                .setParameter("username", username)
-                .getResultList().stream().findAny();
-    }
-
-    @Override
     public Optional<User> findByEmail(String email) {
         return entityManager.createQuery("select u from User u where u.email = :email", User.class)
                 .setParameter("email", email)

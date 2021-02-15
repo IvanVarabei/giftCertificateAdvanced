@@ -22,13 +22,14 @@ import static org.mockito.Mockito.*;
 class UserServiceImplTest {
     @Autowired
     UserConverter userConverter;
+
     UserService userService;
     UserRepository userRepository;
 
     @BeforeEach
     void setUp() {
         userRepository = mock(UserRepository.class);
-        userService = new UserServiceImpl(userRepository, userConverter);
+        userService = new UserServiceImpl(userRepository, userConverter, null);
     }
 
     @Test
