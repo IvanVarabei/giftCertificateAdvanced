@@ -1,6 +1,7 @@
 package com.epam.esm.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import org.postgresql.util.PSQLException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.convert.ConversionFailedException;
@@ -145,10 +146,12 @@ public class ErrorControllerAdvice {
      */
     @ExceptionHandler
     public ResponseEntity<ExceptionDto> handle(DataIntegrityViolationException ex) {
-        Throwable cause = ex.getCause().getCause();
-        String errorMessage = cause.getLocalizedMessage();
+        PSQLException cause = (PSQLException) ex.getCause().getCause();
+        String errorMessage = cause.getMessage();
+        errorMessage = errorMessage.replaceAll("\\s\"\\w+\"\n\\s", ".");
+        errorMessage = errorMessage.replaceAll("Key \\(\\w+\\)", "value");
         ExceptionDto exceptionDto = new ExceptionDto();
-        exceptionDto.setErrorMessage(errorMessage); // todo custom message
+        exceptionDto.setErrorMessage(errorMessage);
         exceptionDto.setErrorCode(40001);
         exceptionDto.setTimestamp(LocalDateTime.now());
         return ResponseEntity.badRequest().body(exceptionDto);
