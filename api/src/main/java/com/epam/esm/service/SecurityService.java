@@ -9,6 +9,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class SecurityService {
+    /**
+     * The method prevents a user to change other user's data.
+     *
+     * @param authentication contains request sender's user object.
+     * @param userId         which request sender tries to access.
+     */
     public void ifUserIdNotMatchingThrowException(Authentication authentication, Long userId) {
         JwtUser jwtUser = (JwtUser) authentication.getPrincipal();
         boolean containsRoleUser = jwtUser.getAuthorities().stream()

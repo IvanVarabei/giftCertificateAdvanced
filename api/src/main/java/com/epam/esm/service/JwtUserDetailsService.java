@@ -23,8 +23,8 @@ public class JwtUserDetailsService implements UserDetailsService {
                 user.getId(),
                 user.getUsername(),
                 user.getPassword(),
-                List.of(new SimpleGrantedAuthority(user.getRole().name())),
-                true
+                true,
+                List.of(new SimpleGrantedAuthority(user.getRole().name()))
         );
     }
 }
