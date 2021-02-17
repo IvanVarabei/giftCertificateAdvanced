@@ -46,7 +46,7 @@ public class HateoasService {
         userDto.add(selfLink);
         if (orderService.getOrdersByUserId(userId).size() > 0) {
             Link ordersLink = linkTo(methodOn(UserController.class)
-                    .getOrdersByUserId(userId, null)).withRel("allOrders");
+                    .getOrdersByUserId(userId)).withRel("allOrders");
             userDto.add(ordersLink);
         }
     }

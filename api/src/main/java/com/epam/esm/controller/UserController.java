@@ -11,7 +11,6 @@ import com.epam.esm.service.hateoas.HateoasService;
 import com.epam.esm.service.hateoas.PaginationHateoas;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -64,9 +63,8 @@ public class UserController {
      */
     @GetMapping("/{userId}")
     @RolesAllowed({"ADMIN", "USER"})
-    public ResponseEntity<UserDto> getUserById(@PathVariable("userId") @Min(1) Long userId,
-                                               Authentication authentication) {
-        securityService.ifUserIdNotMatchingThrowException(authentication, userId);
+    public ResponseEntity<UserDto> getUserById(@PathVariable("userId") @Min(1) Long userId) {
+        securityService.validateUserAccess(userId);
         UserDto userDto = userService.getUserById(userId);
         hateoasService.attachHateoas(userDto);
         return ResponseEntity.ok().body(userDto);
@@ -80,9 +78,8 @@ public class UserController {
      */
     @GetMapping("/{userId}/orders")
     @RolesAllowed({"ADMIN", "USER"})
-    public ResponseEntity<Map<Long, OrderDto>> getOrdersByUserId(@PathVariable("userId") @Min(1) Long userId,
-                                                                 Authentication authentication) {
-        securityService.ifUserIdNotMatchingThrowException(authentication, userId);
+    public ResponseEntity<Map<Long, OrderDto>> getOrdersByUserId(@PathVariable("userId") @Min(1) Long userId) {
+        securityService.validateUserAccess(userId);
         Map<Long, OrderDto> orderDtoMap = orderService.getOrdersByUserId(userId);
         orderDtoMap.values().forEach(hateoasService::attachHateoas);
         return ResponseEntity.ok().body(orderDtoMap);
