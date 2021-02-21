@@ -60,7 +60,7 @@ public class ErrorControllerAdvice {
                     String fullMessage = String.format("%s.%s value '%s' %s", className, property, invalidValue, message);
                     ExceptionDto exceptionDto = new ExceptionDto();
                     exceptionDto.setErrorMessage(fullMessage);
-                    exceptionDto.setErrorCode(4001);
+                    exceptionDto.setErrorCode(40001);
                     exceptionDto.setTimestamp(LocalDateTime.now());
                     exceptionDtoList.add(exceptionDto);
                 });
@@ -89,7 +89,7 @@ public class ErrorControllerAdvice {
         }
         ExceptionDto exceptionDto = new ExceptionDto();
         exceptionDto.setErrorMessage(message);
-        exceptionDto.setErrorCode(4001);
+        exceptionDto.setErrorCode(40001);
         exceptionDto.setTimestamp(LocalDateTime.now());
         return ResponseEntity.badRequest().body(exceptionDto);
     }
@@ -195,6 +195,18 @@ public class ErrorControllerAdvice {
     }
 
     /**
+     * Handles CustomAccessDeniedException
+     */
+    @ExceptionHandler
+    public ResponseEntity<ExceptionDto> handle(CustomAccessDeniedException ex) {
+        ExceptionDto exceptionDto = new ExceptionDto();
+        exceptionDto.setErrorMessage(ex.getMessage());
+        exceptionDto.setErrorCode(40301);
+        exceptionDto.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exceptionDto);
+    }
+
+    /**
      * Catches all unexpected exceptions
      */
     @ExceptionHandler
@@ -202,7 +214,7 @@ public class ErrorControllerAdvice {
         log.error(ex.getMessage(), ex);
         ExceptionDto exceptionDto = new ExceptionDto();
         exceptionDto.setErrorMessage(ex.getMessage());
-        exceptionDto.setErrorCode(5001);
+        exceptionDto.setErrorCode(50001);
         exceptionDto.setTimestamp(LocalDateTime.now());
         return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(exceptionDto);
     }
