@@ -1,6 +1,5 @@
 package com.epam.esm.entity;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -14,13 +13,18 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "\"user\"")
 @EqualsAndHashCode(callSuper = true)
-@AllArgsConstructor
 @NoArgsConstructor
 public class User extends BaseEntity {
-    private String username;
-    private String password;
-    private String email;
+    protected String email;
+    protected String password;
 
     @Enumerated(EnumType.STRING)
-    private Role role;
+    protected Role role;
+
+    public User(Long id, String email, String password, Role role) {
+        super(id);
+        this.email = email;
+        this.password = password;
+        this.role = role;
+    }
 }

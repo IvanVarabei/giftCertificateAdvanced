@@ -53,7 +53,7 @@ class OrderServiceImplTest {
         OrderDto orderDto = new OrderDto();
         when(orderRepository.save(any())).thenReturn(order);
 
-        orderService.createOrder(orderDto);
+        orderService.createOrder(orderDto, user);
 
         verify(orderRepository).update(any(Order.class));
     }
@@ -85,7 +85,7 @@ class OrderServiceImplTest {
         updateOrderDto.setId(order.getId());
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
 
-        orderService.updateOrder(updateOrderDto);
+        orderService.updateOrder(updateOrderDto, user);
 
         verify(orderRepository).update(any());
     }
@@ -95,7 +95,7 @@ class OrderServiceImplTest {
         OrderDto orderDto = new OrderDto();
         orderDto.setId(1L);
 
-        assertThrows(ResourceNotFoundException.class, () -> orderService.updateOrder(orderDto));
+        assertThrows(ResourceNotFoundException.class, () -> orderService.updateOrder(orderDto, user));
     }
 
     @Test

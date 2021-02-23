@@ -7,7 +7,10 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.hateoas.RepresentationModel;
 
-import javax.validation.constraints.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -16,10 +19,6 @@ public class UserDto extends RepresentationModel<UserDto> {
     @NotNull
     @Min(1)
     private Long id;
-
-    @NotBlank
-    @Pattern(regexp = "[\\w\\s\\.]{2,64}")
-    private String username;
 
     @NotBlank
     @Email

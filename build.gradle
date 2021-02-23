@@ -1,6 +1,7 @@
 plugins {
     id 'org.springframework.boot' version '2.4.2'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id "org.sonarqube" version "3.0"
 }
 
 subprojects {
@@ -74,5 +75,11 @@ subprojects {
 
     test {
         useJUnitPlatform()
+    }
+
+    sonarqube {
+        properties {
+            property "sonar.sources", "src"
+        }
     }
 }

@@ -16,7 +16,7 @@ VALUES (1, 1),
        (3, 3),
        (3, 2);
 
-INSERT INTO "user"(id, username, password, email, role)
-VALUES (1, 'Alex', 'qwerty', 'alex@gmail.com', 'ROLE_ADMIN'),
-       (2, 'Oleg', 'qwerty', 'oleg@gmail.com', 'ROLE_USER');
+INSERT INTO "user"(id, password, email, role)
+VALUES (1, 'qwerty', 'alex@gmail.com', 'ROLE_ADMIN'),
+       (2, 'qwerty', 'oleg@gmail.com', 'ROLE_USER');
 alter sequence user_id_seq restart with 3;

@@ -2,11 +2,14 @@ package com.epam.esm.controller;
 
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.OrderDto;
+import com.epam.esm.entity.Order;
+import com.epam.esm.entity.User;
 import com.epam.esm.service.OrderService;
 import com.epam.esm.service.SecurityService;
 import com.epam.esm.service.hateoas.HateoasService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,9 +37,9 @@ public class OrderController {
      */
     @PostMapping
     @RolesAllowed({"ADMIN", "USER"})
-    public ResponseEntity<OrderDto> createOrder(@Valid @RequestBody OrderDto orderDto) {
-        securityService.validateUserAccess(orderDto.getUser().getId());
-        OrderDto createdOrderDto = orderService.createOrder(orderDto);
+    public ResponseEntity<OrderDto> createOrder(@Valid @RequestBody OrderDto orderDto, Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        OrderDto createdOrderDto = orderService.createOrder(orderDto, user);
         hateoasService.attachHateoas(createdOrderDto);
         return ResponseEntity.status(CREATED).body(createdOrderDto);
     }
@@ -50,7 +53,6 @@ public class OrderController {
     @PutMapping
     @RolesAllowed({"ADMIN", "USER"})
     public ResponseEntity<OrderDto> updateOrder(@Valid @RequestBody OrderDto orderDto) {
-        securityService.validateUserAccess(orderDto.getUser().getId());
         OrderDto updatedOrderDto = orderService.updateOrder(orderDto);
         hateoasService.attachHateoas(updatedOrderDto);
         return ResponseEntity.ok().body(updatedOrderDto);
@@ -65,8 +67,8 @@ public class OrderController {
     @DeleteMapping("/{orderId}")
     @RolesAllowed({"ADMIN", "USER"})
     public ResponseEntity<GiftCertificateDto> deleteOrder(@PathVariable("orderId") @Min(1) Long orderId) {
-        OrderDto orderDto = orderService.getOrderById(orderId);
-        securityService.validateUserAccess(orderDto.getUser().getId());
+        Order order = orderService.getOrderById(orderId);
+        securityService.validateUserAccess(order.getUser().getId());
         orderService.deleteOrder(orderId);
         return ResponseEntity.noContent().build();
     }

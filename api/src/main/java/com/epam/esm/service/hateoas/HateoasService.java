@@ -52,7 +52,7 @@ public class HateoasService {
     }
 
     public void attachHateoas(OrderDto orderDto) {
-        attachHateoas(orderDto.getUser());
+      //  attachHateoas(orderDto.getUser());
         orderDto.getOrderItems().forEach(orderItemDto -> attachHateoas(orderItemDto.getCertificate()));
     }
 }

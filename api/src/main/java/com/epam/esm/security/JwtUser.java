@@ -1,19 +1,22 @@
 package com.epam.esm.security;
 
+import com.epam.esm.entity.Role;
+import com.epam.esm.entity.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.AllArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.List;
 
-@AllArgsConstructor
-public class JwtUser implements UserDetails {
-    private final Long id;
-    private final String username;
-    private final String password;
+public class JwtUser extends User implements UserDetails {
     private final boolean enabled;
-    private final Collection<? extends GrantedAuthority> authorities;
+
+    public JwtUser(Long id, String email, String password, Role role, boolean enabled) {
+        super(id, email, password, role);
+        this.enabled = enabled;
+    }
 
     @JsonIgnore
     public Long getId() {
@@ -22,28 +25,24 @@ public class JwtUser implements UserDetails {
 
     @Override
     public String getUsername() {
-        return username;
+        return email;
     }
 
-    @JsonIgnore
     @Override
     public boolean isAccountNonExpired() {
         return true;
     }
 
-    @JsonIgnore
     @Override
     public boolean isAccountNonLocked() {
         return true;
     }
 
-    @JsonIgnore
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
-    @JsonIgnore
     @Override
     public String getPassword() {
         return password;
@@ -51,7 +50,7 @@ public class JwtUser implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
+        return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
     @Override

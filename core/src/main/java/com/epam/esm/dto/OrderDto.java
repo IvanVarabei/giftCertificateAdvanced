@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -19,10 +18,6 @@ import java.util.List;
 public class OrderDto {
     @Min(1)
     private Long id;
-
-    @NotNull
-    @Valid
-    private UserDto user;
 
     private List<@Valid OrderItemDto> orderItems = new ArrayList<>();
     private BigDecimal cost;

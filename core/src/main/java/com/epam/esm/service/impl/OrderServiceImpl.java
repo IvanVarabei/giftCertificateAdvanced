@@ -4,6 +4,7 @@ import com.epam.esm.config.TimeZoneConfig;
 import com.epam.esm.dto.OrderDto;
 import com.epam.esm.entity.Order;
 import com.epam.esm.entity.OrderItem;
+import com.epam.esm.entity.User;
 import com.epam.esm.exception.ErrorMessage;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.mapper.OrderConverter;
@@ -31,8 +32,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public OrderDto createOrder(OrderDto orderDto) {
+    public OrderDto createOrder(OrderDto orderDto, User user) {
         Order order = orderConverter.toEntity(orderDto);
+        order.setUser(user);
         order.setCreatedDate(LocalDateTime.now(TimeZoneConfig.DATABASE_ZONE));
         BigDecimal cost = order.getOrderItems().stream()
                 .map(item -> item.getCertificate().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
@@ -58,9 +60,9 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderDto getOrderById(Long orderId) {
-        return orderConverter.toDTO(orderRepository.findById(orderId).orElseThrow(() ->
-                new ResourceNotFoundException(String.format(ErrorMessage.RESOURCE_NOT_FOUND, orderId))));
+    public Order getOrderById(Long orderId) {
+        return orderRepository.findById(orderId).orElseThrow(() ->
+                new ResourceNotFoundException(String.format(ErrorMessage.RESOURCE_NOT_FOUND, orderId)));
     }
 
     @Override

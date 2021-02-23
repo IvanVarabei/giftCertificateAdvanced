@@ -37,7 +37,6 @@ public class UserServiceImpl implements UserService {
         });
         User user = userConverter.toUser(authenticationRequestDto);
         user.setRole(Role.ROLE_USER);
-        user.setUsername("defaultUsername");
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userConverter.toDTO(userRepository.save(user));
     }

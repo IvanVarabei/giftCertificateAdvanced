@@ -23,7 +23,8 @@ import java.util.Date;
  */
 @Component
 public class JwtTokenProvider {
-    private static final String BEARER = "Bearer_";
+    private static final String BEARER = "Bearer ";
+    private static final String JWT_REGEXP = "Bearer\\s\\w*\\.\\w*\\.\\w*";
 
     @Value("${jwt.token.secret}")
     private String secret;
@@ -47,7 +48,6 @@ public class JwtTokenProvider {
         Date validity = new Date(now.getTime() + validityInMilliseconds);
         return Jwts.builder()
                 .setClaims(claims)
-                .setIssuedAt(now)
                 .setExpiration(validity)
                 .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
@@ -64,10 +64,13 @@ public class JwtTokenProvider {
 
     public String resolveToken(HttpServletRequest req) {
         String bearerToken = req.getHeader(HttpHeaders.AUTHORIZATION);
-        if (bearerToken != null && bearerToken.startsWith(BEARER)) {
-            return bearerToken.substring(BEARER.length());
+        if (bearerToken == null) {
+            return null;
         }
-        return null;
+        if (!bearerToken.matches(JWT_REGEXP)) {
+            throw new BadCredentialsException(String.format("JWT token is not matching: '%s'", JWT_REGEXP));
+        }
+        return bearerToken.substring(BEARER.length());
     }
 
     public boolean validateToken(String token) {
