@@ -1,0 +1,437 @@
+{
+  "variables": [],
+  "info": {
+    "name": "giftCertificateProject",
+    "_postman_id": "7a2fe321-a21a-855d-39eb-38e0ba6c7c9d",
+    "description": "",
+    "schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "auth",
+      "description": "",
+      "item": [
+        {
+          "name": "login",
+          "request": {
+            "url": "http://localhost:8080/api/auth/login/",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": ""
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"email\": \"admin@gmail.com\",\n\t\"password\": \"test\"\n}"
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "signup",
+          "request": {
+            "url": "http://localhost:8080/api/auth/signup",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": ""
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"email\": \"user@gmail.com\",\n\t\"password\": \"test\"\n}"
+            },
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "tag",
+      "description": "",
+      "item": [
+        {
+          "name": "createTag",
+          "request": {
+            "url": "http://localhost:8080/api/tags/",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": ""
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyQGdtYWlsLmNvbSIsInJvbGVzIjoiUk9MRV9VU0VSIiwiZXhwIjoxNjE0MjM1ODI4fQ.F2AkncfEx-6AMrwnV-EXAo5jJp-mpN8_NxQJW4hcei8",
+                "description": ""
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"name\": \"hello\"\n}"
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "findAllTags",
+          "request": {
+            "url": {
+              "raw": "http://localhost:8080/api/tags?page=0&size=5",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "tags"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0",
+                  "equals": true,
+                  "description": ""
+                },
+                {
+                  "key": "size",
+                  "value": "5",
+                  "equals": true,
+                  "description": ""
+                }
+              ],
+              "variable": []
+            },
+            "method": "GET",
+            "header": [],
+            "body": {},
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "findTagById",
+          "request": {
+            "url": "http://localhost:8080/api/tags/2",
+            "method": "GET",
+            "header": [],
+            "body": {},
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "deleteTag",
+          "request": {
+            "url": "http://localhost:8080/api/tags/1001",
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJyb2xlcyI6IlJPTEVfQURNSU4iLCJleHAiOjE2MTQyMzU5MDR9.IYow4XiB6UV-dCAWEuCPHR2sx408JwnrP0TqYnYqxoQ",
+                "description": ""
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "",
+                  "value": "",
+                  "description": "",
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "certificate",
+      "description": "",
+      "item": [
+        {
+          "name": "createCertificate",
+          "request": {
+            "url": "http://localhost:8080/api/certificates",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": ""
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyQGdtYWlsLmNvbSIsInJvbGVzIjoiUk9MRV9VU0VSIiwiZXhwIjoxNjE0MjM1OTc1fQ.fL-SlYbHUevlv5VmMrDVcSmpQXfgA4V2abiNb2Ca2Tk",
+                "description": ""
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": " {\n        \"name\": \"rope jump\",\n        \"description\": \"2 free jumps\",\n        \"price\": 9.11,\n    \t\"duration\": 777,\n        \"tags\": [\n            {\n            \t\"name\": \"rope\"\n            },\n            {\n\t\t\t    \"id\": 1,\n            \t\"name\": \"Silk_1\"\n\t\t\t}\n        ]\n}"
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "searchCertificates",
+          "request": {
+            "url": "http://localhost:8080/api/certificates/",
+            "method": "GET",
+            "header": [],
+            "body": {},
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "findCertificateById",
+          "request": {
+            "url": "http://localhost:8080/api/certificates/2",
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/xml",
+                "description": ""
+              }
+            ],
+            "body": {},
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "updateCertificate",
+          "request": {
+            "url": "http://localhost:8080/api/certificates",
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": ""
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyQGdtYWlsLmNvbSIsInJvbGVzIjoiUk9MRV9VU0VSIiwiZXhwIjoxNjE0MjM2MjIxfQ.8qCQodHvpJSSm3EyO5DX-JGSyVbp6FptJl_VF5H4RsQ",
+                "description": ""
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "\n{\n            \"id\": 395,\n            \"name\": \"Ebiten maki_395\",\n            \"description\": \"I g-guess you guys aren`t ready for that yet. But your kids are gonna love it.\",\n            \"price\": 62.28,\n            \"duration\": 6,\n            \"createdDate\": \"2021-02-10T21:33:50\",\n            \"updatedDate\": \"2021-02-10T21:33:50\",\n            \"tags\": [\n                {\n                    \"id\": 138,\n                    \"name\": \"bear_138\",\n                    \"_links\": {\n                        \"self\": {\n                            \"href\": \"http://localhost:8080/api/tags/138\"\n                        },\n                        \"certificates\": {\n                            \"href\": \"http://localhost:8080/api/certificates?tagName=bear_138{&name,description,sortByField,sortOrder}\",\n                            \"templated\": true\n                        }\n                    }\n                },\n                {\n                    \"id\": 448,\n                    \"name\": \"ox_448\",\n                    \"_links\": {\n                        \"self\": {\n                            \"href\": \"http://localhost:8080/api/tags/448\"\n                        },\n                        \"certificates\": {\n                            \"href\": \"http://localhost:8080/api/certificates?tagName=ox_448{&name,description,sortByField,sortOrder}\",\n                            \"templated\": true\n                        }\n                    }\n                },\n                {\n                \t\"id\": 84,\n                    \"name\": \"Purplecarrot_84\"\n                },\n                {\n                    \"id\": 985,\n                    \"name\": \"Bloodoranges_985\",\n                    \"_links\": {\n                        \"self\": {\n                            \"href\": \"http://localhost:8080/api/tags/985\"\n                        },\n                        \"certificates\": {\n                            \"href\": \"http://localhost:8080/api/certificates?tagName=Bloodoranges_985{&name,description,sortByField,sortOrder}\",\n                            \"templated\": true\n                        }\n                    }\n                },\n                {\n                    \"id\": 669,\n                    \"name\": \"goat_669\",\n                    \"_links\": {\n                        \"self\": {\n                            \"href\": \"http://localhost:8080/api/tags/669\"\n                        },\n                        \"certificates\": {\n                            \"href\": \"http://localhost:8080/api/certificates?tagName=goat_669{&name,description,sortByField,sortOrder}\",\n                            \"templated\": true\n                        }\n                    }\n                }\n            ]\n        }"
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "updatePrice",
+          "request": {
+            "url": "http://localhost:8080/api/certificates",
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": ""
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJyb2xlcyI6IlJPTEVfQURNSU4iLCJleHAiOjE2MTQyMzYwODh9.ya5xrnFV5ECXO6fG0uYcYAnwD0nLZwz_OpIr7UExO24",
+                "description": ""
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"id\": 1,\n\t\"price\": 5.55\n}"
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "deleteCertificate",
+          "request": {
+            "url": "http://localhost:8080/api/certificates/1",
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyQGdtYWlsLmNvbSIsInJvbGVzIjoiUk9MRV9VU0VSIiwiZXhwIjoxNjE0MjM1ODI4fQ.F2AkncfEx-6AMrwnV-EXAo5jJp-mpN8_NxQJW4hcei8",
+                "description": ""
+              }
+            ],
+            "body": {},
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "user",
+      "description": "",
+      "item": [
+        {
+          "name": "getOrdersByUserId",
+          "request": {
+            "url": "http://localhost:8080/api/users/1001/orders",
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyQGdtYWlsLmNvbSIsInJvbGVzIjoiUk9MRV9VU0VSIiwiZXhwIjoxNjE0MjM2MjIxfQ.8qCQodHvpJSSm3EyO5DX-JGSyVbp6FptJl_VF5H4RsQ",
+                "description": ""
+              }
+            ],
+            "body": {},
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "findAllUsers",
+          "request": {
+            "url": "http://localhost:8080/api/users/",
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyQGdtYWlsLmNvbSIsInJvbGVzIjoiUk9MRV9VU0VSIiwiZXhwIjoxNjE0MjM2NDgzfQ.j_4jh-lJjN7vKTlaTGvJRaLnEOAd8J4IsVDFVL07_Tc",
+                "description": ""
+              }
+            ],
+            "body": {},
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "findUserById",
+          "request": {
+            "url": "http://localhost:8080/api/users/1002",
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJyb2xlcyI6IlJPTEVfQURNSU4iLCJleHAiOjE2MTQyMzY1Mzd9.NCJY-fyb8ZY9mepvKaTnx_cMfdjeCyQ7xFRkIGVQtjg",
+                "description": ""
+              }
+            ],
+            "body": {},
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "order",
+      "description": "",
+      "item": [
+        {
+          "name": "createOrder",
+          "request": {
+            "url": "http://localhost:8080/api/orders",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": ""
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJyb2xlcyI6IlJPTEVfQURNSU4iLCJleHAiOjE2MTQyMzYzODN9.Q7EV_LWitIkdi3Mt31WmVolMvQwwAXW64JPHqcBKk3U",
+                "description": ""
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"userId\": 1002,\n\t\"orderItems\": {\n\t\t\"3\": 1,\n\t\t\"2\": 1\n\t}\n}"
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "updateOrder",
+          "request": {
+            "url": "http://localhost:8080/api/orders/919",
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": ""
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJyb2xlcyI6IlJPTEVfQURNSU4iLCJleHAiOjE2MTQyMzcxODh9.6defyr3SE6Ahd5VDrkx3ItQN3BXrmbfe-PoYkFgwSLc",
+                "description": ""
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"userId\": 1,\n\t\"orderItems\": {\n\t\t\"2\": 2\n\t}\n}"
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "deleteOrder",
+          "request": {
+            "url": "http://localhost:8080/api/orders/920",
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyQGdtYWlsLmNvbSIsInJvbGVzIjoiUk9MRV9VU0VSIiwiZXhwIjoxNjE0MjM2NjE3fQ.2YsdvXuDBesj7CZR2FCdDko3f6Gryik0asOVWug3tKE",
+                "description": ""
+              }
+            ],
+            "body": {},
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "analysis",
+      "description": "",
+      "item": [
+        {
+          "name": "findPrevalentTag",
+          "request": {
+            "url": "http://localhost:8080/api/statistics/prevalent",
+            "method": "GET",
+            "header": [],
+            "body": {},
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

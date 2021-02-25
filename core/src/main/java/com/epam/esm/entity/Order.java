@@ -1,6 +1,7 @@
 package com.epam.esm.entity;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
@@ -12,12 +13,9 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "\"order\"")
+@EqualsAndHashCode(callSuper = true)
 @Audited
-public class Order {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+public class Order extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     @NotAudited

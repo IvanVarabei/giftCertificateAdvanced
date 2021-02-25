@@ -12,6 +12,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
@@ -34,6 +35,7 @@ public class TagController {
      * @return ResponseEntity witch contains created tag with generated id. Response code 201.
      */
     @PostMapping
+    @RolesAllowed("ADMIN")
     public ResponseEntity<TagDto> createTag(@RequestBody @Valid TagDto tagDto) {
         TagDto createdTagDto = tagService.createTag(tagDto);
         hateoasService.attachHateoas(createdTagDto);
@@ -83,6 +85,7 @@ public class TagController {
      * @see com.epam.esm.dto.TagDto
      */
     @PutMapping
+    @RolesAllowed("ADMIN")
     public ResponseEntity<TagDto> updateTag(@Valid @RequestBody TagDto tagDto) {
         TagDto updatedTag = tagService.updateTag(tagDto);
         hateoasService.attachHateoas(updatedTag);
@@ -96,6 +99,7 @@ public class TagController {
      * @return responseEntity having empty body. Response code 204.
      */
     @DeleteMapping("/{tagId}")
+    @RolesAllowed("ADMIN")
     public ResponseEntity<TagDto> deleteTagById(@PathVariable("tagId") @Min(1) Long tagId) {
         tagService.deleteTag(tagId);
         return ResponseEntity.noContent().build();

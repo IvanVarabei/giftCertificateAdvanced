@@ -73,7 +73,7 @@ public class TagServiceImpl implements TagService {
     @Override
     public TagDto getPrevalentTagOfMostProfitableUser() {
         Tag tag = tagRepository.getPrevalentTagOfMostProfitableUser().orElseThrow(() ->
-                new ResourceNotFoundException(ErrorMessage.ORDER_ITEMS_BOUND_WITH_TAGS_NOT_FOUND));
+                new ResourceNotFoundException("Order items bound with tags not found"));
         return tagConverter.toDTO(tag);
     }
 }

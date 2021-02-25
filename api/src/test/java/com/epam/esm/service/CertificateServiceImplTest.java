@@ -24,11 +24,12 @@ import static org.mockito.Mockito.*;
 
 @SpringBootTest
 class CertificateServiceImplTest {
+    @Autowired
+    CertificateConverter certificateConverter;
+
     GiftCertificateRepository certificateRepository;
     GiftCertificateService giftCertificateService;
     GiftCertificate certificate;
-    @Autowired
-    CertificateConverter certificateConverter;
 
     {
         certificate = new GiftCertificate();

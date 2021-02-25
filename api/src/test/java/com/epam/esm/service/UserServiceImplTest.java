@@ -22,13 +22,14 @@ import static org.mockito.Mockito.*;
 class UserServiceImplTest {
     @Autowired
     UserConverter userConverter;
+
     UserService userService;
     UserRepository userRepository;
 
     @BeforeEach
     void setUp() {
         userRepository = mock(UserRepository.class);
-        userService = new UserServiceImpl(userRepository, userConverter);
+        userService = new UserServiceImpl(userRepository, userConverter, null);
     }
 
     @Test
@@ -52,12 +53,12 @@ class UserServiceImplTest {
     void returns_user_having_specified_id_when_getUserBuId() {
         User foundUser = new User();
         foundUser.setId(1L);
-        foundUser.setUsername("ivan");
+        foundUser.setEmail("ivan@gmail.com");
         when(userRepository.findById(foundUser.getId())).thenReturn(Optional.of(foundUser));
 
         UserDto userDto = userService.getUserById(foundUser.getId());
 
-        assertEquals(foundUser.getUsername(), userDto.getUsername());
+        assertEquals(foundUser.getEmail(), userDto.getEmail());
     }
 
     @Test

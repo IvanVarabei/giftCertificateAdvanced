@@ -1,17 +1,23 @@
 package com.epam.esm.service.impl;
 
+import com.epam.esm.dto.AuthenticationRequestDto;
 import com.epam.esm.dto.CustomPage;
 import com.epam.esm.dto.CustomPageable;
 import com.epam.esm.dto.UserDto;
+import com.epam.esm.entity.Role;
 import com.epam.esm.entity.User;
 import com.epam.esm.exception.ErrorMessage;
+import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.mapper.UserConverter;
 import com.epam.esm.repository.UserRepository;
 import com.epam.esm.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,6 +26,20 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserConverter userConverter;
+    private final PasswordEncoder passwordEncoder;
+
+    @Override
+    @Transactional
+    public UserDto register(AuthenticationRequestDto authenticationRequestDto) {
+        String email = authenticationRequestDto.getEmail();
+        userRepository.findByEmail(email).ifPresent(r -> {
+            throw new ResourceAlreadyExistException(String.format(ErrorMessage.USER_ALREADY_EXISTS, email));
+        });
+        User user = userConverter.toUser(authenticationRequestDto);
+        user.setRole(Role.ROLE_USER);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        return userConverter.toDTO(userRepository.save(user));
+    }
 
     @Override
     public CustomPage<UserDto> getPaginated(CustomPageable pageRequest) {
@@ -41,5 +61,11 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new ResourceNotFoundException(String.format(ErrorMessage.RESOURCE_NOT_FOUND, userId)));
         return userConverter.toDTO(user);
+    }
+
+    @Override
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email).orElseThrow(() ->
+                new UsernameNotFoundException(String.format(ErrorMessage.USER_NOT_FOUND, email)));
     }
 }

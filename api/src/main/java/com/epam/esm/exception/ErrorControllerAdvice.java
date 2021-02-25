@@ -1,11 +1,15 @@
 package com.epam.esm.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import org.postgresql.util.PSQLException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -56,7 +60,7 @@ public class ErrorControllerAdvice {
                     String fullMessage = String.format("%s.%s value '%s' %s", className, property, invalidValue, message);
                     ExceptionDto exceptionDto = new ExceptionDto();
                     exceptionDto.setErrorMessage(fullMessage);
-                    exceptionDto.setErrorCode(4001);
+                    exceptionDto.setErrorCode(40001);
                     exceptionDto.setTimestamp(LocalDateTime.now());
                     exceptionDtoList.add(exceptionDto);
                 });
@@ -85,7 +89,7 @@ public class ErrorControllerAdvice {
         }
         ExceptionDto exceptionDto = new ExceptionDto();
         exceptionDto.setErrorMessage(message);
-        exceptionDto.setErrorCode(4001);
+        exceptionDto.setErrorCode(40001);
         exceptionDto.setTimestamp(LocalDateTime.now());
         return ResponseEntity.badRequest().body(exceptionDto);
     }
@@ -119,7 +123,7 @@ public class ErrorControllerAdvice {
             String fieldName = ((FieldError) error).getField();
             ExceptionDto exceptionDto = new ExceptionDto();
             exceptionDto.setErrorMessage(String.format("%s - %s", fieldName, errorMessage));
-            exceptionDto.setErrorCode(4001);
+            exceptionDto.setErrorCode(40001);
             exceptionDto.setTimestamp(LocalDateTime.now());
             exceptionDtoList.add(exceptionDto);
         });
@@ -139,17 +143,67 @@ public class ErrorControllerAdvice {
     }
 
     /**
+     * Handles custom exception ResourceAlreadyExistException
+     */
+    @ExceptionHandler
+    public ResponseEntity<ExceptionDto> handle(ResourceAlreadyExistException ex) {
+        ExceptionDto exceptionDto = new ExceptionDto();
+        exceptionDto.setErrorMessage(ex.getMessage());
+        exceptionDto.setErrorCode(40001);
+        exceptionDto.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.badRequest().body(exceptionDto);
+    }
+
+    /**
      * Handles duplicate key error
      */
     @ExceptionHandler
     public ResponseEntity<ExceptionDto> handle(DataIntegrityViolationException ex) {
-        Throwable cause = ex.getCause().getCause();
-        String errorMessage = cause.getLocalizedMessage();
+        PSQLException cause = (PSQLException) ex.getCause().getCause();
+        String errorMessage = cause.getMessage();
+        errorMessage = errorMessage.replaceAll("\\s\"\\w+\"\n\\s", ".");
+        errorMessage = errorMessage.replaceAll("Key \\(\\w+\\)", "value");
         ExceptionDto exceptionDto = new ExceptionDto();
         exceptionDto.setErrorMessage(errorMessage);
-        exceptionDto.setErrorCode(4001);
+        exceptionDto.setErrorCode(40001);
         exceptionDto.setTimestamp(LocalDateTime.now());
         return ResponseEntity.badRequest().body(exceptionDto);
+    }
+
+    /**
+     * Run if JWT token is expired or invalid
+     */
+    @ExceptionHandler
+    public ResponseEntity<ExceptionDto> handle(AuthenticationException ex) {
+        ExceptionDto exceptionDto = new ExceptionDto();
+        exceptionDto.setErrorMessage(ex.getMessage());
+        exceptionDto.setErrorCode(40101);
+        exceptionDto.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(exceptionDto);
+    }
+
+    /**
+     * Run if a user doesn't have required role
+     */
+    @ExceptionHandler
+    public ResponseEntity<ExceptionDto> handle(AccessDeniedException ex) {
+        ExceptionDto exceptionDto = new ExceptionDto();
+        exceptionDto.setErrorMessage(ex.getMessage());
+        exceptionDto.setErrorCode(40301);
+        exceptionDto.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exceptionDto);
+    }
+
+    /**
+     * Handles CustomAccessDeniedException
+     */
+    @ExceptionHandler
+    public ResponseEntity<ExceptionDto> handle(CustomAccessDeniedException ex) {
+        ExceptionDto exceptionDto = new ExceptionDto();
+        exceptionDto.setErrorMessage(ex.getMessage());
+        exceptionDto.setErrorCode(40301);
+        exceptionDto.setTimestamp(LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exceptionDto);
     }
 
     /**
@@ -160,7 +214,7 @@ public class ErrorControllerAdvice {
         log.error(ex.getMessage(), ex);
         ExceptionDto exceptionDto = new ExceptionDto();
         exceptionDto.setErrorMessage(ex.getMessage());
-        exceptionDto.setErrorCode(5001);
+        exceptionDto.setErrorCode(50001);
         exceptionDto.setTimestamp(LocalDateTime.now());
         return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(exceptionDto);
     }

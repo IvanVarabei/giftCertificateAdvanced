@@ -1,11 +1,12 @@
 package com.epam.esm.config;
 
-
 import com.epam.esm.dto.search.SortByField;
 import com.epam.esm.dto.search.SortOrder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 public class SpringContextConfig {
@@ -33,5 +34,10 @@ public class SpringContextConfig {
                 return SortOrder.valueOf(source.toUpperCase());
             }
         };
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder(8);
     }
 }

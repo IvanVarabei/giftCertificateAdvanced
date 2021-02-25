@@ -2,9 +2,10 @@ package com.epam.esm.controller;
 
 import com.epam.esm.dto.CustomPage;
 import com.epam.esm.dto.CustomPageable;
-import com.epam.esm.dto.OrderDto;
+import com.epam.esm.dto.ResponseOrderDto;
 import com.epam.esm.dto.UserDto;
 import com.epam.esm.service.OrderService;
+import com.epam.esm.service.SecurityService;
 import com.epam.esm.service.UserService;
 import com.epam.esm.service.hateoas.HateoasService;
 import com.epam.esm.service.hateoas.PaginationHateoas;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
@@ -30,6 +32,7 @@ public class UserController {
     private final UserService userService;
     private final OrderService orderService;
     private final HateoasService hateoasService;
+    private final SecurityService securityService;
     private final PaginationHateoas<UserDto> paginationHateoas;
 
     /**
@@ -41,6 +44,7 @@ public class UserController {
      * @return Response entity containing page object. Response code 200.
      */
     @GetMapping
+    @RolesAllowed("ADMIN")
     public CustomPage<UserDto> getUsers(@Valid CustomPageable pageRequest, UriComponentsBuilder uriBuilder,
                                         HttpServletRequest request) {
         CustomPage<UserDto> users = userService.getPaginated(pageRequest);
@@ -58,7 +62,9 @@ public class UserController {
      * @return TagDto. Response code 200.
      */
     @GetMapping("/{userId}")
+    @RolesAllowed({"ADMIN", "USER"})
     public ResponseEntity<UserDto> getUserById(@PathVariable("userId") @Min(1) Long userId) {
+        securityService.validateUserAccess(userId);
         UserDto userDto = userService.getUserById(userId);
         hateoasService.attachHateoas(userDto);
         return ResponseEntity.ok().body(userDto);
@@ -71,8 +77,10 @@ public class UserController {
      * @return map (key: orderId)
      */
     @GetMapping("/{userId}/orders")
-    public ResponseEntity<Map<Long, OrderDto>> getOrdersByUserId(@PathVariable("userId") @Min(1) Long userId) {
-        Map<Long, OrderDto> orderDtoMap = orderService.getOrdersByUserId(userId);
+    @RolesAllowed({"ADMIN", "USER"})
+    public ResponseEntity<Map<Long, ResponseOrderDto>> getOrdersByUserId(@PathVariable("userId") @Min(1) Long userId) {
+        securityService.validateUserAccess(userId);
+        Map<Long, ResponseOrderDto> orderDtoMap = orderService.getOrdersByUserId(userId);
         orderDtoMap.values().forEach(hateoasService::attachHateoas);
         return ResponseEntity.ok().body(orderDtoMap);
     }
