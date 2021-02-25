@@ -1,0 +1,7 @@
+package com.epam.esm.exception;
+
+public class CustomAccessDeniedException extends RuntimeException {
+    public CustomAccessDeniedException(String message) {
+        super(message);
+    }
+}

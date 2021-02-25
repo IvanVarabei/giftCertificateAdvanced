@@ -4,7 +4,7 @@ import com.epam.esm.controller.CertificateController;
 import com.epam.esm.controller.TagController;
 import com.epam.esm.controller.UserController;
 import com.epam.esm.dto.GiftCertificateDto;
-import com.epam.esm.dto.OrderDto;
+import com.epam.esm.dto.ResponseOrderDto;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.dto.UserDto;
 import com.epam.esm.service.OrderService;
@@ -51,7 +51,7 @@ public class HateoasService {
         }
     }
 
-    public void attachHateoas(OrderDto orderDto) {
+    public void attachHateoas(ResponseOrderDto orderDto) {
         attachHateoas(orderDto.getUser());
         orderDto.getOrderItems().forEach(orderItemDto -> attachHateoas(orderItemDto.getCertificate()));
     }

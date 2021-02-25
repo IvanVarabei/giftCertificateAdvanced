@@ -5,8 +5,6 @@ import com.epam.esm.repository.GenericRepository;
 import com.epam.esm.repository.TagRepository;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,12 +26,8 @@ public class TagRepositoryImpl extends GenericRepository<Tag> implements TagRepo
                     "order by sum(quantity) desc " +
                     "limit 1";
 
-    @PersistenceContext
-    private final EntityManager entityManager;
-
-    public TagRepositoryImpl(EntityManager entityManager) {
-        super(entityManager, Tag.class);
-        this.entityManager = entityManager;
+    public TagRepositoryImpl() {
+        super(Tag.class);
     }
 
     @Override

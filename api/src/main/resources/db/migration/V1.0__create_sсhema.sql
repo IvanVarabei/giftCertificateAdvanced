@@ -28,10 +28,9 @@ create table certificate_tag
 create table "user"
 (
     id       serial       not null primary key,
-    username varchar(64)  not null,
     password varchar(64)  not null,
     email    varchar(256) not null,
-    constraint unique_username unique (username),
+    role     varchar(64)  not null,
     constraint unique_email unique (email)
 );
 

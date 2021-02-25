@@ -1,10 +1,13 @@
 package com.epam.esm.service;
 
-import com.epam.esm.dto.OrderDto;
+import com.epam.esm.dto.ReceiveOrderDto;
+import com.epam.esm.dto.ResponseOrderDto;
 import com.epam.esm.entity.Order;
+import com.epam.esm.entity.Role;
 import com.epam.esm.entity.User;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.mapper.OrderConverter;
+import com.epam.esm.repository.GiftCertificateRepository;
 import com.epam.esm.repository.OrderRepository;
 import com.epam.esm.repository.UserRepository;
 import com.epam.esm.service.impl.OrderServiceImpl;
@@ -26,12 +29,14 @@ import static org.mockito.Mockito.*;
 
 @SpringBootTest
 class OrderServiceImplTest {
-    OrderRepository orderRepository;
-    UserRepository userRepository;
-    OrderService orderService;
-    Order order;
     @Autowired
     OrderConverter orderConverter;
+
+    OrderRepository orderRepository;
+    UserRepository userRepository;
+    GiftCertificateRepository certificateRepository;
+    OrderService orderService;
+    Order order;
 
     {
         order = new Order();
@@ -44,17 +49,19 @@ class OrderServiceImplTest {
     void setUp() {
         orderRepository = mock(OrderRepository.class);
         userRepository = mock(UserRepository.class);
-        orderService = new OrderServiceImpl(orderRepository, userRepository, orderConverter);
+        orderService = new OrderServiceImpl(orderRepository, userRepository, certificateRepository, orderConverter);
     }
 
     @Test
     void should_invoke_orderRepository_update_when_createOrder() {
-        OrderDto orderDto = new OrderDto();
-        when(orderRepository.save(any())).thenReturn(order);
+        ReceiveOrderDto orderDto = new ReceiveOrderDto();
+        orderDto.setUserId(1L);
+        User user = new User(1L, "email@gmail.com", "password", Role.ROLE_USER);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
         orderService.createOrder(orderDto);
 
-        verify(orderRepository).update(any(Order.class));
+        verify(orderRepository).save(any(Order.class));
     }
 
     @Test
@@ -63,12 +70,12 @@ class OrderServiceImplTest {
         Order order = new Order();
         order.setId(1L);
         when(orderRepository.findOrdersByUserId(1L)).thenReturn(List.of(order));
-        OrderDto orderDto = new OrderDto();
+        ResponseOrderDto orderDto = new ResponseOrderDto();
         orderDto.setId(1L);
         orderDto.setOrderItems(null);
-        Map<Long, OrderDto> expected = Map.of(1L, orderDto);
+        Map<Long, ResponseOrderDto> expected = Map.of(1L, orderDto);
 
-        Map<Long, OrderDto> actual = orderService.getOrdersByUserId(1L);
+        Map<Long, ResponseOrderDto> actual = orderService.getOrdersByUserId(1L);
 
         assertEquals(expected, actual);
     }
@@ -80,21 +87,19 @@ class OrderServiceImplTest {
 
     @Test
     void should_invoke_orderRepository_update_when_updateOrder() {
-        OrderDto updateOrderDto = new OrderDto();
-        updateOrderDto.setId(order.getId());
+        ReceiveOrderDto updateOrderDto = new ReceiveOrderDto();
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
 
-        orderService.updateOrder(updateOrderDto);
+        orderService.updateOrder(updateOrderDto, order.getId());
 
         verify(orderRepository).update(any());
     }
 
     @Test
     void should_throw_ResourceNotFoundException_when_order_not_found_when_update() {
-        OrderDto orderDto = new OrderDto();
-        orderDto.setId(1L);
+        ReceiveOrderDto orderDto = new ReceiveOrderDto();
 
-        assertThrows(ResourceNotFoundException.class, () -> orderService.updateOrder(orderDto));
+        assertThrows(ResourceNotFoundException.class, () -> orderService.updateOrder(orderDto, 1L));
     }
 
     @Test

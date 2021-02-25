@@ -7,8 +7,6 @@ import com.epam.esm.repository.GiftCertificateRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,12 +36,8 @@ public class GiftCertificateRepositoryImpl extends GenericRepository<GiftCertifi
 
     private static final String BLANK = " ";
 
-    @PersistenceContext
-    private final EntityManager entityManager;
-
-    public GiftCertificateRepositoryImpl(EntityManager entityManager) {
-        super(entityManager, GiftCertificate.class);
-        this.entityManager = entityManager;
+    public GiftCertificateRepositoryImpl() {
+        super(GiftCertificate.class);
     }
 
     /**
@@ -100,8 +94,6 @@ public class GiftCertificateRepositoryImpl extends GenericRepository<GiftCertifi
      * HAVING COUNT(tag_id) = 2)
      * and name ilike '%name_fragment%'
      * and description ilike '%description_fragment%'
-     *
-     * @return
      */
     @Override
     public Long countAll(SearchCertificateDto searchDto) {

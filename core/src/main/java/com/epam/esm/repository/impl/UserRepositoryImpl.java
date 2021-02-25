@@ -1,20 +1,18 @@
 package com.epam.esm.repository.impl;
 
 import com.epam.esm.entity.User;
+import com.epam.esm.repository.GenericRepository;
 import com.epam.esm.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-@RequiredArgsConstructor
-public class UserRepositoryImpl implements UserRepository {
-    @PersistenceContext
-    private final EntityManager entityManager;
+public class UserRepositoryImpl extends GenericRepository<User> implements UserRepository {
+    public UserRepositoryImpl() {
+        super(User.class);
+    }
 
     @Override
     public List<User> findPaginated(Integer offset, Integer limit) {
@@ -31,7 +29,9 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public Optional<User> findById(Long userId) {
-        return Optional.ofNullable(entityManager.find(User.class, userId));
+    public Optional<User> findByEmail(String email) {
+        return entityManager.createQuery("select u from User u where u.email = :email", User.class)
+                .setParameter("email", email)
+                .getResultList().stream().findAny();
     }
 }
