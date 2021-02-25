@@ -7,6 +7,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 
@@ -23,6 +24,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
         jsr250Enabled = true,
         prePostEnabled = true
 )
+@EnableWebSecurity(debug = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     @Override
@@ -41,7 +43,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/tags/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/certificates/**").permitAll()
-                .antMatchers(HttpMethod.GET, "/api/statistics/**").permitAll()
-                .antMatchers("/actuator/**").hasRole("ADMIN");
+                .antMatchers(HttpMethod.GET, "/api/statistics/**").permitAll();
     }
 }

@@ -24,7 +24,7 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
     private static final String BEARER = "Bearer ";
-    private static final String JWT_REGEXP = "Bearer\\s\\w*\\.\\w*\\.\\w*";
+    private static final String JWT_REGEXP = "Bearer\\s[\\w-]*\\.[\\w-]*\\.[\\w-]*";
 
     @Value("${jwt.token.secret}")
     private String secret;

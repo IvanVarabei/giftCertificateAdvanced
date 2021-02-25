@@ -1,19 +1,18 @@
 package com.epam.esm.service;
 
-import com.epam.esm.dto.OrderDto;
-import com.epam.esm.entity.Order;
-import com.epam.esm.entity.User;
+import com.epam.esm.dto.ReceiveOrderDto;
+import com.epam.esm.dto.ResponseOrderDto;
 
 import java.util.Map;
 
 public interface OrderService {
-    OrderDto createOrder(OrderDto orderDto, User user);
+    ResponseOrderDto createOrder(ReceiveOrderDto orderDto);
 
-    Map<Long, OrderDto> getOrdersByUserId(Long userId);
+    Map<Long, ResponseOrderDto> getOrdersByUserId(Long userId);
 
-    Order getOrderById(Long orderId);
+    ResponseOrderDto getOrderById(Long orderId);
 
-    OrderDto updateOrder(OrderDto orderDto);
+    ResponseOrderDto updateOrder(ReceiveOrderDto orderDto, Long orderId);
 
     void deleteOrder(Long orderId);
 }

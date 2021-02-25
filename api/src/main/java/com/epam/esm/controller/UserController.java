@@ -2,7 +2,7 @@ package com.epam.esm.controller;
 
 import com.epam.esm.dto.CustomPage;
 import com.epam.esm.dto.CustomPageable;
-import com.epam.esm.dto.OrderDto;
+import com.epam.esm.dto.ResponseOrderDto;
 import com.epam.esm.dto.UserDto;
 import com.epam.esm.service.OrderService;
 import com.epam.esm.service.SecurityService;
@@ -78,9 +78,9 @@ public class UserController {
      */
     @GetMapping("/{userId}/orders")
     @RolesAllowed({"ADMIN", "USER"})
-    public ResponseEntity<Map<Long, OrderDto>> getOrdersByUserId(@PathVariable("userId") @Min(1) Long userId) {
+    public ResponseEntity<Map<Long, ResponseOrderDto>> getOrdersByUserId(@PathVariable("userId") @Min(1) Long userId) {
         securityService.validateUserAccess(userId);
-        Map<Long, OrderDto> orderDtoMap = orderService.getOrdersByUserId(userId);
+        Map<Long, ResponseOrderDto> orderDtoMap = orderService.getOrdersByUserId(userId);
         orderDtoMap.values().forEach(hateoasService::attachHateoas);
         return ResponseEntity.ok().body(orderDtoMap);
     }

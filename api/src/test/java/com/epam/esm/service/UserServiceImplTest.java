@@ -53,12 +53,12 @@ class UserServiceImplTest {
     void returns_user_having_specified_id_when_getUserBuId() {
         User foundUser = new User();
         foundUser.setId(1L);
-        foundUser.setUsername("ivan");
+        foundUser.setEmail("ivan@gmail.com");
         when(userRepository.findById(foundUser.getId())).thenReturn(Optional.of(foundUser));
 
         UserDto userDto = userService.getUserById(foundUser.getId());
 
-        assertEquals(foundUser.getUsername(), userDto.getUsername());
+        assertEquals(foundUser.getEmail(), userDto.getEmail());
     }
 
     @Test

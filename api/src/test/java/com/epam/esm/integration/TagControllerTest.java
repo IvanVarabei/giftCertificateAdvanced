@@ -48,10 +48,10 @@ class TagControllerTest {
     void setup(@Autowired DataSource dataSource, @Autowired JwtTokenProvider tokenProvider) throws SQLException {
         try (Connection connection = dataSource.getConnection()) {
             Statement statement = connection.createStatement();
-            statement.executeUpdate("INSERT INTO \"user\" (username, password, email, role) " +
-                    "VALUES ('Alex', 'qwerty', 'testTagController@gamil.com', 'ROLE_ADMIN')");
+            statement.executeUpdate("INSERT INTO \"user\" (password, email, role) " +
+                    "VALUES ('qwerty', 'testTagController@gamil.com', 'ROLE_ADMIN')");
         }
-        token = "Bearer_" + tokenProvider.createToken("testTagController@gamil.com", Role.ROLE_ADMIN);
+        token = "Bearer " + tokenProvider.createToken("testTagController@gamil.com", Role.ROLE_ADMIN);
     }
 
     @Test
