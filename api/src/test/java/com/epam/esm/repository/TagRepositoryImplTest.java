@@ -34,7 +34,7 @@ class TagRepositoryImplTest {
     void should_return_one_tags_when_findPaginated() {
         List<Tag> tags = tagRepository.findPaginated(0, 1);
 
-        assertEquals(tags.size(), 1);
+        assertEquals(1, tags.size());
     }
 
     @Test

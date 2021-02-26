@@ -1,12 +1,15 @@
 plugins {
     id 'org.springframework.boot' version '2.4.2'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id "org.sonarqube" version "3.0"
 }
 
 subprojects {
     apply plugin: 'java-library'
     apply plugin: 'org.springframework.boot'
     apply plugin: 'io.spring.dependency-management'
+    apply plugin: "org.sonarqube"
+    apply plugin: 'jacoco'
 
     ext.springVersion = '5.3.2'
     ext.jacksonVersion = '2.12.0'
@@ -74,5 +77,27 @@ subprojects {
 
     test {
         useJUnitPlatform()
+        finalizedBy jacocoTestReport
+    }
+
+    sonarqube {
+        properties {
+            System.setProperty('sonar.login', '7167ffa945ec95399bc9cf9bd05ababea5ad75df')
+        }
+    }
+
+    jacoco {
+        toolVersion = "0.8.2"
+    }
+
+    jacocoTestReport {
+        dependsOn test
+        reports {
+            xml.enabled = true
+        }
+    }
+
+    jacocoTestCoverageVerification {
+        dependsOn test
     }
 }
