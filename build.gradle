@@ -2,6 +2,56 @@ plugins {
     id 'org.springframework.boot' version '2.4.2'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id "org.sonarqube" version "3.0"
+    id 'java'
+}
+
+allprojects {
+    apply plugin: 'jacoco'
+
+    repositories {
+        mavenCentral()
+    }
+
+    jacoco {
+        toolVersion = '0.8.2'
+    }
+}
+
+//xmlReportPaths
+def allTestCoverageFile = "$buildDir/jacoco/allTestCoverage.exec"
+
+sonarqube {
+    properties {
+        //sonar.coverage.jacoco.xmlReportPaths
+        //gradle build jacocoTestReport sonarqube
+        //System.setProperty('sonar.jacoco.xmlReportPaths', allTestCoverageFile)
+        property 'sonar.projectName', 'Example of SonarQube Scanner for Gradle Usage'
+        System.setProperty('sonar.coverage.jacoco.xmlReportPaths', "$buildDir/reports/jococo/jacocoRootReport/jacocoTestReport.xml")
+        System.setProperty('sonar.login', '7167ffa945ec95399bc9cf9bd05ababea5ad75df')
+    }
+}
+
+//task jacocoMergeTest(type: JacocoMerge) {
+//    destinationFile = file(allTestCoverageFile)
+//    executionData = project.fileTree(dir: '.', include: '**/build/jacoco/test.exec')
+//}
+
+test {
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        html.enabled = true
+        xml.enabled = true
+        csv.enabled = false
+    }
+}
+
+jacocoTestCoverageVerification {
+    dependsOn test
 }
 
 subprojects {
@@ -9,7 +59,6 @@ subprojects {
     apply plugin: 'org.springframework.boot'
     apply plugin: 'io.spring.dependency-management'
     apply plugin: "org.sonarqube"
-    apply plugin: 'jacoco'
 
     ext.springVersion = '5.3.2'
     ext.jacksonVersion = '2.12.0'
@@ -26,6 +75,13 @@ subprojects {
     }
 
     dependencies {
+        // Test
+        testImplementation group: 'com.opentable.components', name: 'otj-pg-embedded', version: '0.13.3'
+        testImplementation group: 'org.flywaydb', name: 'flyway-core', version: '7.4.0'
+        testImplementation('org.springframework.boot:spring-boot-starter-test') {
+            exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+        }
+
         // Spring Boot
         implementation 'org.springframework.boot:spring-boot-starter-hateoas'
         implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -80,24 +136,43 @@ subprojects {
         finalizedBy jacocoTestReport
     }
 
-    sonarqube {
-        properties {
-            System.setProperty('sonar.login', '7167ffa945ec95399bc9cf9bd05ababea5ad75df')
-        }
-    }
+//    jacocoTestReport {
+//        dependsOn test
+//        reports {
+//            html.enabled = true
+//            xml.enabled = true
+//            csv.enabled = false
+//        }
+//    }
+//
+//    jacocoTestCoverageVerification {
+//        dependsOn test
+//    }
 
-    jacoco {
-        toolVersion = "0.8.2"
-    }
+//    sonarqube {
+//        properties {
+//            System.setProperty('sonar.jacoco.xmlReportPaths', allTestCoverageFile)
+//        }
+//    }
+}
 
-    jacocoTestReport {
-        dependsOn test
-        reports {
-            xml.enabled = true
-        }
+task jacocoRootReport(type: JacocoReport) {
+    dependsOn = subprojects.test
+    getAdditionalSourceDirs().setFrom(files(subprojects.sourceSets.main.allSource.srcDirs))
+    getSourceDirectories().setFrom(files(subprojects.sourceSets.main.allSource.srcDirs))
+    getClassDirectories().setFrom(files(subprojects.sourceSets.main.output))
+    getExecutionData().setFrom(files(subprojects.jacocoTestReport.executionData))
+    reports {
+        html.enabled = true
+        xml.enabled = true
+        csv.enabled = false
     }
-
-    jacocoTestCoverageVerification {
-        dependsOn test
+    onlyIf = {
+        true
     }
+//    doFirst {
+//        getExecutionData().setFrom(files(executionData.findAll) {
+//            it.exists()
+//        })
+//    }
 }
