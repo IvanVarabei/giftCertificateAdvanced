@@ -2,7 +2,6 @@ plugins {
     id 'org.springframework.boot' version '2.4.2'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id "org.sonarqube" version "3.0"
-    id 'java'
 }
 
 allprojects {
@@ -11,48 +10,8 @@ allprojects {
     repositories {
         mavenCentral()
     }
-
-    jacoco {
-        toolVersion = '0.8.2'
-    }
 }
 
-//xmlReportPaths
-def allTestCoverageFile = "$buildDir/jacoco/allTestCoverage.exec"
-
-sonarqube {
-    properties {
-        //sonar.coverage.jacoco.xmlReportPaths
-        //gradle build jacocoTestReport sonarqube
-        //System.setProperty('sonar.jacoco.xmlReportPaths', allTestCoverageFile)
-        property 'sonar.projectName', 'Example of SonarQube Scanner for Gradle Usage'
-        System.setProperty('sonar.coverage.jacoco.xmlReportPaths', "$buildDir/reports/jococo/jacocoRootReport/jacocoTestReport.xml")
-        System.setProperty('sonar.login', '7167ffa945ec95399bc9cf9bd05ababea5ad75df')
-    }
-}
-
-//task jacocoMergeTest(type: JacocoMerge) {
-//    destinationFile = file(allTestCoverageFile)
-//    executionData = project.fileTree(dir: '.', include: '**/build/jacoco/test.exec')
-//}
-
-test {
-    useJUnitPlatform()
-    finalizedBy jacocoTestReport
-}
-
-jacocoTestReport {
-    dependsOn test
-    reports {
-        html.enabled = true
-        xml.enabled = true
-        csv.enabled = false
-    }
-}
-
-jacocoTestCoverageVerification {
-    dependsOn test
-}
 
 subprojects {
     apply plugin: 'java-library'
@@ -136,43 +95,33 @@ subprojects {
         finalizedBy jacocoTestReport
     }
 
-//    jacocoTestReport {
-//        dependsOn test
-//        reports {
-//            html.enabled = true
-//            xml.enabled = true
-//            csv.enabled = false
-//        }
-//    }
-//
-//    jacocoTestCoverageVerification {
-//        dependsOn test
-//    }
-
-//    sonarqube {
-//        properties {
-//            System.setProperty('sonar.jacoco.xmlReportPaths', allTestCoverageFile)
-//        }
-//    }
 }
 
-task jacocoRootReport(type: JacocoReport) {
-    dependsOn = subprojects.test
-    getAdditionalSourceDirs().setFrom(files(subprojects.sourceSets.main.allSource.srcDirs))
-    getSourceDirectories().setFrom(files(subprojects.sourceSets.main.allSource.srcDirs))
-    getClassDirectories().setFrom(files(subprojects.sourceSets.main.output))
-    getExecutionData().setFrom(files(subprojects.jacocoTestReport.executionData))
+task codeCoverageReport(type: JacocoReport) {
+    executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
+
+    subprojects.each {
+        sourceSets it.sourceSets.main
+    }
+
     reports {
-        html.enabled = true
-        xml.enabled = true
-        csv.enabled = false
+        xml.enabled true
+        xml.destination file("${buildDir}/reports/jacoco/report.xml")
+        html.enabled false
+        csv.enabled false
     }
-    onlyIf = {
-        true
-    }
-//    doFirst {
-//        getExecutionData().setFrom(files(executionData.findAll) {
-//            it.exists()
-//        })
-//    }
 }
+
+codeCoverageReport.dependsOn {
+    subprojects*.test
+}
+
+sonarqube {
+    properties {
+        property 'sonar.projectName', 'Example of SonarQube Scanner for Gradle Usage'
+//        property('sonar.coverage.jacoco.xmlReportPaths', "$buildDir/reports/jacoco/jacocoRootReport/jacocoTestReport.xml")
+        property('sonar.coverage.jacoco.reportPaths', "$rootProject.buildDir/jacoco/test.exec")
+        property('sonar.login', '7167ffa945ec95399bc9cf9bd05ababea5ad75df')
+    }
+}
+
