@@ -41,7 +41,7 @@ class TagRepositoryImplTest {
     void should_be_not_empty_optional_when_findById() {
         Optional<Tag> tagOptional = tagRepository.findById(1L);
 
-        assertEquals(1L, (long) tagOptional.get().getId());
+        assertEquals(1L, (long) tagOptional.orElseThrow(AssertionError::new).getId());
     }
 
     @Test

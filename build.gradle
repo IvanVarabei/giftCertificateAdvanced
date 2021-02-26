@@ -12,7 +12,6 @@ allprojects {
     }
 }
 
-
 subprojects {
     apply plugin: 'java-library'
     apply plugin: 'org.springframework.boot'
@@ -29,18 +28,7 @@ subprojects {
         options.encoding = 'UTF-8'
     }
 
-    repositories {
-        mavenCentral()
-    }
-
     dependencies {
-        // Test
-        testImplementation group: 'com.opentable.components', name: 'otj-pg-embedded', version: '0.13.3'
-        testImplementation group: 'org.flywaydb', name: 'flyway-core', version: '7.4.0'
-        testImplementation('org.springframework.boot:spring-boot-starter-test') {
-            exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
-        }
-
         // Spring Boot
         implementation 'org.springframework.boot:spring-boot-starter-hateoas'
         implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -94,7 +82,6 @@ subprojects {
         useJUnitPlatform()
         finalizedBy jacocoTestReport
     }
-
 }
 
 task codeCoverageReport(type: JacocoReport) {
@@ -118,10 +105,7 @@ codeCoverageReport.dependsOn {
 
 sonarqube {
     properties {
-        property 'sonar.projectName', 'Example of SonarQube Scanner for Gradle Usage'
-//        property('sonar.coverage.jacoco.xmlReportPaths', "$buildDir/reports/jacoco/jacocoRootReport/jacocoTestReport.xml")
-        property('sonar.coverage.jacoco.reportPaths', "$rootProject.buildDir/jacoco/test.exec")
-        property('sonar.login', '7167ffa945ec95399bc9cf9bd05ababea5ad75df')
+        property('sonar.login', '44aa41c5f3ea5e2444d6496f1df001c71edd34cd')
+        property('sonar.coverage.jacoco.xmlReportPaths', "${buildDir}/reports/jacoco/report.xml")
     }
 }
-
