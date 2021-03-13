@@ -34,14 +34,14 @@ class TagRepositoryImplTest {
     void should_return_one_tags_when_findPaginated() {
         List<Tag> tags = tagRepository.findPaginated(0, 1);
 
-        assertEquals(tags.size(), 1);
+        assertEquals(1, tags.size());
     }
 
     @Test
     void should_be_not_empty_optional_when_findById() {
         Optional<Tag> tagOptional = tagRepository.findById(1L);
 
-        assertEquals(1L, (long) tagOptional.get().getId());
+        assertEquals(1L, (long) tagOptional.orElseThrow(AssertionError::new).getId());
     }
 
     @Test

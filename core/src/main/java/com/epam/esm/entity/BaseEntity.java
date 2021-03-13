@@ -2,6 +2,7 @@ package com.epam.esm.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.GeneratedValue;
@@ -13,6 +14,7 @@ import javax.persistence.MappedSuperclass;
 @MappedSuperclass
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode
 public class BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

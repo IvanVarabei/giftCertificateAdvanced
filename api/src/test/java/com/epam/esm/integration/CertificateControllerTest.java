@@ -50,8 +50,8 @@ class CertificateControllerTest {
 
     @BeforeAll
     void setup(@Autowired DataSource dataSource, @Autowired JwtTokenProvider tokenProvider) throws SQLException {
-        try (Connection connection = dataSource.getConnection()) {
-            Statement statement = connection.createStatement();
+        try (Connection connection = dataSource.getConnection();
+             Statement statement = connection.createStatement()) {
             statement.executeUpdate("INSERT INTO \"user\" (password, email, role) " +
                     "VALUES ('qwerty', 'testCertificateController@gamil.com', 'ROLE_ADMIN')");
         }
@@ -178,7 +178,8 @@ class CertificateControllerTest {
         GiftCertificateDto updatedCertificate = objectMapper.readValue(responseAsString, GiftCertificateDto.class);
 
         assertEquals("updated name", updatedCertificate.getName());
-        assertEquals("newCreatedTag", updatedCertificate.getTags().stream().findAny().get().getName());
+        assertEquals("newCreatedTag", updatedCertificate.getTags()
+                .stream().findAny().orElseThrow(AssertionError::new).getName());
     }
 
     @Test

@@ -1,5 +1,7 @@
+apply plugin: "war"
+
 dependencies {
-    implementation project(":core")
+    implementation project(path: ':core', configuration: 'default')
 
     // Test
     testImplementation group: 'com.opentable.components', name: 'otj-pg-embedded', version: '0.13.3'
@@ -9,6 +11,19 @@ dependencies {
     }
 }
 
-bootJar{
-    archiveFileName  = 'apiBootJar.jar'
+bootJar {
+    archiveFileName = 'apiBootJar.jar'
+}
+
+war {
+    enabled = true
+    finalizedBy jar
+}
+
+jar {
+    archiveFileName = "apiFatJar.jar"
+    configurations.implementation.setCanBeResolved(true)
+    from { configurations.implementation.collect { it.isDirectory() ? it : zipTree(it) } }
+    from { configurations.annotationProcessor.collect { it.isDirectory() ? it : zipTree(it) } }
+    from { configurations.testAnnotationProcessor.collect { it.isDirectory() ? it : zipTree(it) } }
 }

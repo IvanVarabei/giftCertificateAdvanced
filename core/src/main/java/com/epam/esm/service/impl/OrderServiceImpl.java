@@ -53,8 +53,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Map<Long, ResponseOrderDto> getOrdersByUserId(Long userId) {
-        userRepository.findById(userId).orElseThrow(() ->
-                new ResourceNotFoundException(String.format(ErrorMessage.RESOURCE_NOT_FOUND, userId)));
+        if (userRepository.findById(userId).isEmpty()) {
+            throw new ResourceNotFoundException(String.format(ErrorMessage.RESOURCE_NOT_FOUND, userId));
+        }
         List<Order> orders = orderRepository.findOrdersByUserId(userId);
         return orders.stream()
                 .map(orderConverter::toDTO)
