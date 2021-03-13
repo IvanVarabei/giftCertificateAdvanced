@@ -2,7 +2,7 @@ package com.epam.esm.security;
 
 import com.epam.esm.entity.Role;
 import com.epam.esm.entity.User;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.EqualsAndHashCode;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
 public class JwtUser extends User implements UserDetails {
     private final boolean enabled;
 
@@ -18,7 +19,7 @@ public class JwtUser extends User implements UserDetails {
         this.enabled = enabled;
     }
 
-    @JsonIgnore
+    @Override
     public Long getId() {
         return id;
     }

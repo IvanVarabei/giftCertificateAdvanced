@@ -3,6 +3,7 @@ package com.epam.esm.controller;
 import com.epam.esm.dto.AuthenticationRequestDto;
 import com.epam.esm.dto.UserDto;
 import com.epam.esm.entity.Role;
+import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.security.JwtTokenProvider;
 import com.epam.esm.security.JwtUser;
 import com.epam.esm.service.UserService;
@@ -50,7 +51,8 @@ public class AuthenticationController {
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(email, password));
         JwtUser jwtUser = (JwtUser) authentication.getPrincipal();
-        String role = jwtUser.getAuthorities().stream().findAny().get().toString();
+        String role = jwtUser.getAuthorities().stream()
+                .findAny().orElseThrow(ResourceNotFoundException::new).toString();
         String token = jwtTokenProvider.createToken(email, Role.valueOf(role));
         return ResponseEntity.ok(Map.of("email", email, "token", token));
     }

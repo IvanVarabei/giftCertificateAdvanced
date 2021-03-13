@@ -63,7 +63,7 @@ class GiftCertificateRepositoryImplTest {
     void should_find_certificate_having_specified_id() {
         Optional<GiftCertificate> giftCertificateOptional = certificateRepository.findById(1L);
 
-        assertEquals(1L, (long) giftCertificateOptional.get().getId());
+        assertEquals(1L, (long) giftCertificateOptional.orElseThrow(AssertionError::new).getId());
     }
 
     @Test
@@ -88,7 +88,7 @@ class GiftCertificateRepositoryImplTest {
 
         certificateRepository.update(update);
 
-        assertEquals(update.getName(), certificateRepository.findById(id).get().getName());
+        assertEquals(update.getName(), certificateRepository.findById(id).orElseThrow(AssertionError::new).getName());
     }
 
     @Test

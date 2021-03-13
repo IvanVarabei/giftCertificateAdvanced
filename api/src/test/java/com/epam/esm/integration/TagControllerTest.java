@@ -46,8 +46,8 @@ class TagControllerTest {
 
     @BeforeAll
     void setup(@Autowired DataSource dataSource, @Autowired JwtTokenProvider tokenProvider) throws SQLException {
-        try (Connection connection = dataSource.getConnection()) {
-            Statement statement = connection.createStatement();
+        try (Connection connection = dataSource.getConnection();
+             Statement statement = connection.createStatement()) {
             statement.executeUpdate("INSERT INTO \"user\" (password, email, role) " +
                     "VALUES ('qwerty', 'testTagController@gamil.com', 'ROLE_ADMIN')");
         }
